@@ -307,8 +307,8 @@ resultados, limitações e eventuais pendências. Não avance para a etapa segui
 - [x] Etapa 1 — Estrutura MVC e roteamento
 - [x] Etapa 2 — Layout e identidade visual
 - [x] Etapa 3 — Página inicial e sobre mim
-- [ ] Etapa 4 — Catálogo de projetos
-- [ ] Etapa 5 — Detalhes dos projetos
+- [x] Etapa 4 — Catálogo de projetos
+- [x] Etapa 5 — Detalhes dos projetos
 - [ ] Etapa 6 — Habilidades técnicas
 - [ ] Etapa 7 — Contato e redes profissionais
 - [ ] Etapa 8 — Responsividade, acessibilidade e SEO
@@ -319,6 +319,10 @@ Atualize o checklist quando uma etapa for validada. A conclusão de uma implemen
 Etapa 2 validada em 18/10/2026: home e 404 utilizam o mesmo layout, links e CSS conferidos via HTTP no Apache e no servidor PHP. A base de responsividade está implementada; inspeção visual e testes reais de teclado permanecem pendentes por indisponibilidade de navegador nesta sessão. Detalhes e evidências em `PROGRESS.md`.
 
 Etapa 3 validada funcionalmente em 18/10/2026: home com hero, sobre mim, objetivos e chamada para uma seção informativa de projetos. Dados pessoais ausentes estão explicitamente sinalizados; nenhuma informação biográfica foi inventada. Navegação e âncoras conferidas na home e a partir do 404, inclusive em subdiretórios. O catálogo e a rota `/projetos` permanecem para a etapa 4. Inspeção visual e interação real por teclado continuam pendentes por indisponibilidade de navegador; evidências em `PROGRESS.md`.
+
+Etapa 4 validada funcionalmente em 18/10/2026: catálogo GET `/projetos`, dados em `config/projects.php`, Model com `all()`/`featured()`, cards reutilizados e destaques na home. O catálogo real inicia vazio por falta de projetos confirmados; fixtures isoladas demonstram inclusão por arquivo, campos opcionais, escaping e filtragem de URLs. Home/catálogo retornam 200, detalhes permanecem 404 para a etapa 5. Validação visual e teclado real continuam pendentes por indisponibilidade de navegador; evidências em `PROGRESS.md`.
+
+Etapa 5 validada funcionalmente em 18/10/2026: rota GET `/projetos/{slug}`, consulta validada por slug, página individual com descrição em texto escapado, opcionais, links nos títulos dos cards e retorno ao catálogo. Fixtures isoladas validaram detalhes 200 e slugs inválidos/desconhecidos 404; a integração com o front controller/autoload foi verificada em cópia temporária sem alterar o catálogo real vazio. Inspeção visual e teclado real continuam pendentes por indisponibilidade de navegador. Etapa 6 não iniciada; detalhes em `PROGRESS.md`.
 
 ## 11. Decisões e informações pendentes
 

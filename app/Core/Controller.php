@@ -23,6 +23,7 @@ abstract class Controller
         $appName = $this->config['name'];
         $basePath = rtrim($this->config['base_path'], '/');
         $homeUrl = $basePath . '/';
+        $projectsUrl = $basePath . '/projetos';
         $stylesheetUrl = $basePath . '/assets/css/style.css';
         $data += ['title' => $appName, 'currentPage' => ''];
 

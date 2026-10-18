@@ -1,3 +1,7 @@
+<?php
+/** @var list<array<string, mixed>> $projects */
+/** @var string $projectsUrl */
+?>
 <section class="home-hero" aria-labelledby="apresentacao-titulo">
     <p class="eyebrow">Portfólio em construção</p>
     <p class="hero-name">[Nome de exibição a informar]</p>
@@ -42,11 +46,17 @@
 <section id="projetos" class="home-section" aria-labelledby="projetos-titulo" tabindex="-1">
     <div class="section-heading">
         <p class="eyebrow">03 / Projetos</p>
-        <h2 id="projetos-titulo">Projetos</h2>
+        <h2 id="projetos-titulo">Projetos em destaque</h2>
     </div>
-    <div class="section-content project-notice">
-        <h3>Projetos em preparação</h3>
-        <p>Os projetos serão apresentados após a confirmação de suas informações. O catálogo estará disponível em uma próxima etapa.</p>
-        <a class="text-link" href="#sobre">Voltar à apresentação <span aria-hidden="true">&uarr;</span></a>
+    <div class="section-content">
+        <?php if ($projects === []): ?>
+            <div class="project-notice">
+                <h3>Nenhum projeto em destaque</h3>
+                <p>Os destaques serão apresentados após a confirmação dos projetos e a seleção dos itens pelo proprietário.</p>
+            </div>
+        <?php else: ?>
+            <?php require dirname(__DIR__) . '/partials/project-list.php'; ?>
+        <?php endif; ?>
+        <a class="button button--secondary" href="<?= htmlspecialchars($projectsUrl, ENT_QUOTES, 'UTF-8') ?>">Ver todos os projetos <span aria-hidden="true">&rarr;</span></a>
     </div>
 </section>

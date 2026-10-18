@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 use App\Controllers\HomeController;
 use App\Controllers\ErrorController;
+use App\Controllers\ProjectController;
 use App\Core\Router;
+use App\Models\Project;
 
 ini_set('display_errors', '0');
 header('Content-Type: text/html; charset=UTF-8');
@@ -19,7 +21,11 @@ try {
     $config = require dirname(__DIR__) . '/config/app.php';
 
     $router = new Router($config['base_path']);
-    $router->get('/', [new HomeController($config), 'index']);
+    $projects = new Project();
+    $projectController = new ProjectController($config, $projects);
+    $router->get('/', [new HomeController($config, $projects), 'index']);
+    $router->get('/projetos', [$projectController, 'index']);
+    $router->get('/projetos/{slug}', [$projectController, 'show']);
 
     if (!$router->dispatch($_SERVER['REQUEST_METHOD'] ?? 'GET', $_SERVER['REQUEST_URI'] ?? '/')) {
         (new ErrorController($config))->notFound();

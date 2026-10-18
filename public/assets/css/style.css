@@ -317,10 +317,124 @@ img {
 }
 
 .project-notice {
+    width: 100%;
     padding: var(--space-3);
     border: 1px solid var(--color-border);
     border-radius: var(--radius);
     background: var(--color-surface);
+}
+
+.project-notice p {
+    color: var(--color-muted);
+}
+
+.project-catalog {
+    display: grid;
+    gap: var(--space-5);
+}
+
+.catalog-heading {
+    margin-bottom: var(--space-3);
+}
+
+.project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: var(--space-3);
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.project-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+}
+
+.project-image {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: var(--radius) var(--radius) 0 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.project-image--placeholder {
+    display: grid;
+    place-items: center;
+    padding: var(--space-2);
+    color: var(--color-muted);
+    background: var(--color-background);
+}
+
+.project-card-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-3);
+}
+
+.project-card-content > p {
+    color: var(--color-muted);
+}
+
+.project-technologies,
+.project-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-2);
+}
+
+.project-technologies {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.project-technologies li {
+    max-width: 100%;
+    padding: 0.25rem var(--space-1);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    color: var(--color-muted);
+    font-size: 0.875rem;
+}
+
+.project-links {
+    margin-top: auto;
+}
+
+.project-detail {
+    display: grid;
+    gap: var(--space-4);
+    max-width: 56rem;
+    margin-inline: auto;
+}
+
+.project-detail > .text-link {
+    justify-self: start;
+}
+
+.project-detail-image {
+    width: 100%;
+    height: auto;
+    max-height: 36rem;
+    object-fit: contain;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+}
+
+.project-description {
+    white-space: pre-line;
 }
 
 @media (min-width: 48rem) {

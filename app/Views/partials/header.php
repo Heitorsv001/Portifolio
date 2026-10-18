@@ -1,6 +1,7 @@
 <?php
 /** @var string $appName */
 /** @var string $homeUrl */
+/** @var string $projectsUrl */
 /** @var string $currentPage */
 ?>
 <header class="site-header">
@@ -21,7 +22,7 @@
                     <a class="nav-link" href="<?= htmlspecialchars($homeUrl . '#objetivos', ENT_QUOTES, 'UTF-8') ?>">Objetivos</a>
                 </li>
                 <li>
-                    <a class="nav-link" href="<?= htmlspecialchars($homeUrl . '#projetos', ENT_QUOTES, 'UTF-8') ?>">Projetos</a>
+                    <a class="nav-link" href="<?= htmlspecialchars($projectsUrl, ENT_QUOTES, 'UTF-8') ?>"<?= $currentPage === 'projects' ? ' aria-current="page"' : '' ?>>Projetos</a>
                 </li>
             </ul>
         </nav>

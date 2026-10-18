@@ -1,8 +1,122 @@
 # Progresso e passagem de contexto
 
-Atualizado em **18/10/2026**. A seção 0 registra o estado atual após a etapa 3. As demais seções preservam o histórico das etapas 1 e 2 e devem ser interpretadas como estados anteriores. Conferir novamente o ambiente na próxima sessão.
+Atualizado em **18/10/2026**. A seção 0 registra o estado atual após a etapa 5. As demais seções preservam o histórico das etapas 1 a 4 e devem ser interpretadas como estados anteriores. Conferir novamente o ambiente na próxima sessão.
 
-## 0. Entrega atual — etapa 3: página inicial e apresentação pessoal
+## 0. Entrega atual — etapa 5: páginas individuais dos projetos
+
+Implementada exclusivamente a etapa 5, a pedido do proprietário. Etapas 1 a 5 concluídas funcionalmente; **etapa 6 não iniciada**. A árvore de trabalho já continha a entrega da etapa 4, sem commit, sobre `47c0546`; essas alterações foram preservadas. A pedido do proprietário, as entregas das etapas 4 e 5 são reunidas no commit `Implementa catálogo e páginas individuais dos projetos`; consultar `git log` para o hash. Sem push.
+
+### Alterações realizadas
+
+| Arquivo ou área | Alteração desta etapa |
+|---|---|
+| `app/Core/Router.php` | Reconhece parâmetros de um segmento em rotas GET; prioriza rotas fixas e passa parâmetros decodificados ao handler. |
+| `app/Models/Project.php` | Adiciona `findBySlug()`, validando formato e procurando correspondência exata nos dados já normalizados. |
+| `app/Controllers/ProjectController.php` | Adiciona `show()`: consulta o Model, renderiza detalhe ou delega ao Controller 404 existente. |
+| `public/index.php` | Registra GET `/projetos/{slug}` e reutiliza a instância do ProjectController. |
+| `app/Views/projects/show.php` (novo) | Página individual com título, resumo, descrição completa, imagem e opcionais; retorno ao catálogo. |
+| `app/Views/partials/project-list.php` | Títulos dos cards viram links para os detalhes na home e no catálogo. |
+| `app/Views/partials/project-technologies.php` e `project-links.php` (novos) | Extraem markup dos cards para reutilização na página individual, preservando escaping e nomes acessíveis. |
+| `public/assets/css/style.css` | Layout do detalhe, apresentação da imagem e quebras de linha na descrição. |
+| `tests/run.php` | Amplia testes para Router parametrizado, busca por slug, detalhes, navegação, opcionais, escaping e 404. |
+| `README.md` e `PROJECT_CONTEXT.md` | Documenta rotas, formato dos slugs, descrições, evidências e checklist da etapa 5. |
+
+### Decisões técnicas e limites de escopo
+
+- Router permanece genérico: parâmetros como `{slug}` ocupam um segmento, são decodificados por `rawurldecode` uma única vez e enviados por posição ao handler. Rotas fixas têm prioridade independentemente da ordem de registro. Caminho-base, query string, barra final, métodos e retorno booleano de despacho existentes foram preservados.
+- A validação específica fica no Model: formato `^[a-z0-9]+(?:-[a-z0-9]+)*$`, com correspondência exata e sensível a maiúsculas. Slug vazio, barras decodificadas, travessia, espaços, acentos, hífens duplicados/extremos e controles não são aceitos. Desconhecidos e inválidos retornam `null`; o Controller responde com a página/status 404 existentes, sem expor entradas ou caminhos internos.
+- Detalhes utilizam o layout compartilhado, título próprio, h1 único e seções semânticas. O menu não indica a home ou o catálogo como página atual durante a visualização do detalhe. Link explícito retorna ao catálogo, respeitando o caminho-base.
+- Descrição é texto simples com escaping; CSS `white-space: pre-line` preserva quebras de linha. Nenhum HTML arbitrário, Markdown, editor ou sanitizador adicional foi introduzido. Títulos, resumos, tecnologias, atributos e links também são escapados.
+- Imagem e URLs reutilizam a normalização da etapa 4. No detalhe, imagem ausente é omitida e seções de tecnologias/links só aparecem quando há conteúdo. Imagem disponível é exibida sem corte intencional, com dimensões e texto alternativo. Cards mantêm o fallback e os links externos existentes.
+- Partials de tecnologias e links são compartilhadas entre cards e detalhe, evitando duplicação de markup. URLs dos cards usam o slug codificado com `rawurlencode` e atributo escapado. Não houve mudança no arquivo de dados real, que permanece vazio, nem acréscimo de campos ao esquema.
+- Fixtures fictícias foram usadas apenas em arquivos de teste e cópia temporária. Nenhum projeto, habilidade, contato ou informação biográfica foi atribuído ao proprietário. Sem novas dependências, JavaScript, banco de dados ou alterações no Apache/permissões. Habilidades e demais etapas não foram iniciadas.
+
+### Testes e evidências desta entrega
+
+| Verificação | Resultado |
+|---|---|
+| Suíte antes das mudanças | **320/320** aprovadas. |
+| `php -d error_reporting=E_ALL tests/run.php` | **589/589** aprovadas. |
+| Sintaxe em `app`, `public`, `config`, `tests` e `index.php` | **21 arquivos PHP**, sem erros. |
+| `git diff --check` | Aprovado. |
+| Router parametrizado | Captura/decodificação única, precedência de rotas fixas, query/barra final, prefixos, métodos e rejeição de segmentos extras aprovados. |
+| Model/Controllers/Views isolados | Projeto correto por slug, item não destacado, descrição escapada com quebras, imagem/links/tecnologias, ausência de opcionais, título específico, layout único, IDs/headings, links dos cards e retorno ao catálogo aprovados. |
+| Raiz, `/portifolio` e subdiretório aninhado | Detalhes e 404 testados via Router com fixtures; URLs e imagens respeitam caminho-base. |
+| Slugs inválidos/desconhecidos | **404**, incluindo maiúsculas, controles, barras codificadas e codificação dupla; sem caminhos internos. |
+| Apache real, catálogo vazio | Home/catálogo **200**; detalhe desconhecido, slug inválido e segmento extra **404**; POST ao detalhe **404**. |
+| Apache: arquivos privados | `config/projects.php` e `app/Views/projects/show.php` **403**. |
+| Cópia temporária + servidor PHP com raiz `public/` | Detalhes completos, mínimos e com opcionais inválidos **200**; fluxo card → detalhe → catálogo aprovado; imagem **200**, query/barra final e slug válido codificado **200**; inválidos/desconhecidos e POST **404**. |
+| HTML/CSS via HTTP | Layout e h1 únicos, IDs e `aria-labelledby` válidos, âncoras existentes, texto escapado; CSS **200** e idêntico ao arquivo local nos dois servidores. |
+
+A cópia de teste continha os mesmos arquivos `app/`, `public/`, autoload Composer e configuração de caminho-base, com dados fictícios apenas nessa cópia. Isso validou o front controller e o autoload sem cadastrar exemplos no catálogo real. Cópia e imagem temporárias foram removidas e o servidor foi encerrado, sem erros de aplicação no log. O Apache real não possui projetos cadastrados para medir um detalhe 200; esse caso foi validado na cópia e nos testes isolados. Acesso HTTP local e servidor temporário exigiram escalada do sandbox, sem mudança de configuração ou permissões.
+
+### Aceite, pendências e próxima retomada
+
+- **Aceite funcional da etapa 5 atendido:** cada item válido recebe URL própria por slug; detalhe mostra os dados do projeto correto e retorna ao catálogo; slug desconhecido/inválido responde 404. Inclusão continua sendo feita apenas pelo arquivo de dados.
+- **Conteúdo:** projetos reais, títulos, descrições, tecnologias, imagens e links continuam pendentes de confirmação do proprietário. O catálogo real permanece vazio; nomes e biografia pendentes das etapas anteriores também foram preservados.
+- **Validação manual:** verificar detalhe mobile/desktop e zoom, imagem, descrições longas, console e Tab/Enter nos títulos dos cards, retorno ao catálogo e links externos. O inventário retornou `apps: []` e `browsers: []`; inspeção visual e teclado real não puderam ser realizados. Testes de HTML/HTTP não substituem essa revisão.
+- Próxima implementação: **etapa 6 — habilidades e tecnologias**, somente após novo pedido. Exibir apenas conhecimentos confirmados; não inferir habilidades pessoais pelas tecnologias usadas nesta aplicação ou nas fixtures.
+
+## Histórico — etapa 4: catálogo de projetos
+
+Implementada exclusivamente a etapa 4, a pedido do proprietário. Etapas 1 a 4 concluídas funcionalmente; **etapa 5 não iniciada**. Árvore de trabalho limpa no início, no commit `47c0546` (`Implementa página inicial e apresentação da etapa 3`). Alterações desta entrega mantidas na árvore de trabalho, sem commit ou push.
+
+### Alterações realizadas
+
+| Arquivo ou área | Alteração |
+|---|---|
+| `config/projects.php` (novo) | Fonte única de dados; lista vazia enquanto não houver projetos reais confirmados. |
+| `app/Models/Project.php` (novo) | Carrega o arquivo PHP, oferece `all()` e `featured()`, normaliza opcionais, valida links HTTP(S) e caminhos de imagens locais existentes. |
+| `app/Controllers/ProjectController.php` (novo) | Consulta todos os projetos e renderiza catálogo com título próprio e navegação ativa. |
+| `app/Controllers/HomeController.php` | Consulta os projetos em destaque e os envia à home. |
+| `public/index.php` | Instancia o Model compartilhado entre Controllers e registra GET `/projetos`. |
+| `app/Core/Controller.php` | Disponibiliza URL do catálogo respeitando o caminho-base já existente. |
+| `app/Views/projects/index.php` (novo) | Catálogo e aviso explícito quando não há itens. |
+| `app/Views/partials/project-list.php` (novo) | Cards compartilhados: imagem/fallback, título, resumo, tecnologias e links disponíveis. |
+| `app/Views/home/index.php` e `partials/header.php` | Substitui aviso futuro por destaques/estado vazio e chamada ao catálogo; menu aponta à nova rota e identifica página ativa. |
+| `public/assets/css/style.css` | Grid fluido, cards, tecnologias, links e imagens 16:9 usando tokens existentes. |
+| `public/assets/images/.gitkeep` (novo) | Preserva o diretório de imagens em novos checkouts. |
+| `tests/run.php` | Amplia verificações de rota, catálogo, Model, destaques, opcionais e segurança com fixtures temporárias. |
+| `README.md` e `PROJECT_CONTEXT.md` | Cadastro de projetos, regras dos opcionais, rotas, testes e checklist atualizado. |
+
+### Decisões técnicas e limites de escopo
+
+- Mantidos Router, layout, apresentação pessoal e tratamento de erro existentes. Models não geram HTML; Views recebem dados dos Controllers e não leem configuração. Nenhum framework, biblioteca, JavaScript ou banco de dados foi introduzido.
+- Model carrega `config/projects.php` por padrão e aceita um caminho alternativo para testes. Controllers aceitam o Model por injeção; a entrada web compartilha uma instância por requisição. As consultas preservam a ordem do arquivo e apenas `featured === true` seleciona destaques.
+- O arquivo real permanece vazio: não há dados de projetos confirmados. Exemplos existem apenas na documentação e em fixtures isoladas, sem atribuir projetos, tecnologias ou resultados ao proprietário. Catálogo vazio e ausência de destaques têm avisos próprios; botão de catálogo funciona em ambos os casos.
+- Campos `image`, `github_url` e `demo_url` ausentes/nulos são tratados; tecnologias ausentes/nulas usam lista vazia e destaque omitido assume `false`. Dados obrigatórios devem seguir o formato documentado no README; não foi criada uma infraestrutura genérica de validação de configuração.
+- Links aceitam somente URLs completas HTTP(S), sem credenciais; inválidos, vazios e esquemas como `javascript:`, `data:` e FTP são omitidos. Abrem na mesma aba e possuem nomes acessíveis com título do projeto. Todo texto e atributo dinâmico é escapado com `htmlspecialchars` e `ENT_QUOTES`.
+- Imagens aceitam caminhos relativos sob `assets/images/`, sem travessia de diretórios, para arquivos existentes e extensões documentadas no README. Ausência ou caminho inválido recebe fallback sem gerar request quebrado. Imagens têm dimensões, proporção 16:9, texto alternativo e lazy loading.
+- Cards são listas sem IDs derivados dos dados, compartilhadas entre catálogo e home; headings seguem h1/h2/h3. Grid se adapta ao espaço disponível mantendo cores, fontes e foco existentes. Revisão visual completa permanece pendente.
+- Não foram adicionadas páginas individuais, consulta por slug ou links para `/projetos/{slug}`. Essas rotas continuam 404 e pertencem à etapa 5. Habilidades, contatos e SEO completo permanecem nas etapas próprias. Nenhuma alteração no Apache, permissões ou proprietário.
+
+### Testes e evidências desta entrega
+
+| Verificação | Resultado |
+|---|---|
+| `php tests/run.php` antes das mudanças | **186/186** aprovadas. |
+| `php tests/run.php` após as mudanças | **320/320** aprovadas. |
+| Sintaxe em `app`, `public`, `config`, `tests` e `index.php` | **18 arquivos PHP**, sem erros. |
+| `git diff --check` | Aprovado. |
+| Fixtures do Model e renderização | Inclusão de item apenas editando arquivo, todos os itens no catálogo, somente `featured` na home, catálogo vazio/sem destaques, opcionais ausentes/nulos, URLs válidas/inválidas, fallback de imagem e escaping aprovados. |
+| Renderização isolada na raiz, `/portifolio` e subdiretório aninhado | Layout único, navegação, imagens e chamadas respeitam o caminho-base. |
+| Apache `/portifolio` e PHP embutido com `APP_BASE_PATH=''` | Home **200**, catálogo **200**, catálogo com barra final/query **200**, rota inexistente **404**, `/projetos/exemplo` **404**, POST ao catálogo **404**. |
+| CSS nos dois servidores | **200**, conteúdo idêntico ao arquivo atualizado; Apache com `text/css`. |
+| Apache: acesso direto a `config/projects.php` e `app/Views/partials/project-list.php` | **403**, bloqueio privado preservado. |
+| HTML servido nos dois servidores | Sem código PHP exposto; documento, landmarks e h1 únicos; IDs únicos, `aria-labelledby` válido, links e âncoras existentes e página ativa correta. |
+
+A integração HTTP utilizou o autoload Composer existente e carregou as novas classes sem mudanças de dependências. O servidor PHP temporário foi encerrado após os testes e não registrou erros de aplicação. Os dados e a imagem de teste são criados temporariamente e removidos pela suíte; `config/projects.php` real não é alterado. Testes dos estados vazios usam Model isolado para continuarem válidos após cadastrar projetos reais.
+
+A primeira tentativa de conexão local falhou no sandbox. As verificações HTTP passaram após escalada para acesso à rede local e abertura da porta temporária, sem mudar a configuração do servidor.
+
+### Aceite, pendências e próxima retomada
+
+- **Aceite funcional da etapa 4 atendido:** alterar o arquivo de dados inclui itens sem editar Views; cards e links opcionais são tratados; home seleciona destaques. O fluxo foi demonstrado com fixtures porque ainda não existem projetos reais confirmados.
+- **Conteúdo:** obter lista real de projetos, títulos, resumos, descrições, tecnologias, imagens, repositórios/demos e seleção de destaques. Nome, biografia, formação e objetivos continuam pendentes das etapas anteriores.
+- **Validação manual:** conferir cards vazios/preenchidos, grid mobile/desktop, zoom, foco visível, Tab/Enter nos links e console/requests de imagens. O inventário retornou `apps: []` e `browsers: []`; inspeção visual, responsividade real, console e teclado não puderam ser executados. As verificações de HTML/HTTP não substituem esses testes.
+- Próxima implementação: **etapa 5 — páginas individuais dos projetos**, somente após novo pedido. Não antecipar a rota dinâmica ou `findBySlug()` antes dessa autorização.
+
+## Histórico — etapa 3: página inicial e apresentação pessoal
 
 Implementada exclusivamente a etapa 3, a pedido do proprietário. Etapas 1 a 3 concluídas funcionalmente; **etapa 4 não iniciada**. Árvore de trabalho limpa no início, no commit `6f65e6f` (`Implementa layout base e identidade visual da etapa 2`). Após a aprovação do proprietário, a entrega foi reunida no commit `Implementa página inicial e apresentação da etapa 3`; consultar `git log` para o hash. Não houve push.
 

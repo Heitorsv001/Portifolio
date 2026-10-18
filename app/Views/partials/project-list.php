@@ -1,0 +1,22 @@
+<?php
+/** @var list<array<string, mixed>> $projects */
+/** @var string $basePath */
+/** @var string $projectsUrl */
+?>
+<ul class="project-grid">
+    <?php foreach ($projects as $project): ?>
+        <li class="project-card">
+            <?php if ($project['image'] !== null): ?>
+                <img class="project-image" src="<?= htmlspecialchars($basePath . '/' . $project['image'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars('Prévia do projeto ' . $project['title'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy" decoding="async" width="640" height="360">
+            <?php else: ?>
+                <div class="project-image project-image--placeholder" aria-hidden="true">Imagem em preparação</div>
+            <?php endif; ?>
+            <div class="project-card-content">
+                <h3><a href="<?= htmlspecialchars($projectsUrl . '/' . rawurlencode($project['slug']), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8') ?></a></h3>
+                <p><?= htmlspecialchars($project['summary'], ENT_QUOTES, 'UTF-8') ?></p>
+                <?php require __DIR__ . '/project-technologies.php'; ?>
+                <?php require __DIR__ . '/project-links.php'; ?>
+            </div>
+        </li>
+    <?php endforeach; ?>
+</ul>
