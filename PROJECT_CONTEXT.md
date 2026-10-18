@@ -306,7 +306,7 @@ resultados, limitações e eventuais pendências. Não avance para a etapa segui
 
 - [x] Etapa 1 — Estrutura MVC e roteamento
 - [x] Etapa 2 — Layout e identidade visual
-- [ ] Etapa 3 — Página inicial e sobre mim
+- [x] Etapa 3 — Página inicial e sobre mim
 - [ ] Etapa 4 — Catálogo de projetos
 - [ ] Etapa 5 — Detalhes dos projetos
 - [ ] Etapa 6 — Habilidades técnicas
@@ -317,6 +317,8 @@ resultados, limitações e eventuais pendências. Não avance para a etapa segui
 Atualize o checklist quando uma etapa for validada. A conclusão de uma implementação não significa que os critérios de aceite foram automaticamente satisfeitos.
 
 Etapa 2 validada em 18/10/2026: home e 404 utilizam o mesmo layout, links e CSS conferidos via HTTP no Apache e no servidor PHP. A base de responsividade está implementada; inspeção visual e testes reais de teclado permanecem pendentes por indisponibilidade de navegador nesta sessão. Detalhes e evidências em `PROGRESS.md`.
+
+Etapa 3 validada funcionalmente em 18/10/2026: home com hero, sobre mim, objetivos e chamada para uma seção informativa de projetos. Dados pessoais ausentes estão explicitamente sinalizados; nenhuma informação biográfica foi inventada. Navegação e âncoras conferidas na home e a partir do 404, inclusive em subdiretórios. O catálogo e a rota `/projetos` permanecem para a etapa 4. Inspeção visual e interação real por teclado continuam pendentes por indisponibilidade de navegador; evidências em `PROGRESS.md`.
 
 ## 11. Decisões e informações pendentes
 

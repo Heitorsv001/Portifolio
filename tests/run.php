@@ -52,7 +52,7 @@ $expect($router->dispatch('GET', '/teste/'), 'Normalização da barra final');
 $expect(!$router->dispatch('GET', '/Teste'), 'Rotas distinguem maiúsculas e minúsculas');
 
 // Ambas as páginas devem manter links e assets válidos na raiz ou em subdiretórios.
-$expectLayout = static function (string $html, string $basePath) use ($expect): void {
+$expectLayout = static function (string $html, string $basePath, string $homeHtml) use ($expect): void {
     foreach (['<!doctype html>', '<html ', '<head>', '<body ', '<header ', '<main ', '<footer '] as $tag) {
         $expect(substr_count($html, $tag) === 1, 'Layout único: ' . $tag . ' em ' . $basePath);
     }
@@ -62,7 +62,16 @@ $expectLayout = static function (string $html, string $basePath) use ($expect): 
     $expect(str_contains($html, 'href="#topo"') && str_contains($html, 'id="topo"'), 'Navegação para o topo');
 
     preg_match_all('/href="([^"]+)"/', $html, $links);
-    $allowedLinks = [$basePath . '/', $basePath . '/assets/css/style.css', '#conteudo', '#topo'];
+    preg_match_all('/\bid="([^"]+)"/', $html, $ids);
+    preg_match_all('/\bid="([^"]+)"/', $homeHtml, $homeIds);
+    $expect(count($ids[1]) === count(array_unique($ids[1])), 'Identificadores únicos na página');
+    $allowedLinks = [$basePath . '/', $basePath . '/assets/css/style.css'];
+    foreach ($ids[1] as $id) {
+        $allowedLinks[] = '#' . $id;
+    }
+    foreach ($homeIds[1] as $id) {
+        $allowedLinks[] = $basePath . '/#' . $id;
+    }
     $expect(array_diff($links[1], $allowedLinks) === [], 'Links apontam apenas para destinos existentes');
 };
 
@@ -73,10 +82,22 @@ foreach (['', '/portifolio', '/outro/caminho/'] as $basePath) {
     ob_start();
     $home->index();
     $html = ob_get_clean();
-    $expect(str_contains($html, 'Estrutura MVC em PHP pronta para começar.'), 'Renderização da home');
+    $homeHtml = $html;
+    $expect(str_contains($html, '[Nome de exibição a informar]'), 'Nome pessoal pendente sinalizado');
+    $expect(str_contains($html, 'Biografia em preparação.'), 'Biografia pendente sinalizada');
+    $expect(str_contains($html, 'Objetivos profissionais a informar.'), 'Objetivos pendentes sinalizados');
+    $expect(str_contains($html, 'Projetos em preparação'), 'Projetos futuros sinalizados sem catálogo');
+    $expect(substr_count($html, '<h1 ') === 1, 'Título principal único na home');
+    $expect(str_contains($html, 'Desenvolvedor <span class="hero-highlight">Full Stack</span>'), 'Posicionamento profissional confirmado');
+    foreach (['sobre', 'objetivos', 'projetos'] as $section) {
+        $expect(str_contains($html, '<section id="' . $section . '"'), 'Seção disponível: ' . $section);
+        $expect(str_contains($html, 'href="' . $root . '/#' . $section . '"'), 'Navegação para a seção: ' . $section);
+    }
+    $expect(str_contains($html, 'class="button" href="#projetos"'), 'Chamada principal leva à seção de projetos');
+    $expect(str_contains($html, 'class="button button--secondary" href="#sobre"'), 'Chamada secundária leva à apresentação');
     $expect(str_contains($html, '&lt;script&gt;'), 'Escaping do título');
     $expect(!str_contains($html, '<script>'), 'Ausência de HTML arbitrário no título');
-    $expectLayout($html, $root);
+    $expectLayout($html, $root, $homeHtml);
     $expect(str_contains($html, 'aria-current="page"'), 'Home identificada na navegação');
     $expect(str_contains($html, '<span>Teste &lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;</span>'), 'Nome escapado no header');
 
@@ -91,7 +112,7 @@ foreach (['', '/portifolio', '/outro/caminho/'] as $basePath) {
     $expect(!str_contains($html, 'aria-current="page"'), '404 não marca home como página atual');
     $expect(str_contains($html, 'class="button" href="' . $root . '/"'), '404 permite retornar ao início');
     $expect(!str_contains($html, '<script>'), 'Nome da aplicação escapado também na página 404');
-    $expectLayout($html, $root);
+    $expectLayout($html, $root, $homeHtml);
 }
 
 $home = new HomeController(['name' => 'Teste', 'base_path' => '/teste" onclick="alert(1)']);

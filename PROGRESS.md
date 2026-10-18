@@ -1,8 +1,55 @@
 # Progresso e passagem de contexto
 
-Atualizado em **18/10/2026**. A seção 0 registra o estado atual após a etapa 2. As seções 1 a 9 preservam o histórico da etapa 1 e devem ser interpretadas como o estado anterior. Conferir novamente o ambiente na próxima sessão.
+Atualizado em **18/10/2026**. A seção 0 registra o estado atual após a etapa 3. As demais seções preservam o histórico das etapas 1 e 2 e devem ser interpretadas como estados anteriores. Conferir novamente o ambiente na próxima sessão.
 
-## 0. Entrega atual — etapa 2: layout base e identidade visual
+## 0. Entrega atual — etapa 3: página inicial e apresentação pessoal
+
+Implementada exclusivamente a etapa 3, a pedido do proprietário. Etapas 1 a 3 concluídas funcionalmente; **etapa 4 não iniciada**. Árvore de trabalho limpa no início, no commit `6f65e6f` (`Implementa layout base e identidade visual da etapa 2`). Após a aprovação do proprietário, a entrega foi reunida no commit `Implementa página inicial e apresentação da etapa 3`; consultar `git log` para o hash. Não houve push.
+
+### Alterações realizadas
+
+| Arquivo | Alteração |
+|---|---|
+| `app/Views/home/index.php` | Substitui a view de teste por hero com título profissional confirmado, nome placeholder e chamadas; seções sobre mim, objetivos e aviso de projetos em preparação. |
+| `app/Views/partials/header.php` | Links para sobre mim, objetivos e projetos usando a URL da home e respeitando o caminho-base, inclusive no 404. |
+| `public/assets/css/style.css` | Estilos da apresentação e seções usando os tokens existentes; botões com quebra de linha e seções em duas colunas a partir de `48rem`. |
+| `tests/run.php` | Atualiza a validação da home e verifica placeholders, chamadas, IDs únicos e destinos reais das âncoras locais e entre páginas. |
+| `README.md`, `PROJECT_CONTEXT.md` e `PROGRESS.md` | Documenta funcionamento, limites, verificações e pendências; marca a etapa 3 no checklist. |
+
+### Decisões técnicas e limites de escopo
+
+- Mantidos `HomeController`, Controllers de erro, Core, Router, front controller, configuração e layout compartilhado. A apresentação está na View e os estilos no asset público existente; não há lógica de negócio nem leitura de dados na View.
+- Sem novos Models, arquivos de dados, dependências ou JavaScript: os textos pessoais ausentes são placeholders estáticos. O título profissional Desenvolvedor Full Stack é a informação confirmada utilizada. Nome, biografia, formação, interesses e objetivos permanecem claramente sinalizados como pendentes; nenhuma experiência ou competência foi inventada.
+- A chamada principal usa `#projetos`, que contém somente um aviso de preparação. Não aponta para uma rota inexistente; não implementa catálogo, cards, itens fictícios ou destaques. A rota `/projetos` continua retornando 404, para implementação na etapa 4.
+- Header com links para `/#sobre`, `/#objetivos` e `/#projetos`, precedidos do caminho-base da instalação; chamadas dentro da home usam fragmentos locais. O retorno do 404 às seções funciona sem JavaScript.
+- Seções identificadas por headings e `aria-labelledby`, com `tabindex="-1"` para receber foco ao navegar por fragmentos, sem entrar no percurso normal de Tab. Mantidos foco visível, link de salto e botões da etapa 2.
+- Conteúdo em uma coluna nas telas pequenas e duas colunas nas seções a partir do breakpoint existente. Tema e tokens da etapa 2 preservados, sem downloads de fontes, fotos ou ilustrações.
+- Habilidades, contatos, redes, currículo e revisão completa de SEO/acessibilidade permanecem nas etapas previstas. Nenhuma alteração de servidor, permissão ou proprietário.
+
+### Testes e evidências desta entrega
+
+| Verificação | Resultado |
+|---|---|
+| `php tests/run.php` antes das mudanças | **141/141** aprovadas. |
+| `php tests/run.php` após as mudanças | **186/186** aprovadas. |
+| Sintaxe de `app`, `public`, `config`, `tests` e `index.php` | **13 arquivos PHP**, sem erros. |
+| `git diff --check` | Aprovado. |
+| Apache: home `/portifolio/`, rota inexistente e CSS | **200**, **404** e **200**; HTML executado e CSS atualizado. |
+| Servidor PHP, `APP_BASE_PATH=''`, raiz `public/` | Home **200**, rota inexistente **404**, CSS **200**. |
+| `/projetos` em ambos os servidores | **404**, preservando o limite da etapa 3. |
+| Apache: acesso direto a `/portifolio/app/Views/home/index.php` | **403**, proteção da View preservada. |
+| Inspeção do HTML servido na home e páginas 404 | Documento e landmarks únicos, um h1, hierarquia de títulos válida, IDs únicos, `aria-labelledby` com destinos existentes e links/âncoras válidos, incluindo retorno do erro às seções da home. |
+
+Os requests do servidor PHP temporário não registraram erros de aplicação. O servidor foi encerrado após a validação. A integração HTTP utiliza o autoload Composer existente, sem alterações. Abertura de porta e acesso HTTP local exigiram escalada do sandbox, como na etapa anterior.
+
+### Pendências e próxima retomada
+
+- **Conteúdo:** obter nome de exibição, biografia, formação, interesses e objetivos para substituir os placeholders. Se esses textos passarem a ser dados dinâmicos, continuar a aplicar escaping no contexto HTML.
+- **Validação manual:** inspecionar mobile/desktop e zoom, verificar console e usar Tab/Enter no menu, link de salto, chamadas e retorno do 404. O inventário novamente retornou `apps: []` e `browsers: []`; renderização, rolagem e interação real por teclado não puderam ser verificadas. As evidências de HTML/HTTP não substituem esses testes.
+- Aceite funcional da etapa 3 atendido com placeholders explícitos e chamadas com destinos válidos. Validação visual e substituição dos dados pessoais continuam pendentes conforme acima.
+- Próxima implementação: **etapa 4 — catálogo de projetos**, somente após novo pedido. Ao retomá-la, substituir o aviso em `#projetos` pela integração de destaques prevista no roadmap e adicionar o link ao catálogo quando a rota existir.
+
+## Histórico — etapa 2: layout base e identidade visual
 
 Implementada exclusivamente a etapa 2, por solicitação explícita do proprietário. Etapas 1 e 2 concluídas; **etapa 3 ainda não iniciada**. O repositório estava limpo no início desta implementação, no commit `7b51b09` (`Document visual reference and Full Stack positioning`). Após a aprovação do proprietário, a entrega foi reunida no commit `Implementa layout base e identidade visual da etapa 2`; consultar `git log` para o hash. Não foi realizado push.
 

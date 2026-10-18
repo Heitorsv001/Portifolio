@@ -14,6 +14,15 @@
                 <li>
                     <a class="nav-link" href="<?= htmlspecialchars($homeUrl, ENT_QUOTES, 'UTF-8') ?>"<?= $currentPage === 'home' ? ' aria-current="page"' : '' ?>>Início</a>
                 </li>
+                <li>
+                    <a class="nav-link" href="<?= htmlspecialchars($homeUrl . '#sobre', ENT_QUOTES, 'UTF-8') ?>">Sobre mim</a>
+                </li>
+                <li>
+                    <a class="nav-link" href="<?= htmlspecialchars($homeUrl . '#objetivos', ENT_QUOTES, 'UTF-8') ?>">Objetivos</a>
+                </li>
+                <li>
+                    <a class="nav-link" href="<?= htmlspecialchars($homeUrl . '#projetos', ENT_QUOTES, 'UTF-8') ?>">Projetos</a>
+                </li>
             </ul>
         </nav>
     </div>

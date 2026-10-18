@@ -1,6 +1,6 @@
 # Portfólio MVC em PHP
 
-Site em PHP organizado no padrão MVC, com estrutura inicial e layout compartilhado implementados, sem framework ou banco de dados. O conteúdo pessoal permanece reservado às próximas etapas.
+Site em PHP organizado no padrão MVC, com as etapas 1 a 3 implementadas: estrutura inicial, layout compartilhado e home de apresentação. Sem framework ou banco de dados; informações pessoais ainda não fornecidas aparecem como placeholders explícitos.
 
 ## Requisitos e instalação
 
@@ -42,7 +42,7 @@ Em produção, configure a raiz pública do servidor para `public/` e `APP_BASE_
 
 ## Rotas atuais
 
-- `GET /`: view de teste da estrutura MVC, identificada como portfólio em construção, com layout base.
+- `GET /`: página inicial com hero, sobre mim, objetivos e seção informativa de projetos em preparação.
 - Rota desconhecida ou método não registrado: página com status HTTP 404.
 
 O Controller solicita a View; o Router apenas encontra e executa a ação. Conteúdo dinâmico e atributos HTML são escapados nas Views. Falhas de inicialização retornam uma mensagem genérica com status 500 e registram detalhes no log do PHP.
@@ -53,7 +53,15 @@ O Controller base recebe a configuração da aplicação e fornece nome, título
 
 Os padrões visuais ficam em `public/assets/css/style.css`: tema escuro com destaque violeta, fontes do sistema (sem download externo), variáveis de cores/espaçamento, títulos fluidos, links e botões `.button` e `.button--secondary`. O container é fluido, header/footer permitem quebra de linha e há um breakpoint em `48rem`. A escolha visual é reversível e aguarda validação do proprietário, seguindo a referência registrada em `PROJECT_CONTEXT.md`.
 
-A navegação inclui somente destinos existentes: início, pular para o conteúdo, voltar ao topo e retorno do 404 à home. Há foco visível e indicação `aria-current` na home. Não há JavaScript, menu recolhível, links vazios ou rotas de etapas futuras.
+A navegação inclui somente destinos existentes: início, seções da home, pular para o conteúdo, voltar ao topo e retorno do 404 à home. Há foco visível e indicação `aria-current` na home. Não há JavaScript, menu recolhível, links vazios ou rotas de etapas futuras.
+
+## Página inicial — etapa 3
+
+A view `app/Views/home/index.php` apresenta o título profissional confirmado, Desenvolvedor Full Stack, e sinaliza a ausência do nome definitivo, biografia, formação, interesses e objetivos. Esses placeholders estão na view e devem ser substituídos por texto confirmado pelo proprietário, com escaping caso sejam futuramente fornecidos como dados dinâmicos pelo Controller. O nome da marca e o título do documento continuam configurados em `config/app.php`.
+
+As chamadas do hero levam a `#sobre` e `#projetos`; o menu também oferece `#objetivos`. Os links do header incluem a URL da home com o caminho-base, permitindo voltar às seções a partir de uma página 404. As seções de destino são focáveis por navegação de fragmentos (`tabindex="-1"`), sem acrescentar paradas ao percurso normal de Tab.
+
+A seção `#projetos` contém apenas um aviso de preparação, para que a chamada tenha um destino válido. Catálogo, cards, dados, Model, Controller e rota `/projetos` serão implementados na etapa 4. Habilidades, contatos e currículo também permanecem nas etapas correspondentes.
 
 ## Verificações
 
@@ -65,7 +73,7 @@ find app public config tests -name '*.php' -print0 | xargs -0 -n1 php -l
 php -l index.php
 ```
 
-Os testes isolados carregam as classes diretamente: verificam rotas, prefixo da instalação, métodos HTTP, escaping, layout único, destinos de navegação e renderização de 404, sem substituir a validação do autoload Composer ou do servidor web. Execute `php tests/run.php`; não há framework de testes.
+Os testes isolados carregam as classes diretamente: verificam rotas, prefixo da instalação, métodos HTTP, escaping, layout único, placeholders, chamadas da home, identificadores únicos, destinos das âncoras locais e de retorno à home e renderização de 404, sem substituir a validação do autoload Composer ou do servidor web. Execute `php tests/run.php`; não há framework de testes.
 
 Com o servidor local em execução, confira a integração:
 
@@ -75,7 +83,7 @@ curl -i http://127.0.0.1:8000/rota-inexistente
 curl -i http://127.0.0.1:8000/assets/css/style.css
 ```
 
-Os resultados esperados são, respectivamente, status 200 com a view de teste, status 404 e status 200 com o CSS. Verifique também a abertura da página e o carregamento do estilo no navegador.
+Os resultados esperados são, respectivamente, status 200 com a página inicial, status 404 e status 200 com o CSS. No navegador, confira as seções em telas pequenas e grandes, o carregamento do estilo e o console. Use Tab e Enter para testar o link de salto, o menu, as chamadas do hero e o retorno às seções a partir de uma página 404; confira foco visível e ausência de rolagem horizontal.
 
 ## Validação da etapa 1 — 18/10/2026
 
@@ -99,4 +107,16 @@ Os critérios funcionais da etapa 1 foram confirmados no servidor PHP documentad
 - Corpos das respostas conferidos nos dois servidores: documento e landmarks únicos, destinos de links/âncoras existentes, página ativa correta e CSS idêntico ao arquivo atualizado.
 - Não foi possível validar renderização visual, redimensionamento, zoom, console ou interação real com teclado: o inventário de navegadores/aplicativos está vazio nesta sessão. Esses testes manuais permanecem pendentes; a base inclui os estilos e a semântica necessários.
 
-Etapa 3 não iniciada. Nome definitivo, biografia, projetos, habilidades e contatos continuam pendentes. Consulte `PROGRESS.md` para a passagem de contexto atual.
+Ao final da etapa 2, a etapa 3 ainda não havia sido iniciada.
+
+## Validação da etapa 3 — 18/10/2026
+
+- `php tests/run.php`: **186/186** verificações aprovadas; suite anterior com **141/141** também aprovada antes das alterações.
+- Sintaxe dos **13 arquivos PHP**: sem erros; `git diff --check` aprovado.
+- Apache com `/portifolio` e servidor PHP com `APP_BASE_PATH=''`: home **200**, rota inexistente **404**, CSS **200**, `/projetos` **404** (rota da etapa 4 ainda não implementada).
+- Apache: acesso direto à view em `/portifolio/app/Views/home/index.php` retorna **403**.
+- HTML das respostas conferido: layout e h1 únicos, hierarquia de títulos, IDs e referências `aria-labelledby` válidos, âncoras locais existentes e links do 404 apontando às seções da home. CSS servido idêntico ao arquivo atualizado.
+- Servidor temporário encerrado após a validação; nenhuma mudança no Apache ou nas dependências.
+- Inspeção visual, responsividade, console, zoom e teclado real continuam pendentes: nenhum aplicativo/navegador disponível na sessão. A inspeção de HTML não substitui esses testes.
+
+Etapa 4 não iniciada. Nome definitivo, biografia, formação, interesses, objetivos, projetos, habilidades e contatos continuam pendentes de confirmação do proprietário. Consulte `PROGRESS.md` para a passagem de contexto atual.
