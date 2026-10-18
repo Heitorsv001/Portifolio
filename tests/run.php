@@ -6,6 +6,7 @@ declare(strict_types=1);
 require dirname(__DIR__) . '/app/Core/Controller.php';
 require dirname(__DIR__) . '/app/Core/Router.php';
 require dirname(__DIR__) . '/app/Models/Project.php';
+require dirname(__DIR__) . '/app/Models/Skill.php';
 require dirname(__DIR__) . '/app/Controllers/HomeController.php';
 require dirname(__DIR__) . '/app/Controllers/ProjectController.php';
 require dirname(__DIR__) . '/app/Controllers/ErrorController.php';
@@ -15,6 +16,7 @@ use App\Controllers\HomeController;
 use App\Controllers\ProjectController;
 use App\Core\Router;
 use App\Models\Project;
+use App\Models\Skill;
 
 $failures = [];
 $checks = 0;
@@ -109,12 +111,13 @@ $expectLayout = static function (string $html, string $basePath, string $homeHtm
 $emptyDataFile = tempnam(sys_get_temp_dir(), 'portfolio-empty-');
 file_put_contents($emptyDataFile, '<?php return [];');
 $emptyProjects = new Project($emptyDataFile);
+$emptySkills = new Skill($emptyDataFile);
 unlink($emptyDataFile);
 
 foreach (['', '/portifolio', '/outro/caminho/'] as $basePath) {
     $root = rtrim($basePath, '/');
     $config = ['name' => 'Teste <script>alert("x")</script>', 'base_path' => $basePath];
-    $home = new HomeController($config, $emptyProjects);
+    $home = new HomeController($config, $emptyProjects, $emptySkills);
     ob_start();
     $home->index();
     $html = ob_get_clean();
@@ -123,10 +126,12 @@ foreach (['', '/portifolio', '/outro/caminho/'] as $basePath) {
     $expect(str_contains($html, 'Biografia em preparação.'), 'Biografia pendente sinalizada');
     $expect(str_contains($html, 'Objetivos profissionais a informar.'), 'Objetivos pendentes sinalizados');
     $expect(str_contains($html, 'Nenhum projeto em destaque'), 'Estado vazio dos destaques sem projetos inventados');
+    $expect(str_contains($html, 'Habilidades a confirmar.'), 'Habilidades pendentes explicitamente sinalizadas');
+    $expect(!str_contains($html, 'class="skill-category"'), 'Estado vazio não atribui habilidades ao proprietário');
     $expect(str_contains($html, 'href="' . $root . '/projetos"'), 'Home permite acessar catálogo');
     $expect(substr_count($html, '<h1 ') === 1, 'Título principal único na home');
     $expect(str_contains($html, 'Desenvolvedor <span class="hero-highlight">Full Stack</span>'), 'Posicionamento profissional confirmado');
-    foreach (['sobre', 'objetivos', 'projetos'] as $section) {
+    foreach (['sobre', 'objetivos', 'projetos', 'habilidades'] as $section) {
         $expect(str_contains($html, '<section id="' . $section . '"'), 'Seção disponível: ' . $section);
         if ($section !== 'projetos') {
             $expect(str_contains($html, 'href="' . $root . '/#' . $section . '"'), 'Navegação para a seção: ' . $section);
@@ -297,12 +302,13 @@ try {
         }
 
         ob_start();
-        (new HomeController($config, $model))->index();
+        (new HomeController($config, $model, $emptySkills))->index();
         $html = ob_get_clean();
         $expect(substr_count($html, 'class="project-card"') === 1, 'Home exibe somente destaque');
         $expect(!str_contains($html, 'Teste sem opcionais'), 'Home omite item não destacado');
         $expect(!str_contains($html, 'Nenhum projeto em destaque'), 'Estado vazio omitido com destaques');
         $expect(str_contains($html, 'href="' . $root . '/projetos/teste-destaque"'), 'Destaque na home aponta para página individual');
+        $expect(str_contains($html, 'Habilidades a confirmar.') && !str_contains($html, 'class="skill-category"'), 'Tecnologias de projetos não são inferidas como habilidades pessoais');
     }
 
     $fixture[] = [
@@ -339,7 +345,7 @@ try {
         $expect($model->all()[0]['image'] === null, 'Imagem ausente ou fora dos assets usa fallback');
         $expect($model->all()[0]['technologies'] === [], 'Tecnologias nulas usam lista vazia');
         ob_start();
-        (new HomeController(['name' => 'Teste', 'base_path' => ''], $model))->index();
+        (new HomeController(['name' => 'Teste', 'base_path' => ''], $model, $emptySkills))->index();
         $html = ob_get_clean();
         $expect(str_contains($html, 'Nenhum projeto em destaque'), 'Home trata catálogo preenchido sem featured');
     }
@@ -348,7 +354,80 @@ try {
     unlink($imageFile);
 }
 
-$home = new HomeController(['name' => 'Teste', 'base_path' => '/teste" onclick="alert(1)'], $emptyProjects);
+// Habilidades fictícias apenas em fixture: categorias e itens vêm do Model.
+$skillFile = tempnam(sys_get_temp_dir(), 'portfolio-skills-');
+try {
+    $writeSkills = static function (array $groups) use ($skillFile): void {
+        file_put_contents($skillFile, '<?php return ' . var_export($groups, true) . ';');
+    };
+    $writeSkills([]);
+    $expect((new Skill($skillFile))->all() === [], 'Arquivo vazio produz habilidades vazias');
+    $writeSkills([
+        ['category' => 'Sem itens', 'items' => []],
+        ['category' => 'Apenas espaços', 'items' => [' ', "\n"]],
+        ['category' => ' ', 'items' => ['Não exibir']],
+    ]);
+    $expect((new Skill($skillFile))->all() === [], 'Categorias sem nome ou habilidades são omitidas');
+
+    $groups = [
+        ['category' => ' Linguagens de teste ', 'items' => [' PHP ', '', 'JavaScript']],
+        ['category' => 'Ferramentas <script>alert("x")</script>', 'items' => ['Git & revisão', '<img src=x onerror=alert(1)>']],
+        ['category' => 'Categoria vazia', 'items' => []],
+    ];
+    $writeSkills($groups);
+    $skills = new Skill($skillFile);
+    $expect($skills->all()[0] === ['category' => 'Linguagens de teste', 'items' => ['PHP', 'JavaScript']], 'Model preserva ordem, remove espaços e omite itens em branco');
+    $expect(count($skills->all()) === 2, 'Somente categorias preenchidas são retornadas');
+
+    foreach (['', '/portifolio', '/outro/caminho/'] as $basePath) {
+        $root = rtrim($basePath, '/');
+        $config = ['name' => 'Teste', 'base_path' => $basePath];
+        http_response_code(200);
+        ob_start();
+        (new HomeController($config, $emptyProjects, $skills))->index();
+        $html = ob_get_clean();
+        $expect(http_response_code() === 200, 'Home com habilidades responde 200');
+        $expect(substr_count($html, 'class="skill-category"') === 2, 'Home apresenta cada categoria preenchida');
+        $expect(substr_count($html, 'class="skill-list"') === 2, 'Habilidades usam listas por categoria');
+        $expect(str_contains($html, '<h3>Linguagens de teste</h3>'), 'Categoria usa heading abaixo do título da seção');
+        $expect(str_contains($html, '<li>PHP</li>') && str_contains($html, '<li>JavaScript</li>'), 'Itens vêm do arquivo sem editar layout');
+        $expect(str_contains($html, 'Ferramentas &lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;'), 'Nome da categoria escapado');
+        $expect(str_contains($html, '<li>Git &amp; revisão</li>') && str_contains($html, '&lt;img src=x onerror=alert(1)&gt;'), 'Habilidades escapadas como texto');
+        $expect(!str_contains($html, '<script>') && !str_contains($html, '<img src=x'), 'Dados de habilidades não injetam HTML');
+        $expect(!str_contains($html, 'Habilidades a confirmar.') && !str_contains($html, 'Categoria vazia'), 'Sem aviso pendente ou categoria vazia quando há habilidades');
+        $expect(str_contains($html, 'id="habilidades" class="home-section" aria-labelledby="habilidades-titulo" tabindex="-1"'), 'Seção tem heading associado e destino focável por fragmento');
+        $expect(str_contains($html, 'href="' . $root . '/#habilidades"'), 'Menu acessa habilidades com caminho-base');
+        $expect(strpos($html, 'id="habilidades"') > strpos($html, 'id="projetos"'), 'Seção de habilidades segue os projetos');
+        preg_match_all('/\bid="([^"]+)"/', $html, $ids);
+        preg_match_all('/aria-labelledby="([^"]+)"/', $html, $labels);
+        $expect(array_diff($labels[1], $ids[1]) === [], 'Headings referenciados existem na home com habilidades');
+        $expectLayout($html, $root, $html);
+
+        foreach (['catalog', 'detail', 'error'] as $page) {
+            ob_start();
+            if ($page === 'error') {
+                (new ErrorController($config))->notFound();
+            } elseif ($page === 'detail') {
+                (new ProjectController($config, $emptyProjects))->show('inexistente');
+            } else {
+                (new ProjectController($config, $emptyProjects))->index();
+            }
+            $otherHtml = ob_get_clean();
+            $expect(str_contains($otherHtml, 'href="' . $root . '/#habilidades"'), 'Menu retorna à seção de habilidades a partir de ' . $page);
+        }
+    }
+
+    $groups[] = ['category' => 'Nova categoria', 'items' => ['Nova habilidade de teste']];
+    $writeSkills($groups);
+    ob_start();
+    (new HomeController(['name' => 'Teste', 'base_path' => ''], $emptyProjects, new Skill($skillFile)))->index();
+    $html = ob_get_clean();
+    $expect(str_contains($html, '<h3>Nova categoria</h3>') && str_contains($html, '<li>Nova habilidade de teste</li>'), 'Atualizar apenas o arquivo inclui categoria e habilidade na home');
+} finally {
+    unlink($skillFile);
+}
+
+$home = new HomeController(['name' => 'Teste', 'base_path' => '/teste" onclick="alert(1)'], $emptyProjects, $emptySkills);
 ob_start();
 $home->index();
 $html = ob_get_clean();

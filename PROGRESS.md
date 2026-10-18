@@ -1,8 +1,60 @@
 # Progresso e passagem de contexto
 
-Atualizado em **18/10/2026**. A seção 0 registra o estado atual após a etapa 5. As demais seções preservam o histórico das etapas 1 a 4 e devem ser interpretadas como estados anteriores. Conferir novamente o ambiente na próxima sessão.
+Atualizado em **18/10/2026**. A seção 0 registra o estado atual após a etapa 6. As demais seções preservam o histórico das etapas 1 a 5 e devem ser interpretadas como estados anteriores. Conferir novamente o ambiente na próxima sessão.
 
-## 0. Entrega atual — etapa 5: páginas individuais dos projetos
+## 0. Entrega atual — etapa 6: habilidades e tecnologias
+
+Implementada exclusivamente a próxima etapa pendente, a etapa 6, conforme o pedido do proprietário. Etapas 1 a 6 concluídas funcionalmente; **etapa 7 não iniciada**. Árvore de trabalho limpa no início, no commit `91e47ed` (`Implementa catálogo e páginas individuais dos projetos`). A pedido do proprietário, esta entrega é reunida no commit `Implementa habilidades e tecnologias da etapa 6`; consultar `git log` para o hash. Sem push.
+
+### Alterações realizadas
+
+| Arquivo ou área | Alteração desta etapa |
+|---|---|
+| `config/skills.php` (novo) | Fonte de habilidades confirmadas por categoria; retorna lista vazia até o proprietário fornecer os dados. |
+| `app/Models/Skill.php` (novo) | Carrega grupos e oferece `all()`; remove espaços nas extremidades, itens em branco e categorias sem nome ou itens. |
+| `app/Controllers/HomeController.php` | Recebe o Model por injeção e envia `skillGroups` à home. Dependências anteriores preservadas. |
+| `public/index.php` | Injeta `Skill` no HomeController usando o autoload Composer existente. |
+| `app/Views/partials/skills.php` (novo) e `home/index.php` | Seção reutilizável após os projetos, com categorias, listas e aviso explícito enquanto não houver habilidades confirmadas. |
+| `app/Views/partials/header.php` | Link para a seção da home em todas as páginas, respeitando o caminho-base. |
+| `public/assets/css/style.css` | Grid fluido e apresentação das categorias/listas usando os tokens existentes. |
+| `tests/run.php` | Fixtures isoladas para dados de habilidades, atualização por arquivo, estado vazio, escaping, semântica e navegação. |
+| `README.md` e `PROJECT_CONTEXT.md` | Formato dos dados, manutenção da seção, verificações e checklist da etapa 6. |
+
+### Decisões técnicas e limites de escopo
+
+- Separação MVC preservada: configuração é lida apenas pelo Model; Controller consulta e passa dados; partial apresenta texto escapado. Não foram alterados Router, Core, dados dos projetos ou páginas individuais.
+- Esquema simples: lista de grupos com `category` (string) e `items` (lista de strings), na ordem do arquivo. Nomes de categorias são configuráveis, sem lista fixa no layout. Categorias sem conteúdo são omitidas; ausência de grupos utilizáveis produz o mesmo aviso de habilidades pendentes.
+- `Skill` aceita arquivo alternativo para testes, seguindo o padrão de `Project`. O parâmetro adicional do HomeController mantém as chamadas existentes compatíveis; não há infraestrutura genérica de validação ou persistência adicional.
+- `config/skills.php` real permanece vazio. Referências de habilidades no contexto e tecnologias dos projetos não confirmam conhecimentos pessoais. Nenhuma habilidade, nível de proficiência, experiência ou contato foi inventado. Exemplos preenchidos existem somente em fixtures temporárias e não foram publicados.
+- Seção `#habilidades` usa h2, categorias em h3, listas nativas e destino focável por fragmento com `tabindex="-1"`. Não foram gerados IDs a partir de categorias; texto arbitrário permanece texto. Navegação de catálogo, detalhe e 404 retorna à home com o prefixo correto.
+- CSS usa o tema e os espaços existentes, com colunas fluidas e quebra de textos longos. Sem JavaScript, ícones ou requests externos, novas dependências, banco de dados, alterações de Apache ou permissões. Contatos e demais etapas permanecem fora desta entrega.
+
+### Testes e evidências desta entrega
+
+| Verificação | Resultado |
+|---|---|
+| Suíte antes das mudanças | **589/589** aprovadas. |
+| `php -d error_reporting=E_ALL tests/run.php` | **696/696** aprovadas. |
+| Sintaxe em `app`, `public`, `config`, `tests` e `index.php` | **24 arquivos PHP**, sem erros. |
+| `git diff --check` | Aprovado. |
+| Fixtures isoladas | Categorias/itens na ordem correta, trimming, omissão de vazios, inclusão por arquivo, escaping de nomes e habilidades, aviso pendente e ausência de inferência a partir dos projetos aprovados. |
+| Raiz, `/portifolio` e subdiretório aninhado | Layout, IDs, headings associados e links de ida/retorno à seção conferidos nos testes. |
+| Apache real | GET home/catálogo **200**; rota inexistente e detalhe desconhecido **404**; nova seção e aviso presentes no HTML executado. |
+| Apache: novos arquivos privados | `config/skills.php` e `app/Views/partials/skills.php` **403**. |
+| CSS via HTTP | **200** e idêntico ao arquivo atualizado no Apache e no servidor PHP temporário. |
+| Cópia temporária + servidor PHP com raiz `public/` | Home preenchida, catálogo e detalhe de fixture **200**; rota desconhecida **404**. Categorias, escaping, atualização apenas dos dados e retorno ao estado vazio aprovados com autoload Composer real. |
+| HTML servido | H1 e IDs únicos, headings referenciados existentes e âncoras locais/da home válidas; nenhuma exposição de código PHP. |
+
+O acesso HTTP exigiu escalada do sandbox após a tentativa local sem escalada não conectar. Foi usado GET para a validação funcional: o Router existente registra apenas GET e continua retornando 404 para HEAD. Nenhuma configuração de servidor foi alterada. A cópia temporária continha fixtures de habilidades e um projeto apenas para verificar integração e navegação; foi removida e seu servidor encerrado, sem avisos ou erros de aplicação no log. Os arquivos de dados reais permaneceram vazios. Nenhuma alteração nas dependências ou no autoload foi necessária.
+
+### Aceite, pendências e próxima retomada
+
+- **Aceite funcional da etapa 6 atendido:** seção integrada ao layout, conhecimentos organizáveis por categorias, partial reutilizável e atualização apenas pelo arquivo de dados. O estado preenchido foi validado com fixtures; a versão real sinaliza a falta de confirmação das habilidades.
+- **Conteúdo pendente:** proprietário deve confirmar as habilidades e suas categorias antes de preencher `config/skills.php`. Nome, biografia, projetos e contatos continuam pendentes conforme o contexto.
+- **Validação manual pendente:** legibilidade em mobile/desktop, textos longos e zoom, console, foco e Tab/Enter no menu “Habilidades”, inclusive a partir de catálogo, detalhe e 404. Inventário desta sessão: `apps: []`, `browsers: []`; não foi possível executar inspeção visual ou teclado real. Testes HTML/HTTP não substituem essa revisão.
+- Próxima etapa de implementação: **etapa 7 — contato e redes profissionais**, somente após novo pedido. Utilizar apenas links e dados confirmados; não adicionar formulário de contato.
+
+## Histórico — etapa 5: páginas individuais dos projetos
 
 Implementada exclusivamente a etapa 5, a pedido do proprietário. Etapas 1 a 5 concluídas funcionalmente; **etapa 6 não iniciada**. A árvore de trabalho já continha a entrega da etapa 4, sem commit, sobre `47c0546`; essas alterações foram preservadas. A pedido do proprietário, as entregas das etapas 4 e 5 são reunidas no commit `Implementa catálogo e páginas individuais dos projetos`; consultar `git log` para o hash. Sem push.
 

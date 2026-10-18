@@ -1,6 +1,6 @@
 # Portfólio MVC em PHP
 
-Site em PHP organizado no padrão MVC, com as etapas 1 a 5 implementadas: estrutura inicial, layout compartilhado, home, catálogo e páginas individuais dos projetos. Sem framework ou banco de dados; informações pessoais ainda não fornecidas aparecem como placeholders explícitos e o catálogo inicia vazio, sem projetos inventados.
+Site em PHP organizado no padrão MVC, com as etapas 1 a 6 implementadas: estrutura inicial, layout compartilhado, home, catálogo, páginas individuais dos projetos e seção de habilidades por categoria. Sem framework ou banco de dados; informações pessoais ainda não fornecidas aparecem como placeholders explícitos, e os dados de projetos e habilidades permanecem vazios até a confirmação do proprietário.
 
 ## Requisitos e instalação
 
@@ -24,6 +24,7 @@ O Composer gera `vendor/autoload.php` com o mapeamento PSR-4 de `App\` para `app
 - `public/`: ponto de entrada e arquivos públicos (CSS, JavaScript e imagens).
 - `config/app.php`: título da aplicação e caminho-base.
 - `config/projects.php`: dados confirmados dos projetos; fonte única do catálogo e dos destaques.
+- `config/skills.php`: habilidades confirmadas, agrupadas por categoria e apresentadas na home.
 - `tests/run.php`: testes isolados de roteamento e renderização, sem framework.
 - `storage/logs/`: destino reservado para logs da aplicação.
 
@@ -43,7 +44,7 @@ Em produção, configure a raiz pública do servidor para `public/` e `APP_BASE_
 
 ## Rotas atuais
 
-- `GET /`: página inicial com hero, sobre mim, objetivos e projetos em destaque.
+- `GET /`: página inicial com hero, sobre mim, objetivos, projetos em destaque e habilidades.
 - `GET /projetos`: catálogo completo, com estado vazio enquanto não houver projetos confirmados.
 - `GET /projetos/{slug}`: página individual de um projeto cadastrado; slug inválido ou inexistente retorna 404.
 - Rota desconhecida ou método não registrado: página com status HTTP 404.
@@ -64,7 +65,7 @@ A view `app/Views/home/index.php` apresenta o título profissional confirmado, D
 
 As chamadas do hero levam a `#sobre` e `#projetos`; o menu também oferece `#objetivos`. Os links do header incluem a URL da home com o caminho-base, permitindo voltar às seções a partir de uma página 404. As seções de destino são focáveis por navegação de fragmentos (`tabindex="-1"`), sem acrescentar paradas ao percurso normal de Tab.
 
-A seção `#projetos`, inicialmente informativa na etapa 3, agora recebe os destaques e a chamada para o catálogo da etapa 4. Habilidades, contatos e currículo permanecem nas etapas correspondentes.
+A seção `#projetos`, inicialmente informativa na etapa 3, agora recebe os destaques e a chamada para o catálogo da etapa 4. A seção `#habilidades` foi acrescentada na etapa 6. Contatos e currículo permanecem na etapa 7.
 
 ## Catálogo e cadastro de projetos — etapa 4
 
@@ -105,6 +106,25 @@ A view `projects/show.php` apresenta título específico no documento, h1, resum
 
 Descrições são texto simples, escapado; quebras de linha são preservadas por CSS, sem interpretar HTML ou Markdown. Imagens e links reutilizam a validação da etapa 4. Imagem ausente é omitida no detalhe; seções vazias de tecnologias e links também são omitidas. Sem JavaScript ou novas dependências.
 
+## Habilidades e tecnologias — etapa 6
+
+A seção `/#habilidades` utiliza `partials/skills.php`, com heading próprio, categorias em h3 e listas de conhecimentos. O menu aponta para essa seção também a partir do catálogo, detalhes e 404, respeitando o caminho-base. Não há rota separada de habilidades.
+
+O Model `App\Models\Skill` lê `config/skills.php` e fornece `all()` ao `HomeController`, que envia `skillGroups` à View. Views não leem o arquivo de dados. O arquivo real retorna `[]` e a home sinaliza “Habilidades a confirmar”; nenhuma tecnologia do projeto, referência visual ou fixture é inferida como conhecimento pessoal.
+
+Após a confirmação do proprietário, inclua grupos no `return [...]` do arquivo. Este exemplo demonstra apenas o formato:
+
+```php
+[
+    'category' => 'Categoria confirmada',
+    'items' => ['Habilidade confirmada', 'Outra habilidade confirmada'],
+],
+```
+
+Cada grupo deve conter `category` como string e `items` como lista de strings. Os nomes das categorias são livres: podem organizar linguagens, back-end, front-end, banco de dados ou ferramentas conforme os conhecimentos confirmados. A ordem do arquivo é preservada; espaços nas extremidades são removidos e itens em branco ou categorias sem nome/itens são omitidos. Se nenhum grupo preenchido restar, aparece o estado vazio. Basta editar esse arquivo para incluir categorias e habilidades, sem alterar Controller, View ou CSS.
+
+Categorias e habilidades são texto simples escapado, sem HTML, links, ícones externos ou níveis de proficiência. O grid usa os tokens visuais existentes e adapta as colunas ao espaço disponível. Não há novas dependências ou JavaScript.
+
 ## Verificações
 
 ```sh
@@ -115,7 +135,7 @@ find app public config tests -name '*.php' -print0 | xargs -0 -n1 php -l
 php -l index.php
 ```
 
-Os testes isolados carregam as classes diretamente: verificam rotas fixas e parametrizadas, prefixo da instalação, métodos HTTP, escaping, layout único, placeholders, chamadas da home, identificadores únicos, destinos das âncoras locais e de retorno à home, catálogo, detalhes e renderização de 404. Dados fictícios em arquivos temporários validam inclusão de itens, seleção de destaques, busca/validação por slug, campos opcionais, imagens locais e rejeição de URLs inseguras; são removidos ao final, sem alterar `config/projects.php`. Isso não substitui a validação do autoload Composer ou do servidor web. Execute `php tests/run.php`; não há framework de testes.
+Os testes isolados carregam as classes diretamente: verificam rotas fixas e parametrizadas, prefixo da instalação, métodos HTTP, escaping, layout único, placeholders, chamadas da home, identificadores únicos, destinos das âncoras locais e de retorno à home, catálogo, detalhes e renderização de 404. Dados fictícios em arquivos temporários validam inclusão de itens, seleção de destaques, busca/validação por slug, campos opcionais, imagens locais e rejeição de URLs inseguras. Habilidades são testadas com categorias preenchidas/vazias, ordenação, atualização apenas pelo arquivo, escaping e navegação nos diferentes caminhos-base. As fixtures são removidas ao final, sem alterar `config/projects.php` ou `config/skills.php`. Isso não substitui a validação do autoload Composer ou do servidor web. Execute `php tests/run.php`; não há framework de testes.
 
 Com o servidor local em execução, confira a integração:
 
@@ -129,6 +149,8 @@ curl -i http://127.0.0.1:8000/assets/css/style.css
 Os resultados esperados são, respectivamente, status 200 com a página inicial, 200 com o catálogo, 404 e 200 com o CSS. No navegador, confira as seções e cards em telas pequenas e grandes, o carregamento do estilo e o console. Use Tab e Enter para testar o link de salto, o menu, as chamadas do hero, o acesso ao catálogo, os links dos cards quando cadastrados e o retorno às seções a partir de uma página 404; confira foco visível e ausência de rolagem horizontal.
 
 Após cadastrar um projeto confirmado, confira `GET /projetos/SEU-SLUG` com status 200, título/descrição corretos, imagem e links disponíveis, navegação pelo título do card e retorno ao catálogo. Um slug desconhecido deve responder 404. Não adicione projetos fictícios ao arquivo real para publicação.
+
+Após cadastrar habilidades confirmadas, confira as categorias e listas na home em mobile/desktop, inclusive com textos longos e zoom. Use Tab/Enter no link “Habilidades” do menu e verifique o destino/foco da seção a partir da home, catálogo, detalhe e 404.
 
 ## Validação da etapa 1 — 18/10/2026
 

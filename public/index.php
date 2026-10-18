@@ -7,6 +7,7 @@ use App\Controllers\ErrorController;
 use App\Controllers\ProjectController;
 use App\Core\Router;
 use App\Models\Project;
+use App\Models\Skill;
 
 ini_set('display_errors', '0');
 header('Content-Type: text/html; charset=UTF-8');
@@ -23,7 +24,7 @@ try {
     $router = new Router($config['base_path']);
     $projects = new Project();
     $projectController = new ProjectController($config, $projects);
-    $router->get('/', [new HomeController($config, $projects), 'index']);
+    $router->get('/', [new HomeController($config, $projects, new Skill()), 'index']);
     $router->get('/projetos', [$projectController, 'index']);
     $router->get('/projetos/{slug}', [$projectController, 'show']);
 

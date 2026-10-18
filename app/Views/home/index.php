@@ -60,3 +60,5 @@
         <a class="button button--secondary" href="<?= htmlspecialchars($projectsUrl, ENT_QUOTES, 'UTF-8') ?>">Ver todos os projetos <span aria-hidden="true">&rarr;</span></a>
     </div>
 </section>
+
+<?php require dirname(__DIR__) . '/partials/skills.php'; ?>
