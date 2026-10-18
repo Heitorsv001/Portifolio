@@ -6,6 +6,17 @@
 
 Desenvolver um **site de portfólio pessoal** para apresentar o desenvolvedor, seus projetos, habilidades e meios de contato. O endereço será divulgado no **LinkedIn, GitHub e currículo**. A experiência deve ser profissional, acessível, responsiva, rápida e simples de manter.
 
+O site será o portfólio pessoal do proprietário, com posicionamento profissional de **Desenvolvedor Full Stack**. Os detalhes dos projetos realizados e das habilidades técnicas serão fornecidos futuramente pelo proprietário; até lá, não atribuir projetos ou competências sem confirmação.
+
+### Referência de identidade visual
+
+A identidade visual terá como inspiração o portfólio de Iuri Silva (iuricode), disponível nas seguintes referências:
+
+- **Repositório no GitHub:** [iuricode/portfolio](https://github.com/iuricode/portfolio).
+- **Site de referência:** [iuricode.com](https://www.iuricode.com/).
+
+Essas referências devem orientar as decisões visuais do layout, adaptadas à identidade pessoal do proprietário e ao posicionamento de Desenvolvedor Full Stack. Os textos, projetos, habilidades e dados profissionais da referência não representam o proprietário e não devem ser incorporados como conteúdo pessoal. A paleta, a tipografia e os demais detalhes visuais serão definidos durante a etapa de layout com base nessa inspiração.
+
 **Objetivo do MVP:** disponibilizar um site público que apresente uma introdução pessoal, uma lista de projetos e páginas individuais de cada projeto, habilidades técnicas e links de contato.
 
 **Público-alvo:** recrutadores, equipes técnicas, outros desenvolvedores e pessoas interessadas nos projetos.
@@ -103,13 +114,13 @@ A seção de habilidades e os meios de contato podem estar na página inicial, c
 ### Página inicial
 
 - Nome do desenvolvedor e uma apresentação breve.
-- Título profissional adequado à experiência real (ex.: “Desenvolvedor em formação”).
+- Título profissional: “Desenvolvedor Full Stack”.
 - Resumo de interesses, formação e objetivos profissionais.
 - Projetos em destaque e botão para catálogo completo.
 - Habilidades agrupadas por categorias.
 - Links para GitHub, LinkedIn e e-mail; currículo PDF opcional.
 
-**Importante:** nome completo de exibição, biografia final, URLs de perfis, endereço de e-mail, currículo e identidade visual ainda precisam ser fornecidos pelo proprietário. Usar placeholders evidentes até receber dados reais. **Nunca inventar experiências, formação, competências ou resultados de projetos.**
+**Importante:** nome completo de exibição, biografia final, URLs de perfis, endereço de e-mail e currículo ainda precisam ser fornecidos pelo proprietário. A referência de identidade visual está registrada na seção 1; seus detalhes serão definidos na etapa de layout. Os dados reais de projetos e habilidades serão informados futuramente. Usar placeholders evidentes até receber dados reais. **Nunca inventar experiências, formação, competências ou resultados de projetos.**
 
 ### Catálogo de projetos
 
@@ -309,12 +320,14 @@ Atualize o checklist quando uma etapa for validada. A conclusão de uma implemen
 
 Antes de substituir placeholders e publicar, confirmar:
 
-- [ ] Nome e título profissional exibidos no site.
+- [x] Título profissional: Desenvolvedor Full Stack.
+- [ ] Nome exibido no site.
 - [ ] Texto “Sobre mim”, formação e objetivos.
 - [ ] URLs reais de GitHub e LinkedIn, e-mail profissional e currículo (se houver).
 - [ ] Lista real de projetos, textos, imagens, tecnologias e repositórios.
 - [ ] Quais habilidades serão listadas.
-- [ ] Identidade visual (claro/escuro, paleta, tipografia) e imagens de destaque.
+- [x] Referência de identidade visual: portfólio iuricode (repositório e site na seção 1).
+- [ ] Detalhes da identidade visual (claro/escuro, paleta, tipografia) e imagens de destaque.
 - [ ] Domínio, provedor de hospedagem e configuração do servidor web.
 
 Na ausência dessas definições, utilizar escolhas técnicas reversíveis e placeholders sinalizados; não bloquear a criação da estrutura inicial.
