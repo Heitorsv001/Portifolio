@@ -305,7 +305,7 @@ resultados, limitações e eventuais pendências. Não avance para a etapa segui
 ## 10. Controle de progresso
 
 - [x] Etapa 1 — Estrutura MVC e roteamento
-- [ ] Etapa 2 — Layout e identidade visual
+- [x] Etapa 2 — Layout e identidade visual
 - [ ] Etapa 3 — Página inicial e sobre mim
 - [ ] Etapa 4 — Catálogo de projetos
 - [ ] Etapa 5 — Detalhes dos projetos
@@ -315,6 +315,8 @@ resultados, limitações e eventuais pendências. Não avance para a etapa segui
 - [ ] Etapa 9 — Testes, documentação e deploy
 
 Atualize o checklist quando uma etapa for validada. A conclusão de uma implementação não significa que os critérios de aceite foram automaticamente satisfeitos.
+
+Etapa 2 validada em 18/10/2026: home e 404 utilizam o mesmo layout, links e CSS conferidos via HTTP no Apache e no servidor PHP. A base de responsividade está implementada; inspeção visual e testes reais de teclado permanecem pendentes por indisponibilidade de navegador nesta sessão. Detalhes e evidências em `PROGRESS.md`.
 
 ## 11. Decisões e informações pendentes
 
@@ -331,6 +333,8 @@ Antes de substituir placeholders e publicar, confirmar:
 - [ ] Domínio, provedor de hospedagem e configuração do servidor web.
 
 Na ausência dessas definições, utilizar escolhas técnicas reversíveis e placeholders sinalizados; não bloquear a criação da estrutura inicial.
+
+Base visual adotada na etapa 2, ainda sujeita à validação do proprietário: tema escuro, destaque violeta, tipografia do sistema e espaçamentos definidos por variáveis CSS. Imagens de destaque não foram adicionadas nesta etapa.
 
 ## 12. Evoluções após o MVP
 

@@ -51,7 +51,23 @@ $router->get('/teste', static function (): void {});
 $expect($router->dispatch('GET', '/teste/'), 'Normalização da barra final');
 $expect(!$router->dispatch('GET', '/Teste'), 'Rotas distinguem maiúsculas e minúsculas');
 
-foreach (['', '/portifolio'] as $basePath) {
+// Ambas as páginas devem manter links e assets válidos na raiz ou em subdiretórios.
+$expectLayout = static function (string $html, string $basePath) use ($expect): void {
+    foreach (['<!doctype html>', '<html ', '<head>', '<body ', '<header ', '<main ', '<footer '] as $tag) {
+        $expect(substr_count($html, $tag) === 1, 'Layout único: ' . $tag . ' em ' . $basePath);
+    }
+    $expect(str_contains($html, 'href="' . $basePath . '/assets/css/style.css"'), 'CSS compartilhado em ' . $basePath);
+    $expect(str_contains($html, 'href="#conteudo"'), 'Link para pular navegação');
+    $expect(str_contains($html, 'id="conteudo"'), 'Destino do link para conteúdo');
+    $expect(str_contains($html, 'href="#topo"') && str_contains($html, 'id="topo"'), 'Navegação para o topo');
+
+    preg_match_all('/href="([^"]+)"/', $html, $links);
+    $allowedLinks = [$basePath . '/', $basePath . '/assets/css/style.css', '#conteudo', '#topo'];
+    $expect(array_diff($links[1], $allowedLinks) === [], 'Links apontam apenas para destinos existentes');
+};
+
+foreach (['', '/portifolio', '/outro/caminho/'] as $basePath) {
+    $root = rtrim($basePath, '/');
     $config = ['name' => 'Teste <script>alert("x")</script>', 'base_path' => $basePath];
     $home = new HomeController($config);
     ob_start();
@@ -60,22 +76,30 @@ foreach (['', '/portifolio'] as $basePath) {
     $expect(str_contains($html, 'Estrutura MVC em PHP pronta para começar.'), 'Renderização da home');
     $expect(str_contains($html, '&lt;script&gt;'), 'Escaping do título');
     $expect(!str_contains($html, '<script>'), 'Ausência de HTML arbitrário no título');
-    $expect(str_contains($html, 'href="' . $basePath . '/assets/css/style.css"'), 'URL do CSS com caminho-base');
+    $expectLayout($html, $root);
+    $expect(str_contains($html, 'aria-current="page"'), 'Home identificada na navegação');
+    $expect(str_contains($html, '<span>Teste &lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;</span>'), 'Nome escapado no header');
+
+    http_response_code(200);
+    ob_start();
+    (new ErrorController($config))->notFound();
+    $html = ob_get_clean();
+    $expect(http_response_code() === 404, 'Status HTTP 404 em ' . $basePath);
+    $expect(str_contains($html, '<h1>Página não encontrada</h1>'), 'View de erro 404');
+    $expect(str_contains($html, '<title>Página não encontrada</title>'), 'Título próprio da página 404');
+    $expect(!str_contains($html, dirname(__DIR__)), '404 sem caminho interno');
+    $expect(!str_contains($html, 'aria-current="page"'), '404 não marca home como página atual');
+    $expect(str_contains($html, 'class="button" href="' . $root . '/"'), '404 permite retornar ao início');
+    $expect(!str_contains($html, '<script>'), 'Nome da aplicação escapado também na página 404');
+    $expectLayout($html, $root);
 }
 
 $home = new HomeController(['name' => 'Teste', 'base_path' => '/teste" onclick="alert(1)']);
 ob_start();
 $home->index();
 $html = ob_get_clean();
-$expect(str_contains($html, '&quot; onclick=&quot;'), 'Escaping do atributo de stylesheet');
-
-http_response_code(200);
-ob_start();
-(new ErrorController())->notFound();
-$html = ob_get_clean();
-$expect(http_response_code() === 404, 'Status HTTP 404');
-$expect(str_contains($html, '<h1>Página não encontrada</h1>'), 'View de erro 404');
-$expect(!str_contains($html, dirname(__DIR__)), '404 sem caminho interno');
+$expect(str_contains($html, 'href="/teste&quot; onclick=&quot;alert(1)/assets/css/style.css"'), 'Escaping do atributo de stylesheet');
+$expect(str_contains($html, 'href="/teste&quot; onclick=&quot;alert(1)/"'), 'Escaping do caminho-base na navegação');
 
 $previousBasePath = getenv('APP_BASE_PATH');
 // O valor padrão é verificado sem depender do ambiente que executa os testes.

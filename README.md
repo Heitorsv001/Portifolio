@@ -1,6 +1,6 @@
 # Portfólio MVC em PHP
 
-Esqueleto inicial de um site em PHP organizado no padrão MVC, sem framework ou banco de dados.
+Site em PHP organizado no padrão MVC, com estrutura inicial e layout compartilhado implementados, sem framework ou banco de dados. O conteúdo pessoal permanece reservado às próximas etapas.
 
 ## Requisitos e instalação
 
@@ -20,7 +20,7 @@ O Composer gera `vendor/autoload.php` com o mapeamento PSR-4 de `App\` para `app
 - `app/Controllers`: recebe requisições e coordena a resposta.
 - `app/Core`: Controller base e roteador GET.
 - `app/Models`: regras e acesso aos dados.
-- `app/Views`: templates HTML.
+- `app/Views`: layout compartilhado em `layouts/main.php`, header/footer em `partials/` e conteúdo das páginas em `home/` e `errors/`.
 - `public/`: ponto de entrada e arquivos públicos (CSS, JavaScript e imagens).
 - `config/app.php`: título da aplicação e caminho-base.
 - `tests/run.php`: testes isolados de roteamento e renderização, sem framework.
@@ -40,12 +40,20 @@ O acesso Apache existente em `http://localhost/portifolio/` permanece suportado.
 
 Em produção, configure a raiz pública do servidor para `public/` e `APP_BASE_PATH` como vazio quando o site estiver na raiz do domínio. O servidor PHP embutido com `-t public` também mantém os arquivos privados fora da raiz pública. Não foi alterada a configuração do servidor nesta etapa.
 
-## Rotas da etapa 1
+## Rotas atuais
 
-- `GET /`: view de teste da estrutura MVC.
+- `GET /`: view de teste da estrutura MVC, identificada como portfólio em construção, com layout base.
 - Rota desconhecida ou método não registrado: página com status HTTP 404.
 
 O Controller solicita a View; o Router apenas encontra e executa a ação. Conteúdo dinâmico e atributos HTML são escapados nas Views. Falhas de inicialização retornam uma mensagem genérica com status 500 e registram detalhes no log do PHP.
+
+## Layout base — etapa 2
+
+O Controller base recebe a configuração da aplicação e fornece nome, título, URL da home e do CSS ao layout. Controllers específicos escolhem a view e podem passar `title` e `currentPage`; a home usa `currentPage = 'home'` para indicar a página atual na navegação. As views de conteúdo não repetem o documento HTML, header, main ou footer. O Controller de erro recebe a mesma configuração, mantendo os links corretos no 404.
+
+Os padrões visuais ficam em `public/assets/css/style.css`: tema escuro com destaque violeta, fontes do sistema (sem download externo), variáveis de cores/espaçamento, títulos fluidos, links e botões `.button` e `.button--secondary`. O container é fluido, header/footer permitem quebra de linha e há um breakpoint em `48rem`. A escolha visual é reversível e aguarda validação do proprietário, seguindo a referência registrada em `PROJECT_CONTEXT.md`.
+
+A navegação inclui somente destinos existentes: início, pular para o conteúdo, voltar ao topo e retorno do 404 à home. Há foco visível e indicação `aria-current` na home. Não há JavaScript, menu recolhível, links vazios ou rotas de etapas futuras.
 
 ## Verificações
 
@@ -57,7 +65,7 @@ find app public config tests -name '*.php' -print0 | xargs -0 -n1 php -l
 php -l index.php
 ```
 
-Os testes isolados carregam as classes diretamente: verificam rotas, prefixo da instalação, métodos HTTP, escaping e renderização de 404, sem substituir a validação do autoload Composer ou do servidor web.
+Os testes isolados carregam as classes diretamente: verificam rotas, prefixo da instalação, métodos HTTP, escaping, layout único, destinos de navegação e renderização de 404, sem substituir a validação do autoload Composer ou do servidor web. Execute `php tests/run.php`; não há framework de testes.
 
 Com o servidor local em execução, confira a integração:
 
@@ -81,3 +89,14 @@ Patch `portfolio-etapa1.patch` aplicado sem conflitos. Composer instalado tempor
 - Renderização visual, responsividade e console não puderam ser inspecionados: nenhum navegador está disponível na sessão. A view de teste não contém JavaScript nem elementos interativos para validar por teclado.
 
 Os critérios funcionais da etapa 1 foram confirmados no servidor PHP documentado acima. O problema de execução PHP no Apache foi resolvido conforme confirmação do proprietário; a revisão visual completa permanece pendente. Nenhuma tarefa da etapa 2 foi iniciada.
+
+## Validação da etapa 2 — 18/10/2026
+
+- `php tests/run.php`: **141/141** verificações aprovadas, incluindo layout e navegação na raiz, em `/portifolio` e em subdiretório aninhado.
+- Sintaxe dos **13 arquivos PHP** em `app/`, `public/`, `config/`, `tests/` e `index.php`: sem erros; `git diff --check` aprovado.
+- Apache em `http://localhost/portifolio/`: home **200** com HTML executado, rota inexistente **404**, CSS **200**, configuração e partial privados **403**.
+- Servidor PHP com `APP_BASE_PATH=''` e raiz `public/`: home **200**, rota inexistente **404** e CSS **200**. Servidor temporário encerrado após a validação.
+- Corpos das respostas conferidos nos dois servidores: documento e landmarks únicos, destinos de links/âncoras existentes, página ativa correta e CSS idêntico ao arquivo atualizado.
+- Não foi possível validar renderização visual, redimensionamento, zoom, console ou interação real com teclado: o inventário de navegadores/aplicativos está vazio nesta sessão. Esses testes manuais permanecem pendentes; a base inclui os estilos e a semântica necessários.
+
+Etapa 3 não iniciada. Nome definitivo, biografia, projetos, habilidades e contatos continuam pendentes. Consulte `PROGRESS.md` para a passagem de contexto atual.

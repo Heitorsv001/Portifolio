@@ -1,6 +1,65 @@
 # Progresso e passagem de contexto
 
-Atualizado em **18/10/2026**. Este registro descreve o trabalho e as evidências desta sessão; o ambiente deve ser conferido novamente na próxima sessão.
+Atualizado em **18/10/2026**. A seção 0 registra o estado atual após a etapa 2. As seções 1 a 9 preservam o histórico da etapa 1 e devem ser interpretadas como o estado anterior. Conferir novamente o ambiente na próxima sessão.
+
+## 0. Entrega atual — etapa 2: layout base e identidade visual
+
+Implementada exclusivamente a etapa 2, por solicitação explícita do proprietário. Etapas 1 e 2 concluídas; **etapa 3 ainda não iniciada**. O repositório estava limpo no início desta implementação, no commit `7b51b09` (`Document visual reference and Full Stack positioning`). Após a aprovação do proprietário, a entrega foi reunida no commit `Implementa layout base e identidade visual da etapa 2`; consultar `git log` para o hash. Não foi realizado push.
+
+### Alterações e responsabilidades
+
+| Arquivo ou área | Alteração |
+|---|---|
+| `app/Core/Controller.php` | Recebe configuração comum; prepara nome, título, caminho da home e CSS; renderiza a view dentro do layout. Mantém a verificação de existência da view e `EXTR_SKIP`. |
+| `app/Controllers/HomeController.php` | Usa configuração herdada e informa a página atual; conteúdo de teste preservado. |
+| `app/Controllers/ErrorController.php` e `public/index.php` | Configuração passada também ao erro, para usar layout e links com o mesmo caminho-base; status 404 preservado. |
+| `app/Views/layouts/main.php` (novo) | Documento HTML único, título e stylesheet escapados, link para pular navegação e landmark principal com destino focável. |
+| `app/Views/partials/header.php` (novo) | Marca textual placeholder, navegação semântica e `aria-current` somente na home. |
+| `app/Views/partials/footer.php` (novo) | Posicionamento confirmado de Desenvolvedor Full Stack e retorno ao topo. |
+| `app/Views/home/index.php` e `app/Views/errors/404.php` | Apenas conteúdo, sem duplicar documento/layout. Home sinalizada como em construção; 404 com botão para voltar à home. |
+| `public/assets/css/style.css` | Tema escuro, variáveis de cores/espaçamento, tipografia, container fluido, botões primário/secundário, foco visível e estilos para telas pequenas e grandes. |
+| `tests/run.php` | Verificações ampliadas para layout único, escaping do header/links, navegação e 404 na raiz e em subdiretórios. |
+| `README.md` e `PROJECT_CONTEXT.md` | Uso do layout, decisões visuais, evidências e limitações documentados; checklist da etapa 2 atualizado. |
+
+### Decisões técnicas
+
+- Layout fixo compartilhado, com partials PHP e inclusão direta da view pelo caminho interno já validado pelo Controller; sem engine de templates ou novas dependências. Models e Router não foram alterados.
+- Configuração injetada no Controller base, evitando repetir URLs de assets e navegação nos Controllers específicos. O front controller continua responsável por carregar a configuração.
+- Escolha visual reversível: fundo `#101014`, superfície `#18181f`, texto `#f4f4f7`, texto secundário `#b4b4c2`, destaque `#b69aff` e fontes do sistema. As referências [site iuricode](https://www.iuricode.com/) e [repositório](https://github.com/iuricode/portfolio) foram consultadas como orientação; não foram incorporados conteúdo pessoal, imagens, marca ou código de terceiros. A aprovação dos detalhes visuais pelo proprietário continua pendente.
+- Escala de espaçamento de `0.5rem` a `5rem`, container máximo de `72rem`, títulos fluidos e breakpoint em `48rem`; header/footer com quebra de linha e footer ao fim da tela por flexbox, sem posição fixa.
+- Navegação apenas para destinos já disponíveis: home, conteúdo e topo; retorno do 404 à home. Não adicionar `/projetos`, habilidades, contato ou âncoras vazias antes das respectivas etapas.
+- Sem JavaScript ou dependências de fontes/imagens externas. Foco visível, link de salto, áreas de link com altura mínima de `2.75rem` e identificação semântica da navegação fazem parte desta base; a revisão completa de acessibilidade permanece na etapa 8.
+- Nome mantido como `Meu portfólio`; nenhuma biografia, experiência, habilidade, projeto ou contato foi inventado. A home continua sendo a view de teste, sem implementar hero ou seções da etapa 3.
+
+### Verificações executadas nesta entrega
+
+| Verificação | Resultado |
+|---|---|
+| Suite antes das mudanças | **43/43** aprovada. |
+| `php tests/run.php` após as mudanças | **141/141** aprovada. |
+| `php -l` em `app`, `public`, `config`, `tests` e `index.php` | **13 arquivos**, sem erros. |
+| `git diff --check` | Aprovado. |
+| Apache: `/portifolio/` | **200**, corpo HTML executado, sem código-fonte PHP. |
+| Apache: `/portifolio/rota-inexistente` | **404**, página com layout compartilhado. |
+| Apache: `/portifolio/assets/css/style.css` | **200**, `text/css`, conteúdo idêntico ao CSS atualizado. |
+| Apache: `/portifolio/config/app.php` e `/portifolio/app/Views/partials/header.php` | **403**, bloqueio privado preservado. |
+| PHP embutido, `APP_BASE_PATH=''`, raiz `public/` | Home **200**, rota inexistente **404**, CSS **200**. |
+| Inspeção dos corpos HTML nos dois servidores | Documento, header/main/footer e h1 únicos; destinos de links e âncoras válidos; `aria-current` apenas na home. |
+
+As verificações HTTP confirmaram a integração com o autoload Composer existente. Não houve alteração de dependências ou autoload; não foi necessário reinstalar Composer. Os requests do servidor PHP não registraram erros de aplicação. O servidor temporário foi encerrado após a validação.
+
+O acesso HTTP local e a abertura da porta exigiram escalada do sandbox; a primeira tentativa isolada não conseguiu conectar/escutar. As verificações acima passaram após a escalada. Nenhuma configuração do Apache, permissão ou propriedade foi alterada.
+
+### Aceite, limitações e próxima retomada
+
+- Critérios da etapa 2 atendidos na estrutura e nas verificações funcionais: páginas existentes reutilizam layout sem duplicar documento HTML, navegação aponta para destinos válidos e estilos estão preparados para responsividade.
+- **Pendente de verificação manual:** renderização visual em mobile/desktop, zoom, foco e ativação dos links por teclado, comportamento do salto ao conteúdo/topo e console/ausência de assets quebrados no navegador. A ferramenta retornou `apps: []` e `browsers: []`; não foi possível produzir screenshots ou validar interações reais. A inspeção de HTML e HTTP não substitui esses testes.
+- **Pendente de conteúdo/validação:** nome definitivo e confirmação da paleta/tipografia; biografia, projetos, habilidades e contatos continuam reservados às etapas futuras.
+- Na próxima sessão, ler os documentos, conferir `git status` e validar visualmente home e 404 quando houver navegador disponível. A próxima etapa de implementação é a **etapa 3 — página inicial e apresentação pessoal**, somente mediante novo pedido.
+
+---
+
+Histórico abaixo: entrega da etapa 1, anterior à implementação descrita na seção 0.
 
 ## 1. Estado de entrega e limite de escopo
 

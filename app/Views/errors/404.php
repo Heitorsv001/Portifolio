@@ -1,14 +1,7 @@
-<!doctype html>
-<html lang="pt-BR">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Página não encontrada</title>
-</head>
-<body>
-    <main>
-        <h1>Página não encontrada</h1>
-        <p>O endereço solicitado não existe.</p>
-    </main>
-</body>
-</html>
+<?php /** @var string $homeUrl */ ?>
+<div class="page-content">
+    <p class="eyebrow">Erro 404</p>
+    <h1>Página não encontrada</h1>
+    <p>O endereço solicitado não existe.</p>
+    <a class="button" href="<?= htmlspecialchars($homeUrl, ENT_QUOTES, 'UTF-8') ?>">Voltar ao início <span aria-hidden="true">&rarr;</span></a>
+</div>

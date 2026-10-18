@@ -6,6 +6,11 @@ namespace App\Core;
 
 abstract class Controller
 {
+    /** @param array{name: string, base_path: string} $config */
+    public function __construct(protected readonly array $config)
+    {
+    }
+
     /** @param array<string, mixed> $data */
     protected function view(string $name, array $data = []): void
     {
@@ -15,7 +20,13 @@ abstract class Controller
             throw new \RuntimeException('View not found: ' . $name);
         }
 
+        $appName = $this->config['name'];
+        $basePath = rtrim($this->config['base_path'], '/');
+        $homeUrl = $basePath . '/';
+        $stylesheetUrl = $basePath . '/assets/css/style.css';
+        $data += ['title' => $appName, 'currentPage' => ''];
+
         extract($data, EXTR_SKIP);
-        require $file;
+        require dirname(__DIR__) . '/Views/layouts/main.php';
     }
 }

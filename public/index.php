@@ -22,7 +22,7 @@ try {
     $router->get('/', [new HomeController($config), 'index']);
 
     if (!$router->dispatch($_SERVER['REQUEST_METHOD'] ?? 'GET', $_SERVER['REQUEST_URI'] ?? '/')) {
-        (new ErrorController())->notFound();
+        (new ErrorController($config))->notFound();
     }
 } catch (Throwable $exception) {
     error_log((string) $exception);
