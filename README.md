@@ -77,7 +77,7 @@ Patch `portfolio-etapa1.patch` aplicado sem conflitos. Composer instalado tempor
 - `php tests/run.php`: 43/43 verificações aprovadas.
 - Sintaxe dos 10 arquivos PHP: sem erros.
 - Integração real com servidor PHP e autoload Composer: home 200, rota inexistente 404 e CSS 200.
-- Apache em `http://localhost/portifolio/`: CSS 200 e acesso direto a `config/app.php` bloqueado com 403, mas home e rota desconhecida entregam o código-fonte PHP como texto (200). A integração PHP do Apache precisa ser corrigida antes de usar esse endereço ou publicá-lo. A configuração do servidor não foi alterada.
+- Na verificação inicial do Apache em `http://localhost/portifolio/`, CSS retornou 200 e `config/app.php` retornou 403, mas o PHP era entregue como texto. Após receber as instruções para habilitar PHP-FPM, o proprietário confirmou que a correção funcionou. Essa confirmação não substitui uma nova verificação automatizada das rotas no Apache.
 - Renderização visual, responsividade e console não puderam ser inspecionados: nenhum navegador está disponível na sessão. A view de teste não contém JavaScript nem elementos interativos para validar por teclado.
 
-Os critérios funcionais da etapa 1 foram confirmados no servidor PHP documentado acima. A limitação do Apache e a revisão visual permanecem registradas; nenhuma tarefa da etapa 2 foi iniciada.
+Os critérios funcionais da etapa 1 foram confirmados no servidor PHP documentado acima. O problema de execução PHP no Apache foi resolvido conforme confirmação do proprietário; a revisão visual completa permanece pendente. Nenhuma tarefa da etapa 2 foi iniciada.
