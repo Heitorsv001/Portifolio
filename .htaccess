@@ -1,0 +1,13 @@
+Options -Indexes
+RewriteEngine On
+
+# Keep application internals and project metadata out of the web root.
+RewriteRule ^(?:app|config|tests|storage|vendor|\.git(?:ignore)?|\.env(?:\.[^/]*)?|composer\.(?:json|lock)|AGENTS\.md|PROJECT_CONTEXT\.md|README\.md)(?:/|$) - [F,L,NC]
+
+# Serve existing public assets directly; send other requests to the front controller.
+RewriteCond %{REQUEST_URI} !^/portifolio/public/
+RewriteRule ^public/ - [L]
+RewriteCond %{DOCUMENT_ROOT}/portifolio/public/$1 -f [OR]
+RewriteCond %{DOCUMENT_ROOT}/portifolio/public/$1 -d
+RewriteRule ^(.*)$ public/$1 [L]
+RewriteRule ^ public/index.php [L]
