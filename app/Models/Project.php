@@ -24,6 +24,14 @@ final class Project
             $project['github_url'] = $this->externalUrl($project['github_url']);
             $project['demo_url'] = $this->externalUrl($project['demo_url']);
             $project['image'] = $this->imagePath($project['image']);
+            $imageSize = $project['image'] !== null
+                ? @getimagesize(dirname(__DIR__, 2) . '/public/' . $project['image'])
+                : false;
+            if ($imageSize === false) {
+                $project['image'] = null;
+            }
+            $project['image_width'] = $imageSize !== false ? $imageSize[0] : null;
+            $project['image_height'] = $imageSize !== false ? $imageSize[1] : null;
             $project['technologies'] ??= [];
         }
         unset($project);

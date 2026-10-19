@@ -311,7 +311,7 @@ resultados, limitações e eventuais pendências. Não avance para a etapa segui
 - [x] Etapa 5 — Detalhes dos projetos
 - [x] Etapa 6 — Habilidades técnicas
 - [x] Etapa 7 — Contato e redes profissionais
-- [ ] Etapa 8 — Responsividade, acessibilidade e SEO
+- [ ] Etapa 8 — Responsividade, acessibilidade e SEO (melhorias implementadas; aceite visual/Lighthouse pendente)
 - [ ] Etapa 9 — Testes, documentação e deploy
 
 Atualize o checklist quando uma etapa for validada. A conclusão de uma implementação não significa que os critérios de aceite foram automaticamente satisfeitos.
@@ -326,7 +326,9 @@ Etapa 5 validada funcionalmente em 18/10/2026: rota GET `/projetos/{slug}`, cons
 
 Etapa 6 validada funcionalmente em 18/10/2026: seção reutilizável `/#habilidades`, dados por categoria em `config/skills.php`, Model `Skill` e integração pelo `HomeController`. O arquivo real permanece vazio por falta de conhecimentos confirmados; a home exibe aviso explícito. Fixtures isoladas e HTTP demonstram categorias/listas, atualização só pelos dados, estado vazio, escaping e navegação com caminho-base. Suíte com 696 verificações aprovada. Inspeção visual e teclado real continuam pendentes por indisponibilidade de navegador. Evidências em `PROGRESS.md`.
 
-Etapa 7 implementada e validada funcionalmente com fixtures em 18/10/2026: seção `/#contato`, configuração `config/contact.php`, Model `Contact`, links individuais de GitHub/LinkedIn, `mailto:` e download de PDF local opcional. O arquivo real permanece com valores nulos e aviso explícito, pois não há contatos ou currículo confirmados. Suíte com 782 verificações e integração HTTP aprovadas, incluindo PDF de teste servido com status 200 e MIME correto. Disponibilidade dos perfis reais, destinatário no aplicativo de e-mail e currículo final permanecem pendentes dos dados do proprietário; inspeção visual e teclado real indisponíveis nesta sessão. Etapa 8 não iniciada; detalhes em `PROGRESS.md`.
+Etapa 7 implementada e validada funcionalmente com fixtures em 18/10/2026: seção `/#contato`, configuração `config/contact.php`, Model `Contact`, links individuais de GitHub/LinkedIn, `mailto:` e download de PDF local opcional. O arquivo real permanece com valores nulos e aviso explícito, pois não há contatos ou currículo confirmados. Suíte com 782 verificações e integração HTTP aprovadas, incluindo PDF de teste servido com status 200 e MIME correto. Disponibilidade dos perfis reais, destinatário no aplicativo de e-mail e currículo final permanecem pendentes dos dados do proprietário; detalhes em `PROGRESS.md`.
+
+Etapa 8 implementada com validação parcial em 18/10/2026: ajustes de navegação/grid para telas estreitas e textos longos, áreas dos links dos cards, semântica de listas, dimensões reais das imagens, metadados específicos por página, noindex no 404 e Open Graph com imagem padrão. `APP_ORIGIN` habilita canonical e URLs absolutas quando houver domínio confirmado; não é inferida da requisição. Suíte com 967 verificações, sintaxe e integração HTTP aprovadas; contrastes dos tokens verificados. Checkbox permanece pendente: revisão visual mobile/desktop, zoom, teclado real, console e Lighthouse não puderam ser executados pela indisponibilidade de navegador da ferramenta/Lighthouse. Domínio, robots/sitemap e preview público continuam pendentes. Não iniciar a etapa 9 sem novo pedido; detalhes em `PROGRESS.md`.
 
 ## 11. Decisões e informações pendentes
 

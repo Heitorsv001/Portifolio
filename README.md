@@ -1,6 +1,6 @@
 # Portfólio MVC em PHP
 
-Site em PHP organizado no padrão MVC, com as etapas 1 a 7 implementadas: estrutura inicial, layout compartilhado, home, catálogo, páginas individuais dos projetos, habilidades por categoria e contato. Sem framework ou banco de dados; informações pessoais ainda não fornecidas aparecem como placeholders explícitos. Projetos, habilidades e contatos permanecem sem dados pessoais até a confirmação do proprietário.
+Site em PHP organizado no padrão MVC, com as etapas 1 a 7 implementadas e as melhorias da etapa 8 aplicadas (aceite visual/Lighthouse pendente). Inclui layout compartilhado, home, catálogo, detalhes dos projetos, habilidades, contato e metadados por página. Sem framework ou banco de dados; informações pessoais ainda não fornecidas aparecem como placeholders explícitos. Projetos, habilidades e contatos permanecem sem dados pessoais até a confirmação do proprietário.
 
 ## Requisitos e instalação
 
@@ -22,7 +22,7 @@ O Composer gera `vendor/autoload.php` com o mapeamento PSR-4 de `App\` para `app
 - `app/Models`: regras e acesso aos dados.
 - `app/Views`: layout compartilhado em `layouts/main.php`, header/footer e cards em `partials/` e conteúdo das páginas em `home/`, `projects/` e `errors/`.
 - `public/`: ponto de entrada e arquivos públicos (CSS, JavaScript e imagens).
-- `config/app.php`: título da aplicação e caminho-base.
+- `config/app.php`: nome da aplicação, caminho-base e origem pública opcional para URLs absolutas.
 - `config/projects.php`: dados confirmados dos projetos; fonte única do catálogo e dos destaques.
 - `config/skills.php`: habilidades confirmadas, agrupadas por categoria e apresentadas na home.
 - `config/contact.php`: GitHub, LinkedIn, e-mail profissional e caminho do currículo opcional.
@@ -94,7 +94,7 @@ Use IDs e slugs únicos; slugs com segmentos de letras minúsculas sem acentos e
 
 As URLs de repositório e demonstração devem ser públicas e completas, com `http://` ou `https://`, sem credenciais; valores vazios, inválidos ou com outros esquemas são omitidos. Links abrem na mesma aba e têm nomes acessíveis que identificam o projeto. Todo texto e atributo dinâmico é escapado.
 
-Imagens são locais, sob `public/assets/images/`. Informe o caminho relativo público, por exemplo `assets/images/meu-projeto.webp`, sem barra inicial. São aceitas extensões minúsculas `png`, `jpg`, `jpeg`, `webp`, `gif` e `avif`, com nomes e subpastas contendo letras, números, hífens ou sublinhados. Imagem ausente, inexistente ou fora desse padrão recebe fallback visual, sem request quebrado. Cards têm proporção de imagem 16:9, carregamento tardio e grid fluido.
+Imagens são locais, sob `public/assets/images/`. Informe o caminho relativo público, por exemplo `assets/images/meu-projeto.webp`, sem barra inicial. São aceitas extensões minúsculas `png`, `jpg`, `jpeg`, `webp`, `gif` e `avif`, com nomes e subpastas contendo letras, números, hífens ou sublinhados. Imagem ausente, inexistente, ilegível como imagem ou fora desse padrão recebe fallback visual, sem request quebrado. O Model obtém `image_width`/`image_height` do arquivo: não é necessário cadastrá-los. As Views usam essas dimensões para reservar a proporção correta; cards mantêm recorte 16:9, carregamento tardio e grid fluido. Otimize os arquivos reais antes de publicá-los; não há processamento de imagens em upload ou biblioteca extra.
 
 O catálogo vazio e a home sem destaques possuem avisos próprios. O arquivo real continua vazio até o proprietário confirmar projetos.
 
@@ -148,17 +148,48 @@ return [
 
 O currículo usa um link local com atributo `download`, nome visível “Baixar currículo (PDF)” e caminho-base da instalação. Para desabilitá-lo, defina `resume` como `null` ou remova o arquivo. Nenhum currículo foi criado ou publicado nesta etapa. Texto e atributos são escapados; sem JavaScript, rastreamento ou novas dependências.
 
+## Responsividade, acessibilidade e SEO — etapa 8
+
+O CSS mantém navegação visível com quebra de linha, ocupa a linha inteira do header nas telas pequenas e permite redução de colunas e quebra de textos longos. Catálogo/detalhe usam colunas com mínimo zero; links dos títulos dos cards têm altura mínima de `2.75rem`, seguindo os demais links de navegação. O link de salto respeita a largura disponível. Foco visível, ordem natural de Tab, destinos focáveis de fragmentos, HTML semântico e headings existentes foram preservados. Listas sem marcador visual declaram `role="list"` para manter sua semântica, inclusive no comportamento documentado do Safari para [`list-style: none`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/list-style#accessibility).
+
+Os testes calculam contraste dos pares de tokens usados em textos/botões e foco. O menor contraste de texto/botão é **7,61:1**; o menor contraste de foco sobre os fundos é **12,28:1**. O cálculo não substitui uma auditoria visual completa; o critério de texto normal usado é o da [WCAG 2.2, contraste mínimo](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html).
+
+Cada Controller informa título, descrição e caminho público da página. O detalhe usa o resumo do projeto como descrição; espaços/quebras são normalizados, e valores são escapados em atributos. O layout renderiza uma descrição única e metadados [Open Graph](https://ogp.me/) de título, descrição, tipo `website`, nome do site e locale `pt_BR`. O 404 mantém status HTTP 404, recebe `noindex, follow` e não publica canonical ou Open Graph de uma página válida.
+
+Quando o domínio estiver confirmado, disponibilize ao processo PHP:
+
+```sh
+APP_ORIGIN='https://SEU-DOMINIO' APP_BASE_PATH='' php -S 127.0.0.1:8000 -t public
+```
+
+Substitua `https://SEU-DOMINIO` pela origem pública real, contendo apenas esquema HTTP(S), host e porta opcional. Não inclua caminho, query string, fragmento ou credenciais. Subdiretórios continuam em `APP_BASE_PATH` (ex.: `/portifolio`). A origem não é inferida de cabeçalhos da requisição.
+
+Com origem válida, o layout emite `rel="canonical"` e `og:url` absolutos, calculados a partir da rota conhecida, sem query string e sem variações de codificação/barra final. Essa escolha segue a orientação de [URLs canônicas absolutas do Google Search Central](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls). A mesma origem compõe `og:image`, com dimensões, MIME e texto alternativo. O detalhe usa a imagem do projeto; home, catálogo e projetos sem imagem usam `assets/images/social-preview.png` (1200×630, 25.149 bytes).
+
+`APP_ORIGIN` ausente ou inválida omite canonical, `og:url` e `og:image`, mantendo os metadados textuais. Nenhum domínio foi inventado; o preview completo em redes depende dessa configuração e da publicação. `robots.txt` e `sitemap.xml` continuam pendentes da definição do domínio, conforme o contexto do projeto.
+
+A imagem padrão contém somente o título profissional confirmado e o tema do portfólio, sem biografia ou projetos inventados. A fonte editável é `public/assets/images/social-preview.svg`; o PNG foi gerado e inspecionado visualmente. Para regenerá-lo após editar o SVG, use opcionalmente ImageMagick no ambiente de manutenção (não é dependência de execução PHP):
+
+```sh
+magick -background none public/assets/images/social-preview.svg -strip PNG24:public/assets/images/social-preview.png
+```
+
+O CSS tem 9.905 bytes; o site não acrescenta JavaScript, fontes remotas ou bibliotecas nesta etapa. Cards continuam com lazy loading, o detalhe mantém imagem sem lazy loading e os atributos de dimensão refletem o arquivo real. Ainda não foram medidos Core Web Vitals ou notas de Lighthouse.
+
+**Aceite pendente:** navegador da ferramenta indisponível e Lighthouse não disponível no PATH nesta sessão. Conferir home, catálogo preenchido/vazio, detalhes e 404 em 320, 375, 768 e 1280 CSS px; zoom de 200%/400%, textos longos, imagens de proporções diferentes, ausência de rolagem horizontal, console/assets e Tab/Shift+Tab/Enter. A revisão de [reflow da WCAG](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html), foco e auditorias Lighthouse mobile/desktop deve ser concluída antes de marcar a etapa 8 como validada. Conferir também o preview real no LinkedIn após configurar o domínio.
+
 ## Verificações
 
 ```sh
 composer validate --no-check-publish
 composer dump-autoload --optimize --strict-psr
 php tests/run.php
+php -d error_reporting=E_ALL tests/run.php
 find app public config tests -name '*.php' -print0 | xargs -0 -n1 php -l
 php -l index.php
 ```
 
-Os testes isolados carregam as classes diretamente: verificam rotas fixas e parametrizadas, prefixo da instalação, métodos HTTP, escaping, layout único, placeholders, chamadas da home, identificadores únicos, destinos das âncoras locais e de retorno à home, catálogo, detalhes e renderização de 404. Dados fictícios em arquivos temporários validam inclusão de itens, seleção de destaques, busca/validação por slug, campos opcionais, imagens locais e rejeição de URLs inseguras. Habilidades são testadas com categorias preenchidas/vazias, ordenação, atualização apenas pelo arquivo, escaping e navegação nos diferentes caminhos-base. Contato cobre valores ausentes/parciais, URLs/e-mails inválidos, escaping, codificação de `mailto:`, PDF local existente/ausente e download com caminho-base. As fixtures são removidas ao final, sem alterar `config/projects.php`, `config/skills.php` ou `config/contact.php`. Isso não substitui a validação do autoload Composer ou do servidor web. Execute `php tests/run.php`; não há framework de testes.
+Os testes isolados carregam as classes diretamente: verificam rotas fixas e parametrizadas, prefixo da instalação, métodos HTTP, escaping, layout único, placeholders, chamadas da home, identificadores únicos, destinos das âncoras locais e de retorno à home, catálogo, detalhes e renderização de 404. Dados fictícios em arquivos temporários validam inclusão de itens, seleção de destaques, busca/validação por slug, campos opcionais, imagens locais e rejeição de URLs inseguras. Habilidades são testadas com categorias preenchidas/vazias, ordenação, atualização apenas pelo arquivo, escaping e navegação nos diferentes caminhos-base. Contato cobre valores ausentes/parciais, URLs/e-mails inválidos, escaping, codificação de `mailto:`, PDF local existente/ausente e download com caminho-base. SEO cobre descrições, Open Graph, origem válida/inválida, canonical, noindex no 404, dimensões e fallback de imagens, além de contrastes e invariantes semânticas. As fixtures são removidas ao final, sem alterar `config/projects.php`, `config/skills.php` ou `config/contact.php`. Isso não substitui a validação do autoload Composer ou do servidor web. Execute `php tests/run.php`; não há framework de testes.
 
 Com o servidor local em execução, confira a integração:
 

@@ -94,6 +94,9 @@ $expectLayout = static function (string $html, string $basePath, string $homeHtm
     $expect(str_contains($html, 'href="' . $basePath . '/assets/css/style.css"'), 'CSS compartilhado em ' . $basePath);
     $expect(str_contains($html, 'href="#conteudo"'), 'Link para pular navegação');
     $expect(str_contains($html, 'id="conteudo"'), 'Destino do link para conteúdo');
+    $expect(str_contains($html, '<html lang="pt-BR"'), 'Idioma da página declarado');
+    $expect(!preg_match('/tabindex="[1-9]/', $html), 'Sem ordem de foco artificial por tabindex positivo');
+    $expect(str_contains($html, '<ul class="nav-list" role="list">'), 'Semântica da lista de navegação preservada');
     $expect(str_contains($html, 'href="#topo"') && str_contains($html, 'id="topo"'), 'Navegação para o topo');
 
     preg_match_all('/href="([^"]+)"/', $html, $links);
@@ -553,6 +556,143 @@ $home->index();
 $html = ob_get_clean();
 $expect(str_contains($html, 'href="/teste&quot; onclick=&quot;alert(1)/assets/css/style.css"'), 'Escaping do atributo de stylesheet');
 $expect(str_contains($html, 'href="/teste&quot; onclick=&quot;alert(1)/"'), 'Escaping do caminho-base na navegação');
+
+// SEO e imagens: fixtures isoladas, sem domínio ou projetos reais inventados.
+$seoFile = tempnam(sys_get_temp_dir(), 'portfolio-seo-');
+$seoImage = tempnam(dirname(__DIR__) . '/public/assets/images', 'test-seo-');
+rename($seoImage, $seoImage . '.png');
+$seoImage .= '.png';
+$seoImagePath = 'assets/images/' . basename($seoImage);
+file_put_contents($seoImage, base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aBLsAAAAASUVORK5CYII='));
+$meta = static function (string $html, string $key): ?string {
+    if (!preg_match('/<meta (?:name|property)="' . preg_quote($key, '/') . '" content="([^"]*)">/', $html, $matches)) {
+        return null;
+    }
+    return html_entity_decode($matches[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+};
+try {
+    $seoFixture = [[
+        'id' => 1, 'slug' => 'projeto-seo', 'title' => 'Projeto "especial" & <script>teste</script>',
+        'summary' => 'Resumo "com aspas" & <script>alert(1)</script>',
+        'description' => 'Descrição de teste.', 'image' => $seoImagePath, 'featured' => true,
+    ]];
+    file_put_contents($seoFile, '<?php return ' . var_export($seoFixture, true) . ';');
+    $seoProjects = new Project($seoFile);
+    $expect($seoProjects->all()[0]['image_width'] === 1 && $seoProjects->all()[0]['image_height'] === 1, 'Model fornece dimensões reais da imagem');
+    $defaultImage = getimagesize(dirname(__DIR__) . '/public/assets/images/social-preview.png');
+    $expect($defaultImage[0] === 1200 && $defaultImage[1] === 630 && $defaultImage['mime'] === 'image/png', 'Imagem padrão de compartilhamento PNG válida');
+
+    foreach (['', '/portifolio', '/outro/caminho/'] as $basePath) {
+        $root = rtrim($basePath, '/');
+        $config = ['name' => 'Teste "SEO" & <script>nome</script>', 'base_path' => $basePath, 'origin' => 'https://portfolio.example/'];
+        $catalog = new ProjectController($config, $seoProjects);
+        $router = new Router($basePath);
+        $router->get('/projetos/{slug}', [$catalog, 'show']);
+
+        foreach (['home' => '/', 'catalog' => '/projetos', 'detail' => '/projetos/projeto-seo'] as $page => $path) {
+            http_response_code(200);
+            ob_start();
+            if ($page === 'home') {
+                (new HomeController($config, $emptyProjects, $emptySkills, $emptyContact))->index();
+            } elseif ($page === 'catalog') {
+                $catalog->index();
+            } else {
+                $router->dispatch('GET', $root . '/projetos/projeto%2Dseo/?origem=teste');
+            }
+            $html = ob_get_clean();
+            $canonical = 'https://portfolio.example' . $root . $path;
+            $expect(str_contains($html, '<link rel="canonical" href="' . $canonical . '">'), 'Canonical absoluto usa rota conhecida e remove query/codificação: ' . $page);
+            $expect($meta($html, 'og:url') === $canonical, 'Open Graph e canonical coincidem: ' . $page);
+            $expect($meta($html, 'og:site_name') === $config['name'], 'Nome do site escapado nos metadados');
+            $expect($meta($html, 'og:type') === 'website' && $meta($html, 'og:locale') === 'pt_BR', 'Tipo e locale de compartilhamento');
+            $expect($meta($html, 'description') !== null && $meta($html, 'description') === $meta($html, 'og:description'), 'Descrição única consistente com Open Graph');
+            $expect(substr_count($html, '<meta name="description"') === 1 && substr_count($html, '<title>') === 1, 'Metadados de título/descrição sem duplicação');
+            $expect($meta($html, 'robots') === null, 'Página válida não recebe noindex');
+            $expect(!str_contains($html, '<script>') && !str_contains($html, 'content="Resumo "'), 'Conteúdo de metadados não injeta HTML ou atributos');
+            if ($page === 'detail') {
+                $expect($meta($html, 'description') === $seoFixture[0]['summary'], 'Detalhe usa resumo do projeto como descrição');
+                $expect($meta($html, 'og:title') === $seoFixture[0]['title'] . ' — ' . $config['name'], 'Título específico do detalhe em Open Graph');
+                $expect($meta($html, 'og:image') === 'https://portfolio.example' . $root . '/' . $seoImagePath, 'Detalhe compartilha imagem do projeto');
+                $expect($meta($html, 'og:image:width') === '1' && $meta($html, 'og:image:height') === '1', 'Open Graph usa dimensões intrínsecas');
+                $expect($meta($html, 'og:image:alt') === 'Prévia do projeto ' . $seoFixture[0]['title'], 'Alt de compartilhamento específico e escapado');
+                $expect(str_contains($html, 'width="1" height="1" decoding="async"'), 'Imagem de detalhe reserva proporção real');
+            } else {
+                $expect($meta($html, 'og:image') === 'https://portfolio.example' . $root . '/assets/images/social-preview.png', 'Home/catálogo compartilham imagem padrão');
+                $expect($meta($html, 'og:image:width') === '1200' && $meta($html, 'og:image:height') === '630', 'Dimensões padrão de compartilhamento');
+                if ($page === 'catalog') {
+                    $expect(str_contains($html, 'loading="lazy" decoding="async" width="1" height="1"'), 'Card usa dimensões reais e lazy loading');
+                }
+            }
+        }
+
+        ob_start();
+        $catalog->show('inexistente');
+        $html = ob_get_clean();
+        $expect(http_response_code() === 404 && $meta($html, 'robots') === 'noindex, follow', 'Erro 404 não é indexável');
+        $expect(!str_contains($html, 'rel="canonical"') && $meta($html, 'og:url') === null && $meta($html, 'og:title') === null, '404 não anuncia URL canônica ou compartilhamento de página válida');
+    }
+
+    foreach ([null, '', '//portfolio.example', 'javascript:alert(1)', 'ftp://portfolio.example', 'https://user:pass@portfolio.example', 'https://portfolio.example/subpasta', 'https://portfolio.example?teste=1', 'https://portfolio.example/#fragmento', 'https://portfolio.example/" onclick="alert(1)'] as $origin) {
+        ob_start();
+        (new HomeController(['name' => 'Teste', 'base_path' => '', 'origin' => $origin], $emptyProjects, $emptySkills, $emptyContact))->index();
+        $html = ob_get_clean();
+        $expect(!str_contains($html, 'rel="canonical"') && $meta($html, 'og:url') === null && $meta($html, 'og:image') === null, 'Origem ausente/inválida não gera URLs absolutas: ' . json_encode($origin));
+        $expect($meta($html, 'og:title') !== null && $meta($html, 'description') !== null, 'Metadados textuais disponíveis sem domínio');
+    }
+
+    $seoFixture[0]['image'] = null;
+    file_put_contents($seoFile, '<?php return ' . var_export($seoFixture, true) . ';');
+    ob_start();
+    (new ProjectController(['name' => 'Teste', 'base_path' => '', 'origin' => 'https://portfolio.example'], new Project($seoFile)))->show('projeto-seo');
+    $html = ob_get_clean();
+    $expect($meta($html, 'og:image') === 'https://portfolio.example/assets/images/social-preview.png', 'Projeto sem imagem própria usa preview padrão');
+
+    $seoFixture[0]['image'] = $seoImagePath;
+    file_put_contents($seoImage, 'Arquivo que não é uma imagem.');
+    file_put_contents($seoFile, '<?php return ' . var_export($seoFixture, true) . ';');
+    $project = (new Project($seoFile))->all()[0];
+    $expect($project['image'] === null && $project['image_width'] === null && $project['image_height'] === null, 'Arquivo de imagem ilegível usa fallback sem dimensões inventadas');
+} finally {
+    unlink($seoFile);
+    unlink($seoImage);
+}
+
+// Contrastes dos tokens usados em texto, botões e foco; não substitui auditoria visual.
+$css = file_get_contents(dirname(__DIR__) . '/public/assets/css/style.css');
+preg_match_all('/--color-([a-z-]+):\s*#([0-9a-f]{6});/i', $css, $colorMatches, PREG_SET_ORDER);
+$luminance = [];
+foreach ($colorMatches as $color) {
+    $rgb = array_map(static function (string $channel): float {
+        $value = hexdec($channel) / 255;
+        return $value <= 0.04045 ? $value / 12.92 : (($value + 0.055) / 1.055) ** 2.4;
+    }, str_split($color[2], 2));
+    $luminance[$color[1]] = 0.2126 * $rgb[0] + 0.7152 * $rgb[1] + 0.0722 * $rgb[2];
+}
+foreach (['background', 'surface'] as $background) {
+    foreach (['text', 'muted', 'accent', 'accent-hover', 'focus'] as $foreground) {
+        $ratio = (max($luminance[$foreground], $luminance[$background]) + 0.05)
+            / (min($luminance[$foreground], $luminance[$background]) + 0.05);
+        $expect($ratio >= ($foreground === 'focus' ? 3 : 4.5), 'Contraste suficiente: ' . $foreground . ' sobre ' . $background);
+    }
+}
+foreach (['accent', 'accent-hover'] as $background) {
+    $ratio = (max($luminance['on-accent'], $luminance[$background]) + 0.05)
+        / (min($luminance['on-accent'], $luminance[$background]) + 0.05);
+    $expect($ratio >= 4.5, 'Texto do botão com contraste suficiente sobre ' . $background);
+}
+
+$previousOrigin = getenv('APP_ORIGIN');
+putenv('APP_ORIGIN');
+$config = require dirname(__DIR__) . '/config/app.php';
+$expect($config['origin'] === null, 'Domínio não é inferido na ausência de APP_ORIGIN');
+putenv('APP_ORIGIN=https://portfolio.example');
+$config = require dirname(__DIR__) . '/config/app.php';
+$expect($config['origin'] === 'https://portfolio.example', 'Origem pública configurável por ambiente');
+if ($previousOrigin === false) {
+    putenv('APP_ORIGIN');
+} else {
+    putenv('APP_ORIGIN=' . $previousOrigin);
+}
 
 $previousBasePath = getenv('APP_BASE_PATH');
 // O valor padrão é verificado sem depender do ambiente que executa os testes.

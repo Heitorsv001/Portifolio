@@ -1,8 +1,70 @@
 # Progresso e passagem de contexto
 
-Atualizado em **18/10/2026**. A seção 0 registra o estado atual após a etapa 7. As demais seções preservam o histórico das etapas 1 a 6 e devem ser interpretadas como estados anteriores. Conferir novamente o ambiente na próxima sessão.
+Atualizado em **18/10/2026**. A seção 0 registra o estado atual da etapa 8, com implementação e validação parcial. As demais seções preservam o histórico das etapas 1 a 7 e devem ser interpretadas como estados anteriores. Conferir novamente o ambiente na próxima sessão.
 
-## 0. Entrega atual — etapa 7: contato e redes profissionais
+## 0. Entrega atual — etapa 8: responsividade, acessibilidade e SEO
+
+A pedido do proprietário, as alterações da etapa 7 foram reunidas no commit **`f864f44` — `Implementa contato e redes profissionais da etapa 7`**, sem push. Em seguida foi implementada exclusivamente a etapa 8. Árvore limpa após esse commit e antes destas mudanças; branch observada: `main`. A pedido do proprietário, as alterações da etapa 8 são reunidas no commit `Melhora responsividade, acessibilidade e SEO da etapa 8`; consultar `git log` para o hash. Sem push. O aceite visual/Lighthouse continua pendente. **Etapa 9 não iniciada.**
+
+### Alterações realizadas
+
+| Arquivo ou área | Alteração desta etapa |
+|---|---|
+| `config/app.php` | Acrescenta origem pública opcional via `APP_ORIGIN`, sem inventar domínio ou usar cabeçalhos da requisição. |
+| `app/Core/Controller.php` | Prepara metadados compartilhados, normaliza descrição, valida origem e compõe URLs absolutas de canonical/compartilhamento a partir de caminhos conhecidos. |
+| `app/Controllers/{Home,Project,Error}Controller.php` | Títulos/descrições por página, caminhos canônicos e dados de imagem do detalhe; 404 sinalizado como não indexável. |
+| `app/Views/layouts/main.php` | Meta description, Open Graph, canonical opcional e noindex no erro; valores dinâmicos escapados. |
+| `app/Models/Project.php` | Obtém dimensões reais das imagens; arquivo ilegível recebe fallback. Não muda o esquema de cadastro. |
+| `app/Views/partials/project-list.php` e `projects/show.php` | Dimensões intrínsecas nos atributos da imagem; preserva recorte dos cards e lazy loading existente. |
+| `app/Views/partials/header.php`, `project-list.php` e `project-technologies.php` | Preserva semântica de listas sem marcadores com `role="list"`. |
+| `public/assets/css/style.css` | Navegação móvel em linha própria, colunas com mínimo zero, links dos cards com altura mínima e melhor quebra de textos longos; limita largura do link de salto. |
+| `public/assets/images/social-preview.{svg,png}` (novos) | Fonte editável e PNG 1200×630 para compartilhamento; apenas título profissional confirmado e tema do site. |
+| `tests/run.php` | SEO, imagens, origem válida/inválida, escaping, canonical, 404 noindex, contrastes e invariantes de navegação/semântica. |
+| `README.md` e `PROJECT_CONTEXT.md` | Configuração, escopo, regeneração da imagem, evidências e pendências de aceite. |
+
+### Decisões técnicas e limites de escopo
+
+- Arquitetura preservada: Controllers escolhem os textos e caminhos de cada página; Core prepara URLs/metadados reutilizáveis; layout apenas os apresenta com escaping. Router, rotas e funcionalidades das etapas anteriores foram mantidos. Sem frameworks, novas dependências de execução, JavaScript, banco de dados ou alterações no Apache/permissões.
+- Home recebe título com o posicionamento profissional confirmado; catálogo tem descrição própria; detalhe usa título/resumo do projeto. Descrições são texto, com espaços normalizados e atributos escapados. Sem biografia ou resultados inventados.
+- `APP_ORIGIN` deve ser HTTP(S), com host e porta opcional, sem caminho (exceto `/` final), query, fragmento ou credenciais. Caminho-base permanece em `APP_BASE_PATH`. Origem ausente/inválida omite canonical, `og:url` e `og:image`, mantendo metadados textuais. Nenhuma URL é derivada do Host ou do esquema da requisição.
+- Canonical utiliza o caminho conhecido da rota, incluindo slug validado/codificado. Query strings, barra final e variações de codificação não alteram sua identidade. 404 mantém status, descrição própria e `noindex, follow`; não recebe canonical ou metadados Open Graph de página válida.
+- Open Graph inclui título, descrição, `website`, nome do site e `pt_BR`. Com origem válida, inclui URL e imagem absolutas, dimensões, MIME e alt. Detalhes usam sua imagem; ausência usa PNG padrão. O preview completo em LinkedIn e a geração de `robots.txt`/`sitemap.xml` dependem do domínio real, ainda pendente no contexto.
+- `Project` fornece `image_width`/`image_height` automaticamente, sem novos campos a preencher. `getimagesize` lê somente arquivos locais já normalizados; imagem ilegível é omitida no detalhe e usa fallback nos cards. Não foram criados uploads ou otimizações de arquivos inexistentes. A revisão das imagens reais continua pendente de conteúdo.
+- Ajustes de CSS tratam causas identificadas por inspeção: mínimos automáticos das colunas de grid, ausência de largura própria da navegação móvel, quebra de textos e área dos títulos clicáveis. Mantidos foco visível, salto, ordem natural de Tab e seções com `tabindex="-1"`; não há tabindex positivo ou menu que exija JavaScript.
+- A imagem padrão usa a paleta existente e texto genérico do portfólio; o SVG é a fonte editável e o PNG tem **25.149 bytes**. Gerada com ImageMagick já disponível e inspecionada visualmente como artefato local. ImageMagick não é dependência da aplicação. CSS atualizado: **9.905 bytes**. Sem fontes remotas ou scripts adicionais.
+
+### Testes e evidências desta entrega
+
+| Verificação | Resultado |
+|---|---|
+| Suíte anterior | **782/782** aprovadas antes das mudanças; mesmas verificações continuaram passando após as mudanças iniciais. |
+| `php -d error_reporting=E_ALL tests/run.php` | **967/967** aprovadas após testes da etapa 8. |
+| Sintaxe em `app`, `public`, `config`, `tests` e `index.php` | **27 arquivos PHP**, sem erros. |
+| `git diff --check` | Aprovado. |
+| Metadados em raiz, `/portifolio` e subdiretório aninhado | Descrições, Open Graph, canonical, URLs com origem/caminho-base, dimensões e escaping aprovados. |
+| Origem ausente/inválida | Sem URLs absolutas inventadas; credenciais, esquemas inseguros, subcaminho, query e fragmento rejeitados. |
+| Rota parametrizada com query/barra final/slug codificado | Canonical usa rota normalizada; HTTP e testes isolados aprovados. |
+| 404 | Status 404 e `noindex, follow`; sem canonical/OG de página válida, inclusive com domínio configurado. |
+| Imagens | Dimensões intrínsecas nos cards/detalhes, lazy loading dos cards e fallback para arquivo ilegível aprovados; PNG padrão válido 1200×630. |
+| Contraste dos tokens | 12 pares verificados. Menor contraste de textos/botões **7,61:1** e de foco sobre fundos **12,28:1**. Paleta preservada. Isso não representa certificação integral de acessibilidade. |
+| Apache real, sem domínio configurado | Home/catálogo **200**; erro e detalhe desconhecido **404**; descrições/OG textual presentes e URLs absolutas omitidas. |
+| Assets e arquivos privados no Apache | CSS e PNG **200**, MIME correto e bytes idênticos aos locais; configuração/layout privados **403**. |
+| Cópia temporária com origem de teste e raiz `public/` | Home/catálogo/detalhe **200**, desconhecido **404**; canonical/OG completos corretos, imagens **200** com `image/png`; imagem ilegível usa preview padrão. |
+| HTML servido | Layout e h1 únicos, IDs/headings/âncoras válidos, imagens com alt/dimensões; sem scripts, formulários ou código PHP exposto. |
+
+A integração utilizou o autoload Composer existente, sem alterações de dependências. As fixtures de projeto/imagem e a origem ilustrativa foram usadas apenas em testes/cópia temporária. Nenhum domínio ou projeto foi publicado. Servidor temporário encerrado, cópia removida e log sem avisos/erros de aplicação. Acesso HTTP/porta temporária exigiu escalada do sandbox, sem mudanças de configuração ou permissões.
+
+Referências técnicas consultadas: [Open Graph](https://ogp.me/), [canonical do Google Search Central](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls), [WCAG — contraste](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html), [WCAG — reflow](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html) e [semântica de listas no MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/list-style#accessibility).
+
+### Aceite e próxima retomada
+
+- **Implementação da etapa 8 disponível; aceite permanece parcial.** O checklist continua desmarcado porque a usabilidade mobile/desktop e os principais problemas visuais/Lighthouse exigidos pelo roadmap ainda precisam de verificação. Inspeção de código, contraste calculado e testes de HTML/HTTP não comprovam reflow/foco reais ou desempenho medido.
+- **Limite de ferramentas confirmado:** inventário `apps: []`, `browsers: []`; tentativa de abrir aba retornou `Browser is not available: iab`. Lighthouse não está disponível no PATH. Não foram executados testes visuais mobile/desktop, zoom, teclado real, console ou Lighthouse. Apenas a imagem de compartilhamento foi inspecionada visualmente.
+- **Retomar a validação da etapa 8:** revisar home, catálogo vazio/preenchido, detalhes com/sem imagem e 404 em 320, 375, 768 e 1280 CSS px; zoom 200%/400%, textos longos e proporções de imagem. Verificar rolagem horizontal, foco/Tab/Shift+Tab/Enter, salto/âncoras, assets e console; rodar Lighthouse mobile/desktop e corrigir problemas observados. Documentar resultados antes de marcar o aceite.
+- **Conteúdo e SEO público:** obter domínio, nome, biografia, projetos, habilidades, contatos e currículo confirmados. Configurar origem/caminho-base de produção, preparar robots/sitemap após domínio e validar preview real no LinkedIn. Nenhum desses valores foi inferido.
+- **Etapa 9 não iniciada:** publicação, configuração do servidor e revisão final de produção dependem de nova autorização e das pendências acima. Não iniciar outra implementação automaticamente.
+
+## Histórico — etapa 7: contato e redes profissionais
 
 Implementada exclusivamente a etapa 7, a pedido do proprietário. Implementação funcional das etapas 1 a 7 disponível; **etapa 8 não iniciada**. Árvore de trabalho limpa no início, no commit `b1307cb` (`Implementa habilidades e tecnologias da etapa 6`). A pedido do proprietário, esta entrega é reunida no commit `Implementa contato e redes profissionais da etapa 7`; consultar `git log` para o hash. Sem push.
 

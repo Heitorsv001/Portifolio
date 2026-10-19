@@ -11,7 +11,7 @@
         <p><?= htmlspecialchars($project['summary'], ENT_QUOTES, 'UTF-8') ?></p>
     </div>
     <?php if ($project['image'] !== null): ?>
-        <img class="project-detail-image" src="<?= htmlspecialchars($basePath . '/' . $project['image'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars('Prévia do projeto ' . $project['title'], ENT_QUOTES, 'UTF-8') ?>" width="640" height="360" decoding="async">
+        <img class="project-detail-image" src="<?= htmlspecialchars($basePath . '/' . $project['image'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars('Prévia do projeto ' . $project['title'], ENT_QUOTES, 'UTF-8') ?>" width="<?= (int) $project['image_width'] ?>" height="<?= (int) $project['image_height'] ?>" decoding="async">
     <?php endif; ?>
     <section class="section-content" aria-labelledby="projeto-descricao-titulo">
         <h2 id="projeto-descricao-titulo">Sobre o projeto</h2>

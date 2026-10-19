@@ -11,7 +11,7 @@
             <span><?= htmlspecialchars($appName, ENT_QUOTES, 'UTF-8') ?></span>
         </a>
         <nav aria-label="Navegação principal">
-            <ul class="nav-list">
+            <ul class="nav-list" role="list">
                 <li>
                     <a class="nav-link" href="<?= htmlspecialchars($homeUrl, ENT_QUOTES, 'UTF-8') ?>"<?= $currentPage === 'home' ? ' aria-current="page"' : '' ?>>Início</a>
                 </li>

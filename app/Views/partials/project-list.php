@@ -3,11 +3,11 @@
 /** @var string $basePath */
 /** @var string $projectsUrl */
 ?>
-<ul class="project-grid">
+<ul class="project-grid" role="list">
     <?php foreach ($projects as $project): ?>
         <li class="project-card">
             <?php if ($project['image'] !== null): ?>
-                <img class="project-image" src="<?= htmlspecialchars($basePath . '/' . $project['image'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars('Prévia do projeto ' . $project['title'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy" decoding="async" width="640" height="360">
+                <img class="project-image" src="<?= htmlspecialchars($basePath . '/' . $project['image'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars('Prévia do projeto ' . $project['title'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy" decoding="async" width="<?= (int) $project['image_width'] ?>" height="<?= (int) $project['image_height'] ?>">
             <?php else: ?>
                 <div class="project-image project-image--placeholder" aria-hidden="true">Imagem em preparação</div>
             <?php endif; ?>
