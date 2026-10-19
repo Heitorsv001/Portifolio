@@ -1,6 +1,6 @@
 # Portfólio MVC em PHP
 
-Site em PHP organizado no padrão MVC, com as etapas 1 a 7 implementadas e as melhorias da etapa 8 aplicadas (aceite visual/Lighthouse pendente). Inclui layout compartilhado, home, catálogo, detalhes dos projetos, habilidades, contato e metadados por página. Sem framework ou banco de dados; informações pessoais ainda não fornecidas aparecem como placeholders explícitos. Projetos, habilidades e contatos permanecem sem dados pessoais até a confirmação do proprietário.
+Site em PHP organizado no padrão MVC, com as etapas 1 a 7 implementadas e as melhorias da etapa 8 aplicadas (Lighthouse validado; aceite manual de zoom/teclado pendente). Inclui layout compartilhado, home, catálogo, detalhes dos projetos, habilidades, contato e metadados por página. Sem framework ou banco de dados; informações pessoais ainda não fornecidas aparecem como placeholders explícitos. Projetos, habilidades e contatos permanecem sem dados pessoais até a confirmação do proprietário.
 
 ## Requisitos e instalação
 
@@ -174,9 +174,11 @@ A imagem padrão contém somente o título profissional confirmado e o tema do p
 magick -background none public/assets/images/social-preview.svg -strip PNG24:public/assets/images/social-preview.png
 ```
 
-O CSS tem 9.905 bytes; o site não acrescenta JavaScript, fontes remotas ou bibliotecas nesta etapa. Cards continuam com lazy loading, o detalhe mantém imagem sem lazy loading e os atributos de dimensão refletem o arquivo real. Ainda não foram medidos Core Web Vitals ou notas de Lighthouse.
+O CSS tem 9.905 bytes; o site não acrescenta JavaScript, fontes remotas ou bibliotecas nesta etapa. Cards continuam com lazy loading, o detalhe mantém imagem sem lazy loading e os atributos de dimensão refletem o arquivo real. O favicon local `assets/images/favicon.svg` reutiliza o símbolo da marca e a paleta existente; seu endereço respeita o caminho-base, evitando a busca automática por um ícone inexistente na raiz do servidor.
 
-**Aceite pendente:** navegador da ferramenta indisponível e Lighthouse não disponível no PATH nesta sessão. Conferir home, catálogo preenchido/vazio, detalhes e 404 em 320, 375, 768 e 1280 CSS px; zoom de 200%/400%, textos longos, imagens de proporções diferentes, ausência de rolagem horizontal, console/assets e Tab/Shift+Tab/Enter. A revisão de [reflow da WCAG](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html), foco e auditorias Lighthouse mobile/desktop deve ser concluída antes de marcar a etapa 8 como validada. Conferir também o preview real no LinkedIn após configurar o domínio.
+Auditorias locais com Lighthouse 13.5.0 e Chrome headless 155 obtiveram **100 em desempenho, acessibilidade, boas práticas e SEO** na home mobile/desktop, catálogo vazio e estados preenchidos de teste. Textos longos, categorias, e-mail e imagens de proporções diferentes foram usados apenas em uma cópia temporária, sem alterar os dados reais. Capturas produzidas pelas auditorias permitiram inspeção estática nas larguras de 320, 375, 768 e 1280 CSS px. Resultados detalhados e limites estão em `PROGRESS.md`; medições locais de laboratório não comprovam Core Web Vitals de usuários reais.
+
+**Aceite manual pendente:** a ferramenta de interação continua sem navegador conectado. Conferir zoom real de 200%/400%, rolagem, foco e Tab/Shift+Tab/Enter, incluindo salto ao conteúdo, âncoras e retorno do 404. A revisão de [reflow da WCAG](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html) e teclado deve ser concluída antes de marcar a etapa 8 como validada; capturas estáticas e Lighthouse não substituem essa interação. Conferir também o preview real no LinkedIn após configurar o domínio.
 
 ## Verificações
 
@@ -188,6 +190,16 @@ php -d error_reporting=E_ALL tests/run.php
 find app public config tests -name '*.php' -print0 | xargs -0 -n1 php -l
 php -l index.php
 ```
+
+Para repetir a auditoria opcional, use Chrome e Node compatível com o [Lighthouse CLI](https://github.com/GoogleChrome/lighthouse#using-the-node-cli) (versão usada: Node 24.19.0). A instalação abaixo fica em `/tmp`, sem dependências de execução novas na aplicação; o servidor local precisa estar em execução:
+
+```sh
+npm install --prefix /tmp/portfolio-lighthouse --no-save --ignore-scripts lighthouse@13.5.0
+node /tmp/portfolio-lighthouse/node_modules/lighthouse/cli/index.js http://localhost/portifolio/ --chrome-flags="--headless" --only-categories=performance,accessibility,best-practices,seo --output=json --output=html --output-path=/tmp/portfolio-lighthouse/mobile
+node /tmp/portfolio-lighthouse/node_modules/lighthouse/cli/index.js http://localhost/portifolio/ --chrome-flags="--headless" --preset=desktop --only-categories=performance,accessibility,best-practices,seo --output=json --output=html --output-path=/tmp/portfolio-lighthouse/desktop
+```
+
+Para larguras específicas, acrescente `--screenEmulation.width=320` (ou 375, 768, 1280), `--screenEmulation.height=900` e `--screenEmulation.deviceScaleFactor=1`; nesta validação, 768 e 1280 usaram o preset desktop. Não publique fixtures para repetir os estados preenchidos: use uma cópia temporária isolada. Relatórios em `/tmp` podem desaparecer entre sessões.
 
 Os testes isolados carregam as classes diretamente: verificam rotas fixas e parametrizadas, prefixo da instalação, métodos HTTP, escaping, layout único, placeholders, chamadas da home, identificadores únicos, destinos das âncoras locais e de retorno à home, catálogo, detalhes e renderização de 404. Dados fictícios em arquivos temporários validam inclusão de itens, seleção de destaques, busca/validação por slug, campos opcionais, imagens locais e rejeição de URLs inseguras. Habilidades são testadas com categorias preenchidas/vazias, ordenação, atualização apenas pelo arquivo, escaping e navegação nos diferentes caminhos-base. Contato cobre valores ausentes/parciais, URLs/e-mails inválidos, escaping, codificação de `mailto:`, PDF local existente/ausente e download com caminho-base. SEO cobre descrições, Open Graph, origem válida/inválida, canonical, noindex no 404, dimensões e fallback de imagens, além de contrastes e invariantes semânticas. As fixtures são removidas ao final, sem alterar `config/projects.php`, `config/skills.php` ou `config/contact.php`. Isso não substitui a validação do autoload Composer ou do servidor web. Execute `php tests/run.php`; não há framework de testes.
 

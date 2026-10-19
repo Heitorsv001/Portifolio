@@ -92,6 +92,7 @@ $expectLayout = static function (string $html, string $basePath, string $homeHtm
         $expect(substr_count($html, $tag) === 1, 'Layout único: ' . $tag . ' em ' . $basePath);
     }
     $expect(str_contains($html, 'href="' . $basePath . '/assets/css/style.css"'), 'CSS compartilhado em ' . $basePath);
+    $expect(str_contains($html, '<link rel="icon" type="image/svg+xml" href="' . $basePath . '/assets/images/favicon.svg">'), 'Favicon local respeita caminho-base em ' . $basePath);
     $expect(str_contains($html, 'href="#conteudo"'), 'Link para pular navegação');
     $expect(str_contains($html, 'id="conteudo"'), 'Destino do link para conteúdo');
     $expect(str_contains($html, '<html lang="pt-BR"'), 'Idioma da página declarado');
@@ -103,7 +104,7 @@ $expectLayout = static function (string $html, string $basePath, string $homeHtm
     preg_match_all('/\bid="([^"]+)"/', $html, $ids);
     preg_match_all('/\bid="([^"]+)"/', $homeHtml, $homeIds);
     $expect(count($ids[1]) === count(array_unique($ids[1])), 'Identificadores únicos na página');
-    $allowedLinks = [$basePath . '/', $basePath . '/projetos', $basePath . '/assets/css/style.css'];
+    $allowedLinks = [$basePath . '/', $basePath . '/projetos', $basePath . '/assets/css/style.css', $basePath . '/assets/images/favicon.svg'];
     foreach ($ids[1] as $id) {
         $allowedLinks[] = '#' . $id;
     }

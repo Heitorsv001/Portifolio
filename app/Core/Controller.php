@@ -25,6 +25,7 @@ abstract class Controller
         $homeUrl = $basePath . '/';
         $projectsUrl = $basePath . '/projetos';
         $stylesheetUrl = $basePath . '/assets/css/style.css';
+        $faviconUrl = $basePath . '/assets/images/favicon.svg';
         $data += [
             'title' => $appName,
             'description' => 'Portfólio de um Desenvolvedor Full Stack.',

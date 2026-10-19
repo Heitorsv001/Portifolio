@@ -1,8 +1,71 @@
 # Progresso e passagem de contexto
 
-Atualizado em **18/10/2026**. A seção 0 registra o estado atual da etapa 8, com implementação e validação parcial. As demais seções preservam o histórico das etapas 1 a 7 e devem ser interpretadas como estados anteriores. Conferir novamente o ambiente na próxima sessão.
+Atualizado em **18/10/2026**. A seção 0 registra a retomada da etapa 8, com Lighthouse executado e aceite manual ainda parcial. As demais seções preservam o histórico e devem ser interpretadas como estados anteriores. Conferir novamente o ambiente na próxima sessão.
 
-## 0. Entrega atual — etapa 8: responsividade, acessibilidade e SEO
+## 0. Entrega atual — retomada da validação da etapa 8
+
+Lidos `AGENTS.md`, `PROJECT_CONTEXT.md`, este registro e `README.md`; código MVC e testes inspecionados antes de modificar arquivos. O repositório iniciou limpo, na branch `main`, commit **`469a890` — `Melhora responsividade, acessibilidade e SEO da etapa 8`**. A próxima etapa pendente continua sendo a **etapa 8**, cujo aceite estava incompleto; a etapa 9 não foi iniciada. A pedido do proprietário, esta entrega é reunida no commit `fix: corrigida a ausência do favicon no portfólio`; consultar `git log` para o hash. Sem push.
+
+### Alterações e decisões técnicas
+
+- A auditoria inicial da home identificou uma requisição automática a `http://localhost/favicon.ico`, com resposta 404 e erro de console. As notas eram 100 em desempenho/acessibilidade/SEO e 96 em boas práticas.
+- Criado `public/assets/images/favicon.svg`, com o símbolo de código e a paleta da marca existente, sem fonte externa, conteúdo pessoal ou dependência adicional. O Controller base prepara `$faviconUrl` com o caminho-base; o layout compartilhado emite um único `link rel="icon"`, com atributo escapado. Isso elimina a busca pelo favicon ausente sem alterar Apache, rotas ou Models.
+- `tests/run.php` verifica o favicon nos cenários de layout existentes, incluindo raiz, `/portifolio`, subdiretório aninhado e página 404. A lista de destinos permitidos foi atualizada para o novo asset.
+- `README.md` documenta resultados, reprodução opcional do Lighthouse e limites de validação. `PROJECT_CONTEXT.md` mantém a etapa 8 desmarcada, agora indicando apenas o aceite manual de zoom/teclado pendente.
+- Preservados CSS, arquitetura MVC, funcionalidades e dados reais: projetos/habilidades continuam vazios; contatos permanecem nulos. Nenhuma informação profissional foi inferida. Sem bibliotecas de execução novas, JavaScript ou mudanças em dependências Composer, permissões e configuração do servidor.
+
+### Ambiente e método de auditoria
+
+A ferramenta de interação retornou novamente **`apps: []`, `browsers: []`**. Foram encontrados Chrome local e Node fora do PATH: **Chrome headless 155**, **Node 24.19.0**. O **Lighthouse 13.5.0** foi instalado pelo registro npm apenas em `/tmp/portfolio-audit`, usando pnpm e store temporária, sem scripts de instalação. Essa auditoria CLI não conecta um navegador à ferramenta de interação nem permite declarar teclado/zoom manuais validados. Referência: [Lighthouse CLI oficial](https://github.com/GoogleChrome/lighthouse#using-the-node-cli).
+
+Auditorias sequenciais, com categorias `performance,accessibility,best-practices,seo`, relatórios JSON/HTML e capturas fornecidas pelo Lighthouse. Home real mobile usou o preset padrão (412 CSS px); desktop usou 1280 CSS px. Os demais cenários usaram larguras explícitas, altura 900 e device scale factor 1; 768/1280 usaram preset desktop e 320/375, mobile. Throttling simulado dos presets foi mantido. As notas são de execuções locais de laboratório; não representam dados de campo/Core Web Vitals ou certificação de acessibilidade.
+
+Catálogo preenchido, detalhes, habilidades e contato foram auditados em cópia isolada de `app/`, `public/`, `config/` e autoload Composer, servida em `127.0.0.1:8018` com raiz `public/`. Fixtures incluíram título/descrição/tecnologia/categoria sem espaços, e-mail longo, imagem horizontal, imagem sintética vertical 300×900 e projeto sem opcionais. A origem configurada foi o próprio servidor local de teste. Nada foi cadastrado na aplicação real; perfis externos e clientes de e-mail não foram acionados.
+
+### Testes e evidências
+
+| Verificação | Resultado |
+|---|---|
+| Suíte anterior com `E_ALL`, antes das mudanças | **967/967** aprovadas. |
+| `php -d error_reporting=E_ALL tests/run.php`, após correção | **979/979** aprovadas. |
+| Sintaxe de `app/`, `public/`, `config/`, `tests/` e `index.php` | **27 arquivos PHP**, sem erros. |
+| `git diff --check` | Aprovado. |
+| Apache: home e catálogo | **200**, HTML executado e favicon declarado uma única vez. |
+| Apache: rota desconhecida | **404**, mantendo `noindex, follow` e layout compartilhado. |
+| Apache: CSS, favicon SVG e preview PNG | **200**, MIME correto e bytes idênticos aos arquivos locais; SVG parseado sem erros. |
+| Apache: configuração e layout privados | **403**. |
+
+Notas Lighthouse após a correção, na ordem desempenho/acessibilidade/boas práticas/SEO:
+
+| Cenário | Largura CSS | Notas |
+|---|---|---|
+| Home real mobile | 412 px | **100 / 100 / 100 / 100** |
+| Home real desktop | 1280 px | **100 / 100 / 100 / 100** |
+| Catálogo real vazio | 375 px | **100 / 100 / 100 / 100** |
+| Home preenchida, fixture | 320 e 768 px | **100 / 100 / 100 / 100** em ambos |
+| Catálogo preenchido, fixture | 375 e 1280 px | **100 / 100 / 100 / 100** em ambos |
+| Detalhe horizontal e textos longos, fixture | 375 e 1280 px | **100 / 100 / 100 / 100** em ambos |
+| Detalhe vertical, fixture | 320 px | **100 / 100 / 100 / 100** |
+| Detalhe sem opcionais, fixture | 768 px | **100 / 100 / 100 / 100** |
+
+Nas 11 execuções acima: FCP entre **0,2 e 0,8 s**, LCP entre **0,2 e 1,2 s**, TBT entre **0 e 10 ms** e CLS **0**. Sem erros de console ou avisos de execução; imagens, CSS e favicon carregaram com 200. O Lighthouse também consultou `robots.txt`, que permanece 404 conforme a pendência de domínio; esse request da auditoria não foi tratado como falha de asset da página.
+
+O 404 real foi auditado separadamente em **320 e 1280 px**, apenas na categoria acessibilidade, com **100 em ambos**. Usado `--ignore-status-code` para permitir a inspeção sem alterar a resposta HTTP: os relatórios registram o aviso esperado de status 404. As duas capturas foram inspecionadas, com heading, retorno ao início e navegação dentro da largura disponível; não se atribuiu nota de SEO a uma página intencionalmente não indexável. Artefatos: `404-{320,1280}.report.{json,html}` e capturas correspondentes.
+
+Capturas inspecionadas de home, catálogo e detalhes mostram quebra de textos longos, adaptação das colunas e tratamento de imagens nas quatro larguras previstas. Os retângulos dos nós registrados pelo Lighthouse ficaram dentro da largura configurada; isso é evidência parcial, não uma medição de `scrollWidth` de todos os elementos nem teste real de rolagem. Na captura expandida da home a 320 px, a imagem horizontal de um card com lazy loading não apareceu, embora a rede registre 200 e a mesma imagem esteja visível no catálogo/detalhe e na home a 768 px; conferir seu carregamento por rolagem real no aceite manual.
+
+Relatórios e capturas desta sessão ficam em **`/tmp/portfolio-audit/`**, incluindo `summary.json`, `home-mobile-after.report.{json,html}` e os relatórios `fixture-*`. São artefatos temporários, podem desaparecer e não foram adicionados ao repositório. Comandos reproduzíveis estão no README. A execução de rede local/Chrome e instalação temporária exigiu escalada do sandbox; as proteções do Chrome foram mantidas.
+
+Servidor temporário encerrado e cópia com fixtures removida após as auditorias. Nenhum aviso/erro de aplicação foi observado nas respostas e no log do servidor temporário. Composer não foi reinstalado nem validado novamente nesta retomada; seu autoload existente foi usado na integração.
+
+### Aceite e pendências para retomar
+
+- **Lighthouse mobile/desktop concluído e erro de console corrigido.** Nenhum outro problema de implementação foi identificado pelas auditorias que justificasse ampliar as alterações desta entrega.
+- **Etapa 8 continua com aceite parcial:** falta interação manual em navegador conectado. Testar Tab/Shift+Tab/Enter, foco visível, salto ao conteúdo, âncoras e retorno de catálogo/detalhe/404; zoom real 200%/400%, rolagem horizontal e carregamento dos cards ao rolar. Não interpretar as notas 100 ou as capturas como substitutos desses testes.
+- Confirmar domínio e conteúdo pessoal antes da publicação. Robots/sitemap, preview público no LinkedIn, imagens/projetos reais, contatos e currículo permanecem pendentes conforme o contexto; nenhum valor foi inventado.
+- A próxima retomada deve terminar o aceite manual da **etapa 8**, sem começar a etapa 9 automaticamente. Não reinstalar o Composer ou alterar Apache/permissões para contornar a falta de navegador conectado.
+
+## Histórico — implementação inicial da etapa 8: responsividade, acessibilidade e SEO
 
 A pedido do proprietário, as alterações da etapa 7 foram reunidas no commit **`f864f44` — `Implementa contato e redes profissionais da etapa 7`**, sem push. Em seguida foi implementada exclusivamente a etapa 8. Árvore limpa após esse commit e antes destas mudanças; branch observada: `main`. A pedido do proprietário, as alterações da etapa 8 são reunidas no commit `Melhora responsividade, acessibilidade e SEO da etapa 8`; consultar `git log` para o hash. Sem push. O aceite visual/Lighthouse continua pendente. **Etapa 9 não iniciada.**
 

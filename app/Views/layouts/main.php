@@ -7,6 +7,7 @@
 /** @var array|false $shareImageSize */
 /** @var string $shareImageAlt */
 /** @var string $stylesheetUrl */
+/** @var string $faviconUrl */
 /** @var string $file Caminho interno da view, definido pelo Controller. */
 ?>
 <!doctype html>
@@ -36,6 +37,7 @@
             <meta property="og:image:type" content="<?= htmlspecialchars($shareImageSize['mime'], ENT_QUOTES, 'UTF-8') ?>">
         <?php endif; ?>
     <?php endif; ?>
+    <link rel="icon" type="image/svg+xml" href="<?= htmlspecialchars($faviconUrl, ENT_QUOTES, 'UTF-8') ?>">
     <link rel="stylesheet" href="<?= htmlspecialchars($stylesheetUrl, ENT_QUOTES, 'UTF-8') ?>">
 </head>
 <body id="topo">
