@@ -1,8 +1,17 @@
 # Progresso e passagem de contexto
 
-Atualizado em **18/10/2026**. A seção 0 registra a retomada da etapa 8, com Lighthouse executado e aceite manual ainda parcial. As demais seções preservam o histórico e devem ser interpretadas como estados anteriores. Conferir novamente o ambiente na próxima sessão.
+Atualizado em **18/10/2026**. A seção 0 registra a conclusão da etapa 8 após a confirmação dos testes manuais pelo proprietário. As demais seções preservam o histórico e devem ser interpretadas como estados anteriores. Conferir novamente o ambiente na próxima sessão.
 
-## 0. Entrega atual — retomada da validação da etapa 8
+## 0. Estado atual — etapa 8 concluída
+
+Em **18/10/2026**, o proprietário confirmou que realizou os testes e que a responsividade e a acessibilidade estão corretas. A pendência de aceite manual da etapa 8 foi encerrada com base nessa confirmação, complementando as auditorias Lighthouse e os testes automatizados registrados abaixo. Os testes manuais foram realizados pelo proprietário, sem nova execução pelo agente.
+
+- Etapa 8 marcada como concluída em `PROJECT_CONTEXT.md`; README atualizado para refletir o aceite.
+- Alterados somente os documentos de acompanhamento, sem mudanças no código ou nas funcionalidades. Verificação desta atualização: `git diff --check`; testes PHP e Lighthouse não foram repetidos por se tratar apenas de documentação.
+- Próxima etapa pendente: **etapa 9 — testes, documentação e publicação**, ainda não iniciada. Domínio, hospedagem, configuração de produção, conteúdo pessoal confirmado, robots/sitemap e preview público continuam pendentes conforme o contexto.
+- A pedido do proprietário, esta atualização é reunida no commit `fix: corrigido o status da etapa 8 na documentação`; consultar `git log` para o hash. Sem push.
+
+## Histórico — retomada da validação da etapa 8
 
 Lidos `AGENTS.md`, `PROJECT_CONTEXT.md`, este registro e `README.md`; código MVC e testes inspecionados antes de modificar arquivos. O repositório iniciou limpo, na branch `main`, commit **`469a890` — `Melhora responsividade, acessibilidade e SEO da etapa 8`**. A próxima etapa pendente continua sendo a **etapa 8**, cujo aceite estava incompleto; a etapa 9 não foi iniciada. A pedido do proprietário, esta entrega é reunida no commit `fix: corrigida a ausência do favicon no portfólio`; consultar `git log` para o hash. Sem push.
 

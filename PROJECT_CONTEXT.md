@@ -311,7 +311,7 @@ resultados, limitações e eventuais pendências. Não avance para a etapa segui
 - [x] Etapa 5 — Detalhes dos projetos
 - [x] Etapa 6 — Habilidades técnicas
 - [x] Etapa 7 — Contato e redes profissionais
-- [ ] Etapa 8 — Responsividade, acessibilidade e SEO (Lighthouse validado; aceite manual de zoom/teclado pendente)
+- [x] Etapa 8 — Responsividade, acessibilidade e SEO
 - [ ] Etapa 9 — Testes, documentação e deploy
 
 Atualize o checklist quando uma etapa for validada. A conclusão de uma implementação não significa que os critérios de aceite foram automaticamente satisfeitos.
@@ -331,6 +331,8 @@ Etapa 7 implementada e validada funcionalmente com fixtures em 18/10/2026: seç�
 Etapa 8 implementada com validação parcial em 18/10/2026: ajustes de navegação/grid para telas estreitas e textos longos, áreas dos links dos cards, semântica de listas, dimensões reais das imagens, metadados específicos por página, noindex no 404 e Open Graph com imagem padrão. `APP_ORIGIN` habilita canonical e URLs absolutas quando houver domínio confirmado; não é inferida da requisição. Suíte com 967 verificações, sintaxe e integração HTTP aprovadas; contrastes dos tokens verificados. Checkbox permanece pendente: revisão visual mobile/desktop, zoom, teclado real, console e Lighthouse não puderam ser executados pela indisponibilidade de navegador da ferramenta/Lighthouse. Domínio, robots/sitemap e preview público continuam pendentes. Não iniciar a etapa 9 sem novo pedido; detalhes em `PROGRESS.md`.
 
 Retomada da etapa 8 em 18/10/2026: Lighthouse instalado apenas em `/tmp`, com auditorias mobile/desktop e inspeção estática das capturas em 320, 375, 768 e 1280 CSS px. Adicionado favicon local no layout compartilhado para eliminar o erro de console encontrado; respeita caminho-base e identidade visual. Home, catálogo e detalhes de fixtures obtiveram 100 nas quatro categorias avaliadas. Suíte ampliada para 979 verificações aprovadas. O aceite continua parcial porque zoom real e navegação manual por teclado não puderam ser executados; a ferramenta de interação permanece sem navegador conectado. Dados reais preservados; etapa 9 não iniciada. A seção 0 de `PROGRESS.md` contém as evidências atuais e substitui as limitações de ferramentas registradas na implementação inicial acima.
+
+Aceite da etapa 8 concluído em 18/10/2026: o proprietário confirmou que realizou os testes e que a responsividade e a acessibilidade estão corretas. Essa confirmação encerra a pendência manual registrada acima e complementa as auditorias Lighthouse e os testes automatizados anteriores; não houve nova execução manual pelo agente. A próxima etapa pendente é a etapa 9, ainda não iniciada. Domínio, hospedagem, conteúdo pessoal e SEO dependente da publicação continuam pendentes; detalhes na seção 0 de `PROGRESS.md`.
 
 ## 11. Decisões e informações pendentes
 

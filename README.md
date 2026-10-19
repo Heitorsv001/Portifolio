@@ -1,6 +1,6 @@
 # Portfólio MVC em PHP
 
-Site em PHP organizado no padrão MVC, com as etapas 1 a 7 implementadas e as melhorias da etapa 8 aplicadas (Lighthouse validado; aceite manual de zoom/teclado pendente). Inclui layout compartilhado, home, catálogo, detalhes dos projetos, habilidades, contato e metadados por página. Sem framework ou banco de dados; informações pessoais ainda não fornecidas aparecem como placeholders explícitos. Projetos, habilidades e contatos permanecem sem dados pessoais até a confirmação do proprietário.
+Site em PHP organizado no padrão MVC, com as etapas 1 a 8 concluídas e testes manuais de responsividade e acessibilidade confirmados pelo proprietário. Inclui layout compartilhado, home, catálogo, detalhes dos projetos, habilidades, contato e metadados por página. Sem framework ou banco de dados; informações pessoais ainda não fornecidas aparecem como placeholders explícitos. Projetos, habilidades e contatos permanecem sem dados pessoais até a confirmação do proprietário.
 
 ## Requisitos e instalação
 
@@ -178,7 +178,7 @@ O CSS tem 9.905 bytes; o site não acrescenta JavaScript, fontes remotas ou bibl
 
 Auditorias locais com Lighthouse 13.5.0 e Chrome headless 155 obtiveram **100 em desempenho, acessibilidade, boas práticas e SEO** na home mobile/desktop, catálogo vazio e estados preenchidos de teste. Textos longos, categorias, e-mail e imagens de proporções diferentes foram usados apenas em uma cópia temporária, sem alterar os dados reais. Capturas produzidas pelas auditorias permitiram inspeção estática nas larguras de 320, 375, 768 e 1280 CSS px. Resultados detalhados e limites estão em `PROGRESS.md`; medições locais de laboratório não comprovam Core Web Vitals de usuários reais.
 
-**Aceite manual pendente:** a ferramenta de interação continua sem navegador conectado. Conferir zoom real de 200%/400%, rolagem, foco e Tab/Shift+Tab/Enter, incluindo salto ao conteúdo, âncoras e retorno do 404. A revisão de [reflow da WCAG](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html) e teclado deve ser concluída antes de marcar a etapa 8 como validada; capturas estáticas e Lighthouse não substituem essa interação. Conferir também o preview real no LinkedIn após configurar o domínio.
+**Aceite manual confirmado em 18/10/2026:** o proprietário informou que realizou os testes e que a responsividade e a acessibilidade estão corretas. Essa confirmação complementa as auditorias anteriores e encerra o aceite da etapa 8; os testes manuais não foram repetidos pelo agente. Em futuras alterações visuais, revisar zoom, rolagem, foco, teclado e [reflow da WCAG](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html). O preview real no LinkedIn continua pendente da configuração do domínio e da publicação. A próxima etapa é testes finais, documentação e publicação (etapa 9), ainda não iniciada.
 
 ## Verificações
 
