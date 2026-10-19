@@ -468,6 +468,23 @@ img {
     overflow-wrap: anywhere;
 }
 
+.contact-links {
+    display: grid;
+    gap: var(--space-1);
+    width: 100%;
+    margin: 0;
+    padding-left: var(--space-2);
+}
+
+.contact-links li {
+    min-width: 0;
+}
+
+.contact-links a {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
 @media (min-width: 48rem) {
     .container {
         width: min(var(--container-width), calc(100% - var(--space-6)));

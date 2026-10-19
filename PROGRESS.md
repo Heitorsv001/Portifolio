@@ -1,8 +1,62 @@
 # Progresso e passagem de contexto
 
-Atualizado em **18/10/2026**. A seção 0 registra o estado atual após a etapa 6. As demais seções preservam o histórico das etapas 1 a 5 e devem ser interpretadas como estados anteriores. Conferir novamente o ambiente na próxima sessão.
+Atualizado em **18/10/2026**. A seção 0 registra o estado atual após a etapa 7. As demais seções preservam o histórico das etapas 1 a 6 e devem ser interpretadas como estados anteriores. Conferir novamente o ambiente na próxima sessão.
 
-## 0. Entrega atual — etapa 6: habilidades e tecnologias
+## 0. Entrega atual — etapa 7: contato e redes profissionais
+
+Implementada exclusivamente a etapa 7, a pedido do proprietário. Implementação funcional das etapas 1 a 7 disponível; **etapa 8 não iniciada**. Árvore de trabalho limpa no início, no commit `b1307cb` (`Implementa habilidades e tecnologias da etapa 6`). A pedido do proprietário, esta entrega é reunida no commit `Implementa contato e redes profissionais da etapa 7`; consultar `git log` para o hash. Sem push.
+
+### Alterações realizadas
+
+| Arquivo ou área | Alteração desta etapa |
+|---|---|
+| `config/contact.php` (novo) | Campos opcionais `github_url`, `linkedin_url`, `email` e `resume`; valores reais mantidos como `null` até confirmação do proprietário. |
+| `app/Models/Contact.php` (novo) | Leitura/normalização dos dados; validação de URLs HTTP(S), e-mail e caminho do PDF local existente. |
+| `app/Controllers/HomeController.php` e `public/index.php` | Injeção do Model e envio dos dados à home, preservando projetos e habilidades. |
+| `app/Views/partials/contact.php` (novo) e `home/index.php` | Seção de contato após habilidades, com links individuais, `mailto:`, currículo opcional e aviso explícito de dados pendentes. |
+| `app/Views/partials/header.php` | Link de retorno à seção da home em todas as páginas, respeitando caminho-base. |
+| `public/assets/documents/.gitkeep` (novo) | Diretório reservado para o currículo público, sem PDF real ou conteúdo inventado. |
+| `public/assets/css/style.css` | Lista de contatos com espaçamento e quebra de endereços longos, usando o tema existente. |
+| `tests/run.php` | Fixtures isoladas de contatos, valores parciais/inválidos, e-mails especiais, download, caminho-base e estado vazio; preserva testes anteriores. |
+| `README.md` e `PROJECT_CONTEXT.md` | Formato dos dados, manutenção do currículo, validação, checklist e limitações de conteúdo. |
+
+### Decisões técnicas e limites de escopo
+
+- Configuração lida exclusivamente pelo Model; Controller consulta `Contact::all()` e passa os valores à View. Model aceita arquivo alternativo para fixtures, seguindo o padrão existente. Não foram alterados Router, Core, páginas de projetos ou dados de habilidades.
+- Campos ausentes/nulos são tratados individualmente: nenhum link vazio, fictício ou desabilitado entra na navegação. Sem dados utilizáveis, a seção informa “Contatos a confirmar”. Contatos reais foram solicitados ao proprietário durante a implementação; como não foram fornecidos até esta entrega, a configuração permanece sem dados pessoais.
+- URLs seguem a política existente dos projetos: completas HTTP(S), sem credenciais, com atributos escapados. Links externos permanecem na mesma aba; não há `target="_blank"` nem necessidade de acrescentar `rel="noopener"`. A validação de formato não verifica a existência remota de um perfil.
+- E-mail é validado como endereço, sem prefixo `mailto:` ou parâmetros. O texto é escapado e caracteres especiais são codificados na URI, impedindo que `?`, `&` ou sequências de percentuais no endereço se tornem parâmetros/cabeçalhos. Não houve abertura de cliente de e-mail, envio de mensagens ou implementação de formulário.
+- Currículo utiliza caminho relativo sob `assets/documents/`, extensão `.pdf`, nomes ASCII documentados e arquivo existente. O caminho real deve continuar dentro do diretório, rejeitando inclusive links simbólicos para fora dele. Download usa o atributo HTML `download` e o caminho-base; não há endpoint extra, upload ou lógica de arquivo no Router. O arquivo final deve ser fornecido/aprovado pelo proprietário; nenhum currículo foi criado para publicação.
+- Seção `#contato` usa h2 associado e `tabindex="-1"`; links têm nomes visíveis descritivos, o e-mail mostra o destinatário e o download informa PDF. Menu retorna à seção a partir de catálogo, detalhe e 404. CSS preserva tokens e estilos de foco existentes.
+- Sem dependências, JavaScript, banco de dados, mudanças no Apache/permissões ou antecipação da revisão geral de SEO/acessibilidade da etapa 8.
+
+### Testes e evidências desta entrega
+
+| Verificação | Resultado |
+|---|---|
+| Suíte anterior, antes das mudanças | **696/696** aprovadas. |
+| `php -d error_reporting=E_ALL tests/run.php` | **782/782** aprovadas. |
+| Sintaxe em `app`, `public`, `config`, `tests` e `index.php` | **27 arquivos PHP**, sem erros. |
+| `git diff --check` | Aprovado. |
+| Fixtures de contato | Campos nulos/omitidos, links parciais, currículo isolado, URLs inseguras, e-mails inválidos/especiais, escaping e estado vazio aprovados. |
+| PDF opcional | Arquivo local disponível habilita download; ausência/remoção/caminho inválido o omite. Fixture PDF temporária removida no final. |
+| Raiz, `/portifolio` e subdiretório aninhado | Links, `mailto:`, download, IDs e headings verificados na renderização isolada. |
+| Apache real | GET home/catálogo **200**; rota desconhecida e detalhe inexistente **404**. Seção/aviso presentes, menu retorna à home, sem dados inventados. |
+| Apache: novos arquivos privados | `config/contact.php` e `app/Views/partials/contact.php` **403**. |
+| Cópia temporária + servidor PHP com raiz `public/` | Home preenchida, catálogo e detalhe de fixture **200**, rota desconhecida **404**. Links de contato, retorno à seção, contatos parciais e retorno ao estado vazio aprovados. |
+| Download HTTP da fixture | **200**, `Content-Type: application/pdf` e bytes idênticos ao PDF de teste. Link com atributo `download` presente; sem PDF no site real. |
+| HTML/CSS via HTTP | H1/IDs únicos, headings e âncoras existentes, nenhum formulário ou código PHP exposto; CSS **200** e idêntico ao arquivo atualizado nos dois servidores. |
+
+Integração confirmou autoload Composer existente sem alterar dependências. Acesso local/abertura da porta temporária executados com escalada do sandbox; nenhuma alteração no Apache ou nas permissões. O servidor temporário foi encerrado, a cópia com fixtures foi removida e o log não registrou avisos/erros de aplicação. As fixtures não consultam perfis externos nem enviam e-mails.
+
+### Aceite, pendências e próxima retomada
+
+- **Implementação funcional da etapa 7 validada com dados isolados:** links individuais, `mailto:`, PDF opcional e estado vazio disponíveis, sem formulário. Checklist marca a implementação; os contatos reais ainda não estão publicados nem foram validados remotamente.
+- **Conteúdo/aceite final pendente:** obter GitHub, LinkedIn e e-mail confirmados e o currículo PDF caso exista. Preencher `config/contact.php`, conferir os perfis, o destinatário no aplicativo de e-mail e o download/leitura do documento final. A ausência desses dados não foi substituída por informações inferidas do usuário do sistema, projetos ou referências visuais.
+- **Validação manual pendente:** conferir mobile/desktop, zoom, endereço longo, console, foco e Tab/Enter no menu, redes, e-mail e currículo. Inventário desta sessão: `apps: []`, `browsers: []`; não foi possível inspecionar visualmente nem usar teclado real. Testes de HTML/HTTP não substituem essa revisão.
+- Próxima etapa do roadmap: **etapa 8 — responsividade, acessibilidade e SEO**, somente após novo pedido. Não foi iniciada nesta entrega; preservar as pendências de conteúdo e a verificação dos contatos reais.
+
+## Histórico — etapa 6: habilidades e tecnologias
 
 Implementada exclusivamente a próxima etapa pendente, a etapa 6, conforme o pedido do proprietário. Etapas 1 a 6 concluídas funcionalmente; **etapa 7 não iniciada**. Árvore de trabalho limpa no início, no commit `91e47ed` (`Implementa catálogo e páginas individuais dos projetos`). A pedido do proprietário, esta entrega é reunida no commit `Implementa habilidades e tecnologias da etapa 6`; consultar `git log` para o hash. Sem push.
 

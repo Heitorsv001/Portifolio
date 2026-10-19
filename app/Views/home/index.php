@@ -62,3 +62,5 @@
 </section>
 
 <?php require dirname(__DIR__) . '/partials/skills.php'; ?>
+
+<?php require dirname(__DIR__) . '/partials/contact.php'; ?>

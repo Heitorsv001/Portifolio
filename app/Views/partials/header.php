@@ -27,6 +27,9 @@
                 <li>
                     <a class="nav-link" href="<?= htmlspecialchars($homeUrl . '#habilidades', ENT_QUOTES, 'UTF-8') ?>">Habilidades</a>
                 </li>
+                <li>
+                    <a class="nav-link" href="<?= htmlspecialchars($homeUrl . '#contato', ENT_QUOTES, 'UTF-8') ?>">Contato</a>
+                </li>
             </ul>
         </nav>
     </div>

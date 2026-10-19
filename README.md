@@ -1,6 +1,6 @@
 # Portfólio MVC em PHP
 
-Site em PHP organizado no padrão MVC, com as etapas 1 a 6 implementadas: estrutura inicial, layout compartilhado, home, catálogo, páginas individuais dos projetos e seção de habilidades por categoria. Sem framework ou banco de dados; informações pessoais ainda não fornecidas aparecem como placeholders explícitos, e os dados de projetos e habilidades permanecem vazios até a confirmação do proprietário.
+Site em PHP organizado no padrão MVC, com as etapas 1 a 7 implementadas: estrutura inicial, layout compartilhado, home, catálogo, páginas individuais dos projetos, habilidades por categoria e contato. Sem framework ou banco de dados; informações pessoais ainda não fornecidas aparecem como placeholders explícitos. Projetos, habilidades e contatos permanecem sem dados pessoais até a confirmação do proprietário.
 
 ## Requisitos e instalação
 
@@ -25,6 +25,8 @@ O Composer gera `vendor/autoload.php` com o mapeamento PSR-4 de `App\` para `app
 - `config/app.php`: título da aplicação e caminho-base.
 - `config/projects.php`: dados confirmados dos projetos; fonte única do catálogo e dos destaques.
 - `config/skills.php`: habilidades confirmadas, agrupadas por categoria e apresentadas na home.
+- `config/contact.php`: GitHub, LinkedIn, e-mail profissional e caminho do currículo opcional.
+- `public/assets/documents/`: PDFs públicos, incluindo o currículo quando fornecido; inicia sem documentos.
 - `tests/run.php`: testes isolados de roteamento e renderização, sem framework.
 - `storage/logs/`: destino reservado para logs da aplicação.
 
@@ -44,7 +46,7 @@ Em produção, configure a raiz pública do servidor para `public/` e `APP_BASE_
 
 ## Rotas atuais
 
-- `GET /`: página inicial com hero, sobre mim, objetivos, projetos em destaque e habilidades.
+- `GET /`: página inicial com hero, sobre mim, objetivos, projetos em destaque, habilidades e contato.
 - `GET /projetos`: catálogo completo, com estado vazio enquanto não houver projetos confirmados.
 - `GET /projetos/{slug}`: página individual de um projeto cadastrado; slug inválido ou inexistente retorna 404.
 - Rota desconhecida ou método não registrado: página com status HTTP 404.
@@ -65,7 +67,7 @@ A view `app/Views/home/index.php` apresenta o título profissional confirmado, D
 
 As chamadas do hero levam a `#sobre` e `#projetos`; o menu também oferece `#objetivos`. Os links do header incluem a URL da home com o caminho-base, permitindo voltar às seções a partir de uma página 404. As seções de destino são focáveis por navegação de fragmentos (`tabindex="-1"`), sem acrescentar paradas ao percurso normal de Tab.
 
-A seção `#projetos`, inicialmente informativa na etapa 3, agora recebe os destaques e a chamada para o catálogo da etapa 4. A seção `#habilidades` foi acrescentada na etapa 6. Contatos e currículo permanecem na etapa 7.
+A seção `#projetos`, inicialmente informativa na etapa 3, agora recebe os destaques e a chamada para o catálogo da etapa 4. As seções `#habilidades` e `#contato` foram acrescentadas nas etapas 6 e 7, respectivamente.
 
 ## Catálogo e cadastro de projetos — etapa 4
 
@@ -125,6 +127,27 @@ Cada grupo deve conter `category` como string e `items` como lista de strings. O
 
 Categorias e habilidades são texto simples escapado, sem HTML, links, ícones externos ou níveis de proficiência. O grid usa os tokens visuais existentes e adapta as colunas ao espaço disponível. Não há novas dependências ou JavaScript.
 
+## Contato e redes profissionais — etapa 7
+
+A seção `/#contato`, após as habilidades, usa `partials/contact.php` e é acessível pelo menu da home, catálogo, detalhes e 404. `App\Models\Contact` lê `config/contact.php`, normaliza os valores e oferece `all()`; o HomeController envia os dados à View. Não há nova rota, formulário ou envio de e-mail pelo servidor.
+
+O arquivo real mantém os quatro campos como `null` e a home mostra “Contatos a confirmar”. Preencha apenas os dados confirmados pelo proprietário. Campos podem ser omitidos ou continuar nulos; cada link é habilitado individualmente. Exemplo de estrutura, **sem contatos reais**:
+
+```php
+return [
+    'github_url' => null,
+    'linkedin_url' => null,
+    'email' => null,
+    'resume' => null,
+];
+```
+
+- `github_url` e `linkedin_url`: URLs completas HTTP(S) dos perfis confirmados, sem credenciais. URLs inválidas ou com outros esquemas são omitidas. Links abrem na mesma aba, seguindo o padrão dos projetos; não usam `target="_blank"` e não precisam de `rel="noopener"`.
+- `email`: endereço profissional, sem prefixo `mailto:`, assunto ou parâmetros. O Model valida o endereço e remove espaços nas extremidades. A View escapa o texto e codifica os caracteres especiais na URI `mailto:`, preservando o endereço como destinatário único. O link abre o aplicativo de e-mail configurado pelo visitante; não envia mensagens automaticamente.
+- `resume`: caminho público relativo, por exemplo `assets/documents/curriculo.pdf`, somente após disponibilizar o PDF aprovado em `public/assets/documents/`. Nomes/subpastas aceitam letras ASCII, números, hífens e sublinhados; a extensão deve ser `.pdf`. O arquivo precisa existir e seu caminho real deve permanecer nesse diretório. Caminhos externos, travessia, links simbólicos para fora do diretório e arquivos ausentes são omitidos.
+
+O currículo usa um link local com atributo `download`, nome visível “Baixar currículo (PDF)” e caminho-base da instalação. Para desabilitá-lo, defina `resume` como `null` ou remova o arquivo. Nenhum currículo foi criado ou publicado nesta etapa. Texto e atributos são escapados; sem JavaScript, rastreamento ou novas dependências.
+
 ## Verificações
 
 ```sh
@@ -135,7 +158,7 @@ find app public config tests -name '*.php' -print0 | xargs -0 -n1 php -l
 php -l index.php
 ```
 
-Os testes isolados carregam as classes diretamente: verificam rotas fixas e parametrizadas, prefixo da instalação, métodos HTTP, escaping, layout único, placeholders, chamadas da home, identificadores únicos, destinos das âncoras locais e de retorno à home, catálogo, detalhes e renderização de 404. Dados fictícios em arquivos temporários validam inclusão de itens, seleção de destaques, busca/validação por slug, campos opcionais, imagens locais e rejeição de URLs inseguras. Habilidades são testadas com categorias preenchidas/vazias, ordenação, atualização apenas pelo arquivo, escaping e navegação nos diferentes caminhos-base. As fixtures são removidas ao final, sem alterar `config/projects.php` ou `config/skills.php`. Isso não substitui a validação do autoload Composer ou do servidor web. Execute `php tests/run.php`; não há framework de testes.
+Os testes isolados carregam as classes diretamente: verificam rotas fixas e parametrizadas, prefixo da instalação, métodos HTTP, escaping, layout único, placeholders, chamadas da home, identificadores únicos, destinos das âncoras locais e de retorno à home, catálogo, detalhes e renderização de 404. Dados fictícios em arquivos temporários validam inclusão de itens, seleção de destaques, busca/validação por slug, campos opcionais, imagens locais e rejeição de URLs inseguras. Habilidades são testadas com categorias preenchidas/vazias, ordenação, atualização apenas pelo arquivo, escaping e navegação nos diferentes caminhos-base. Contato cobre valores ausentes/parciais, URLs/e-mails inválidos, escaping, codificação de `mailto:`, PDF local existente/ausente e download com caminho-base. As fixtures são removidas ao final, sem alterar `config/projects.php`, `config/skills.php` ou `config/contact.php`. Isso não substitui a validação do autoload Composer ou do servidor web. Execute `php tests/run.php`; não há framework de testes.
 
 Com o servidor local em execução, confira a integração:
 
@@ -151,6 +174,8 @@ Os resultados esperados são, respectivamente, status 200 com a página inicial,
 Após cadastrar um projeto confirmado, confira `GET /projetos/SEU-SLUG` com status 200, título/descrição corretos, imagem e links disponíveis, navegação pelo título do card e retorno ao catálogo. Um slug desconhecido deve responder 404. Não adicione projetos fictícios ao arquivo real para publicação.
 
 Após cadastrar habilidades confirmadas, confira as categorias e listas na home em mobile/desktop, inclusive com textos longos e zoom. Use Tab/Enter no link “Habilidades” do menu e verifique o destino/foco da seção a partir da home, catálogo, detalhe e 404.
+
+Após informar os contatos confirmados, use Tab/Enter no menu “Contato” e nos links da seção, confira os perfis corretos, o destinatário no aplicativo de e-mail e o download/leitura do currículo quando habilitado. Confira também estados parciais, endereço longo, mobile/desktop e console. Sem dados confirmados, não é possível validar a disponibilidade dos perfis reais nem o conteúdo do currículo final.
 
 ## Validação da etapa 1 — 18/10/2026
 

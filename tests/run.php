@@ -7,6 +7,7 @@ require dirname(__DIR__) . '/app/Core/Controller.php';
 require dirname(__DIR__) . '/app/Core/Router.php';
 require dirname(__DIR__) . '/app/Models/Project.php';
 require dirname(__DIR__) . '/app/Models/Skill.php';
+require dirname(__DIR__) . '/app/Models/Contact.php';
 require dirname(__DIR__) . '/app/Controllers/HomeController.php';
 require dirname(__DIR__) . '/app/Controllers/ProjectController.php';
 require dirname(__DIR__) . '/app/Controllers/ErrorController.php';
@@ -17,6 +18,7 @@ use App\Controllers\ProjectController;
 use App\Core\Router;
 use App\Models\Project;
 use App\Models\Skill;
+use App\Models\Contact;
 
 $failures = [];
 $checks = 0;
@@ -112,12 +114,13 @@ $emptyDataFile = tempnam(sys_get_temp_dir(), 'portfolio-empty-');
 file_put_contents($emptyDataFile, '<?php return [];');
 $emptyProjects = new Project($emptyDataFile);
 $emptySkills = new Skill($emptyDataFile);
+$emptyContact = new Contact($emptyDataFile);
 unlink($emptyDataFile);
 
 foreach (['', '/portifolio', '/outro/caminho/'] as $basePath) {
     $root = rtrim($basePath, '/');
     $config = ['name' => 'Teste <script>alert("x")</script>', 'base_path' => $basePath];
-    $home = new HomeController($config, $emptyProjects, $emptySkills);
+    $home = new HomeController($config, $emptyProjects, $emptySkills, $emptyContact);
     ob_start();
     $home->index();
     $html = ob_get_clean();
@@ -128,10 +131,12 @@ foreach (['', '/portifolio', '/outro/caminho/'] as $basePath) {
     $expect(str_contains($html, 'Nenhum projeto em destaque'), 'Estado vazio dos destaques sem projetos inventados');
     $expect(str_contains($html, 'Habilidades a confirmar.'), 'Habilidades pendentes explicitamente sinalizadas');
     $expect(!str_contains($html, 'class="skill-category"'), 'Estado vazio não atribui habilidades ao proprietário');
+    $expect(str_contains($html, 'Contatos a confirmar.'), 'Contatos pendentes explicitamente sinalizados');
+    $expect(!str_contains($html, 'mailto:') && !str_contains($html, ' download>'), 'Nenhum contato ou currículo fictício no estado vazio');
     $expect(str_contains($html, 'href="' . $root . '/projetos"'), 'Home permite acessar catálogo');
     $expect(substr_count($html, '<h1 ') === 1, 'Título principal único na home');
     $expect(str_contains($html, 'Desenvolvedor <span class="hero-highlight">Full Stack</span>'), 'Posicionamento profissional confirmado');
-    foreach (['sobre', 'objetivos', 'projetos', 'habilidades'] as $section) {
+    foreach (['sobre', 'objetivos', 'projetos', 'habilidades', 'contato'] as $section) {
         $expect(str_contains($html, '<section id="' . $section . '"'), 'Seção disponível: ' . $section);
         if ($section !== 'projetos') {
             $expect(str_contains($html, 'href="' . $root . '/#' . $section . '"'), 'Navegação para a seção: ' . $section);
@@ -302,7 +307,7 @@ try {
         }
 
         ob_start();
-        (new HomeController($config, $model, $emptySkills))->index();
+        (new HomeController($config, $model, $emptySkills, $emptyContact))->index();
         $html = ob_get_clean();
         $expect(substr_count($html, 'class="project-card"') === 1, 'Home exibe somente destaque');
         $expect(!str_contains($html, 'Teste sem opcionais'), 'Home omite item não destacado');
@@ -345,7 +350,7 @@ try {
         $expect($model->all()[0]['image'] === null, 'Imagem ausente ou fora dos assets usa fallback');
         $expect($model->all()[0]['technologies'] === [], 'Tecnologias nulas usam lista vazia');
         ob_start();
-        (new HomeController(['name' => 'Teste', 'base_path' => ''], $model, $emptySkills))->index();
+        (new HomeController(['name' => 'Teste', 'base_path' => ''], $model, $emptySkills, $emptyContact))->index();
         $html = ob_get_clean();
         $expect(str_contains($html, 'Nenhum projeto em destaque'), 'Home trata catálogo preenchido sem featured');
     }
@@ -384,7 +389,7 @@ try {
         $config = ['name' => 'Teste', 'base_path' => $basePath];
         http_response_code(200);
         ob_start();
-        (new HomeController($config, $emptyProjects, $skills))->index();
+        (new HomeController($config, $emptyProjects, $skills, $emptyContact))->index();
         $html = ob_get_clean();
         $expect(http_response_code() === 200, 'Home com habilidades responde 200');
         $expect(substr_count($html, 'class="skill-category"') === 2, 'Home apresenta cada categoria preenchida');
@@ -420,14 +425,129 @@ try {
     $groups[] = ['category' => 'Nova categoria', 'items' => ['Nova habilidade de teste']];
     $writeSkills($groups);
     ob_start();
-    (new HomeController(['name' => 'Teste', 'base_path' => ''], $emptyProjects, new Skill($skillFile)))->index();
+    (new HomeController(['name' => 'Teste', 'base_path' => ''], $emptyProjects, new Skill($skillFile), $emptyContact))->index();
     $html = ob_get_clean();
     $expect(str_contains($html, '<h3>Nova categoria</h3>') && str_contains($html, '<li>Nova habilidade de teste</li>'), 'Atualizar apenas o arquivo inclui categoria e habilidade na home');
 } finally {
     unlink($skillFile);
 }
 
-$home = new HomeController(['name' => 'Teste', 'base_path' => '/teste" onclick="alert(1)'], $emptyProjects, $emptySkills);
+// Contatos fictícios isolados: não alteram a configuração real nem enviam e-mail.
+$contactFile = tempnam(sys_get_temp_dir(), 'portfolio-contact-');
+$resumeFile = tempnam(dirname(__DIR__) . '/public/assets/documents', 'test-resume-');
+rename($resumeFile, $resumeFile . '.pdf');
+$resumeFile .= '.pdf';
+$resumePath = 'assets/documents/' . basename($resumeFile);
+// PDF mínimo de uma página em branco, para verificar a disponibilidade do arquivo.
+$pdf = "%PDF-1.4\n";
+$offsets = [0];
+foreach (['<< /Type /Catalog /Pages 2 0 R >>', '<< /Type /Pages /Kids [3 0 R] /Count 1 >>', '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] >>'] as $object) {
+    $offsets[] = strlen($pdf);
+    $pdf .= (count($offsets) - 1) . " 0 obj\n" . $object . "\nendobj\n";
+}
+$xref = strlen($pdf);
+$pdf .= "xref\n0 4\n0000000000 65535 f \n";
+foreach (array_slice($offsets, 1) as $offset) {
+    $pdf .= sprintf('%010d 00000 n ', $offset) . "\n";
+}
+$pdf .= "trailer\n<< /Size 4 /Root 1 0 R >>\nstartxref\n" . $xref . "\n%%EOF\n";
+file_put_contents($resumeFile, $pdf);
+
+try {
+    $writeContact = static function (array $data) use ($contactFile): void {
+        file_put_contents($contactFile, '<?php return ' . var_export($data, true) . ';');
+    };
+    $expectedEmpty = ['github_url' => null, 'linkedin_url' => null, 'email' => null, 'resume' => null];
+    $expect($emptyContact->all() === $expectedEmpty, 'Campos de contato omitidos assumem null');
+    $writeContact($expectedEmpty);
+    $expect((new Contact($contactFile))->all() === $expectedEmpty, 'Contatos explicitamente nulos permanecem ausentes');
+    $fixture = [
+        'github_url' => 'https://github.com/exemplo-de-teste?tab=repositories&sort=updated',
+        'linkedin_url' => 'https://www.linkedin.com/in/exemplo-de-teste/',
+        'email' => ' teste+portfolio@example.org ',
+        'resume' => $resumePath,
+    ];
+    $writeContact($fixture);
+    $contact = new Contact($contactFile);
+    $expect($contact->all()['email'] === 'teste+portfolio@example.org', 'E-mail validado e sem espaços nas extremidades');
+    $expect($contact->all()['resume'] === $resumePath, 'PDF local existente habilitado');
+
+    foreach (['', '/portifolio', '/outro/caminho/'] as $basePath) {
+        $root = rtrim($basePath, '/');
+        $config = ['name' => 'Teste', 'base_path' => $basePath];
+        http_response_code(200);
+        ob_start();
+        (new HomeController($config, $emptyProjects, $emptySkills, $contact))->index();
+        $html = ob_get_clean();
+        $expect(http_response_code() === 200, 'Home com contatos responde 200');
+        $expect(str_contains($html, 'id="contato" class="home-section" aria-labelledby="contato-titulo" tabindex="-1"'), 'Contato tem heading e destino focável por fragmento');
+        $expect(str_contains($html, 'href="' . $root . '/#contato"'), 'Menu aponta para contato com caminho-base');
+        $expect(str_contains($html, 'href="https://github.com/exemplo-de-teste?tab=repositories&amp;sort=updated"'), 'GitHub validado e atributo escapado');
+        $expect(str_contains($html, 'href="https://www.linkedin.com/in/exemplo-de-teste/"'), 'LinkedIn disponível');
+        $expect(str_contains($html, 'href="mailto:teste%2Bportfolio@example.org"'), 'Mailto codifica caracteres especiais do endereço');
+        $expect(str_contains($html, 'Enviar e-mail para teste+portfolio@example.org'), 'Endereço tem texto acessível e legível');
+        $expect(str_contains($html, 'href="' . $root . '/' . $resumePath . '" download>Baixar currículo (PDF)'), 'Download do PDF respeita caminho-base');
+        $expect(!str_contains($html, 'Contatos a confirmar.'), 'Aviso pendente omitido com conteúdo disponível');
+        $expect(!str_contains($html, 'target=') && !str_contains($html, '<form'), 'Links na mesma aba e sem formulário de contato');
+        $expect(strpos($html, 'id="contato"') > strpos($html, 'id="habilidades"'), 'Contato segue habilidades');
+        preg_match_all('/\bid="([^"]+)"/', $html, $ids);
+        preg_match_all('/aria-labelledby="([^"]+)"/', $html, $labels);
+        $expect(count($ids[1]) === count(array_unique($ids[1])) && array_diff($labels[1], $ids[1]) === [], 'IDs e headings válidos na home com contatos');
+
+        foreach (['catalog', 'error'] as $page) {
+            ob_start();
+            if ($page === 'catalog') {
+                (new ProjectController($config, $emptyProjects))->index();
+            } else {
+                (new ErrorController($config))->notFound();
+            }
+            $expect(str_contains(ob_get_clean(), 'href="' . $root . '/#contato"'), 'Retorno à seção de contato a partir de ' . $page);
+        }
+    }
+
+    foreach (['', 'endereço inválido', '//github.com/teste', 'javascript:alert(1)', 'data:text/html,teste', 'ftp://example.org', 'https://user:pass@example.org', 'https://example.org/" onclick="alert(1)', "https://example.org/\r\n"] as $url) {
+        $writeContact(['github_url' => $url, 'linkedin_url' => $url]);
+        $data = (new Contact($contactFile))->all();
+        $expect($data['github_url'] === null && $data['linkedin_url'] === null, 'URLs inválidas ou inseguras omitidas: ' . json_encode($url));
+    }
+    foreach (['', 'email-invalido', 'mailto:teste@example.org', 'teste@example.org?subject=teste', "teste@example.org\r\nBcc:outro@example.org", '<script>@example.org'] as $email) {
+        $writeContact(['email' => $email]);
+        $expect((new Contact($contactFile))->all()['email'] === null, 'E-mail inválido ou com parâmetros omitido: ' . json_encode($email));
+    }
+    $writeContact(['email' => 'teste?&%0A@example.org']);
+    ob_start();
+    (new HomeController(['name' => 'Teste', 'base_path' => ''], $emptyProjects, $emptySkills, new Contact($contactFile)))->index();
+    $html = ob_get_clean();
+    $expect(str_contains($html, 'href="mailto:teste%3F%26%250A@example.org"'), 'Caracteres especiais no local-part não viram parâmetros ou cabeçalhos de mailto');
+    $expect(str_contains($html, 'teste?&amp;%0A@example.org'), 'Endereço exibido com escaping HTML');
+    $expect(!str_contains($html, 'Perfil no GitHub') && !str_contains($html, ' download>'), 'Contato parcial não cria links ausentes');
+
+    foreach (['assets/documents/inexistente.pdf', '../config/app.php', 'assets/documents/../../config/app.php', 'https://example.org/curriculo.pdf', '/assets/documents/curriculo.pdf', 'assets/documents/curriculo.php', 'assets/documents/curriculo.pdf?download=1'] as $path) {
+        $writeContact(['resume' => $path]);
+        $expect((new Contact($contactFile))->all()['resume'] === null, 'Currículo ausente ou fora do padrão omitido: ' . $path);
+    }
+    $writeContact(['resume' => $resumePath]);
+    ob_start();
+    (new HomeController(['name' => 'Teste', 'base_path' => ''], $emptyProjects, $emptySkills, new Contact($contactFile)))->index();
+    $html = ob_get_clean();
+    $expect(str_contains($html, ' download>') && !str_contains($html, 'class="contact-links"'), 'Currículo isolado não gera lista vazia de contatos');
+
+    unlink($resumeFile);
+    clearstatcache();
+    $expect((new Contact($contactFile))->all()['resume'] === null, 'Remoção do arquivo desabilita download');
+    $writeContact(['github_url' => 'javascript:alert(1)', 'email' => 'inválido', 'resume' => $resumePath]);
+    ob_start();
+    (new HomeController(['name' => 'Teste', 'base_path' => ''], $emptyProjects, $emptySkills, new Contact($contactFile)))->index();
+    $html = ob_get_clean();
+    $expect(str_contains($html, 'Contatos a confirmar.') && !str_contains($html, 'javascript:') && !str_contains($html, ' download>'), 'Valores inválidos usam estado vazio sem links quebrados');
+} finally {
+    unlink($contactFile);
+    if (is_file($resumeFile)) {
+        unlink($resumeFile);
+    }
+}
+
+$home = new HomeController(['name' => 'Teste', 'base_path' => '/teste" onclick="alert(1)'], $emptyProjects, $emptySkills, $emptyContact);
 ob_start();
 $home->index();
 $html = ob_get_clean();

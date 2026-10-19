@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Core\Controller;
+use App\Models\Contact;
 use App\Models\Project;
 use App\Models\Skill;
 
@@ -14,7 +15,8 @@ final class HomeController extends Controller
     public function __construct(
         array $config,
         private readonly Project $projects = new Project(),
-        private readonly Skill $skills = new Skill()
+        private readonly Skill $skills = new Skill(),
+        private readonly Contact $contact = new Contact()
     ) {
         parent::__construct($config);
     }
@@ -25,6 +27,7 @@ final class HomeController extends Controller
             'currentPage' => 'home',
             'projects' => $this->projects->featured(),
             'skillGroups' => $this->skills->all(),
+            'contact' => $this->contact->all(),
         ]);
     }
 }

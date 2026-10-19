@@ -310,7 +310,7 @@ resultados, limitações e eventuais pendências. Não avance para a etapa segui
 - [x] Etapa 4 — Catálogo de projetos
 - [x] Etapa 5 — Detalhes dos projetos
 - [x] Etapa 6 — Habilidades técnicas
-- [ ] Etapa 7 — Contato e redes profissionais
+- [x] Etapa 7 — Contato e redes profissionais
 - [ ] Etapa 8 — Responsividade, acessibilidade e SEO
 - [ ] Etapa 9 — Testes, documentação e deploy
 
@@ -324,7 +324,9 @@ Etapa 4 validada funcionalmente em 18/10/2026: catálogo GET `/projetos`, dados 
 
 Etapa 5 validada funcionalmente em 18/10/2026: rota GET `/projetos/{slug}`, consulta validada por slug, página individual com descrição em texto escapado, opcionais, links nos títulos dos cards e retorno ao catálogo. Fixtures isoladas validaram detalhes 200 e slugs inválidos/desconhecidos 404; a integração com o front controller/autoload foi verificada em cópia temporária sem alterar o catálogo real vazio. Inspeção visual e teclado real continuam pendentes por indisponibilidade de navegador. Detalhes em `PROGRESS.md`.
 
-Etapa 6 validada funcionalmente em 18/10/2026: seção reutilizável `/#habilidades`, dados por categoria em `config/skills.php`, Model `Skill` e integração pelo `HomeController`. O arquivo real permanece vazio por falta de conhecimentos confirmados; a home exibe aviso explícito. Fixtures isoladas e HTTP demonstram categorias/listas, atualização só pelos dados, estado vazio, escaping e navegação com caminho-base. Suíte com 696 verificações aprovada. Inspeção visual e teclado real continuam pendentes por indisponibilidade de navegador. Etapa 7 não iniciada; evidências em `PROGRESS.md`.
+Etapa 6 validada funcionalmente em 18/10/2026: seção reutilizável `/#habilidades`, dados por categoria em `config/skills.php`, Model `Skill` e integração pelo `HomeController`. O arquivo real permanece vazio por falta de conhecimentos confirmados; a home exibe aviso explícito. Fixtures isoladas e HTTP demonstram categorias/listas, atualização só pelos dados, estado vazio, escaping e navegação com caminho-base. Suíte com 696 verificações aprovada. Inspeção visual e teclado real continuam pendentes por indisponibilidade de navegador. Evidências em `PROGRESS.md`.
+
+Etapa 7 implementada e validada funcionalmente com fixtures em 18/10/2026: seção `/#contato`, configuração `config/contact.php`, Model `Contact`, links individuais de GitHub/LinkedIn, `mailto:` e download de PDF local opcional. O arquivo real permanece com valores nulos e aviso explícito, pois não há contatos ou currículo confirmados. Suíte com 782 verificações e integração HTTP aprovadas, incluindo PDF de teste servido com status 200 e MIME correto. Disponibilidade dos perfis reais, destinatário no aplicativo de e-mail e currículo final permanecem pendentes dos dados do proprietário; inspeção visual e teclado real indisponíveis nesta sessão. Etapa 8 não iniciada; detalhes em `PROGRESS.md`.
 
 ## 11. Decisões e informações pendentes
 

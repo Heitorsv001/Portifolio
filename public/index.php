@@ -6,6 +6,7 @@ use App\Controllers\HomeController;
 use App\Controllers\ErrorController;
 use App\Controllers\ProjectController;
 use App\Core\Router;
+use App\Models\Contact;
 use App\Models\Project;
 use App\Models\Skill;
 
@@ -24,7 +25,7 @@ try {
     $router = new Router($config['base_path']);
     $projects = new Project();
     $projectController = new ProjectController($config, $projects);
-    $router->get('/', [new HomeController($config, $projects, new Skill()), 'index']);
+    $router->get('/', [new HomeController($config, $projects, new Skill(), new Contact()), 'index']);
     $router->get('/projetos', [$projectController, 'index']);
     $router->get('/projetos/{slug}', [$projectController, 'show']);
 
