@@ -3,7 +3,7 @@
     <div class="page-content">
         <p class="eyebrow">Portfólio / Projetos</p>
         <h1>Projetos</h1>
-        <p>Conheça os projetos e acesse os repositórios e demonstrações disponíveis.</p>
+        <p>Conheça meus projetos acadêmicos e pessoais, suas tecnologias e limitações. Acesse os repositórios e as demonstrações disponíveis.</p>
     </div>
     <section aria-labelledby="catalogo-titulo">
         <h2 id="catalogo-titulo" class="catalog-heading">Catálogo de projetos</h2>

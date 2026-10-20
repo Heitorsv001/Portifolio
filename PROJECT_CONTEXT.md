@@ -6,7 +6,7 @@
 
 Desenvolver um **site de portfólio pessoal** para apresentar o desenvolvedor, seus projetos, habilidades e meios de contato. O endereço será divulgado no **LinkedIn, GitHub e currículo**. A experiência deve ser profissional, acessível, responsiva, rápida e simples de manter.
 
-O site será o portfólio pessoal do proprietário, com posicionamento profissional de **Desenvolvedor Full Stack**. Os detalhes dos projetos realizados e das habilidades técnicas serão fornecidos futuramente pelo proprietário; até lá, não atribuir projetos ou competências sem confirmação.
+O site é o portfólio pessoal de **Heitor Silva Vareiro**, com posicionamento de **Desenvolvedor Web Full Stack** e condição de estudante ativo de Técnico Integrado em Informática no IFMS. Perfil, projetos e habilidades foram preenchidos em 19/10/2026 conforme `PORTFOLIO_CONTENT_GUIDE_ATUALIZADO.md`, currículo e cópias locais dos repositórios ativos. Não atribuir competências ou resultados além dessas fontes.
 
 ### Referência de identidade visual
 
@@ -120,7 +120,7 @@ A seção de habilidades e os meios de contato podem estar na página inicial, c
 - Habilidades agrupadas por categorias.
 - Links para GitHub, LinkedIn e e-mail; currículo PDF opcional.
 
-**Importante:** nome completo de exibição, biografia final, URLs de perfis, endereço de e-mail e currículo ainda precisam ser fornecidos pelo proprietário. A referência de identidade visual está registrada na seção 1; seus detalhes serão definidos na etapa de layout. Os dados reais de projetos e habilidades serão informados futuramente. Usar placeholders evidentes até receber dados reais. **Nunca inventar experiências, formação, competências ou resultados de projetos.**
+**Conteúdo confirmado em 19/10/2026:** perfil, formação em andamento (2024–2026, término previsto), estágio de Desenvolvimento Web no IFMS (março–outubro/2026) no Arco Literário, quatro certificações pelos nomes, habilidades, projetos, GitHub e LinkedIn. Dados pessoais em `config/profile.php`, consultados pelo Model `Profile`; os demais dados usam os Models existentes. E-mail depende de autorização específica e currículo PDF não foi fornecido. **Nunca inventar experiências, formação, competências ou resultados de projetos.**
 
 ### Catálogo de projetos
 
@@ -336,19 +336,23 @@ Aceite da etapa 8 concluído em 18/10/2026: o proprietário confirmou que realiz
 
 ## 11. Decisões e informações pendentes
 
-Antes de substituir placeholders e publicar, confirmar:
+Situação após o povoamento autorizado em 19/10/2026:
 
-- [x] Título profissional: Desenvolvedor Full Stack.
-- [ ] Nome exibido no site.
-- [ ] Texto “Sobre mim”, formação e objetivos.
-- [ ] URLs reais de GitHub e LinkedIn, e-mail profissional e currículo (se houver).
-- [ ] Lista real de projetos, textos, imagens, tecnologias e repositórios.
-- [ ] Quais habilidades serão listadas.
+- [x] Título profissional: Desenvolvedor Web Full Stack.
+- [x] Nome exibido: Heitor Silva Vareiro.
+- [x] Texto “Sobre mim”, formação em andamento, estágio, certificações e objetivos.
+- [x] URLs reais de GitHub e LinkedIn.
+- [ ] Autorização de divulgação do e-mail e currículo PDF aprovado.
+- [x] Lista de projetos, textos, tecnologias e repositórios ativos.
+- [ ] Capturas reais dos projetos.
+- [x] Habilidades confirmadas pelo currículo e guia.
 - [x] Referência de identidade visual: portfólio iuricode (repositório e site na seção 1).
 - [ ] Detalhes da identidade visual (claro/escuro, paleta, tipografia) e imagens de destaque.
 - [ ] Domínio, provedor de hospedagem e configuração do servidor web.
 
 Na ausência dessas definições, utilizar escolhas técnicas reversíveis e placeholders sinalizados; não bloquear a criação da estrutura inicial.
+
+Povoamento concluído sem publicação: cinco projetos cadastrados e quatro visíveis. `visible => false` exclui o Portfólio MVC em PHP do catálogo, destaques e consulta por slug até a confirmação do deploy. Por decisão do proprietário, Gerenciador de Permanências e Crowns aparecem em destaque, sem revisão de segurança como condição editorial. Todos os projetos têm status “Finalizado · fora de produção”; as descrições preservam as limitações verificadas, incluindo persistência parcial do Crowns. Festividades de Fim de Ano e Notícias são secundários; somente Festividades possui demo confirmada. `status` opcional informa ressalvas nos cards e detalhes. Imagens ausentes são omitidas. Arquitetura MVC, rotas e dependências preservadas; etapa 9 continua pendente de publicação. Testes atuais e limitações estão na seção 0 de `PROGRESS.md`; registros de etapas anteriores acima são históricos.
 
 Base visual adotada na etapa 2, ainda sujeita à validação do proprietário: tema escuro, destaque violeta, tipografia do sistema e espaçamentos definidos por variáveis CSS. Imagens de destaque não foram adicionadas nesta etapa.
 

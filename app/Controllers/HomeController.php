@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Models\Contact;
 use App\Models\Project;
+use App\Models\Profile;
 use App\Models\Skill;
 
 final class HomeController extends Controller
@@ -16,21 +17,24 @@ final class HomeController extends Controller
         array $config,
         private readonly Project $projects = new Project(),
         private readonly Skill $skills = new Skill(),
-        private readonly Contact $contact = new Contact()
+        private readonly Contact $contact = new Contact(),
+        private readonly Profile $profile = new Profile()
     ) {
         parent::__construct($config);
     }
 
     public function index(): void
     {
+        $profile = $this->profile->all();
         $this->view('home/index', [
-            'title' => 'Desenvolvedor Full Stack — ' . $this->config['name'],
-            'description' => 'Apresentação, projetos, habilidades e canais de contato de um Desenvolvedor Full Stack.',
+            'title' => $profile['headline'] . ' — ' . $profile['name'],
+            'description' => 'Portfólio de ' . $profile['name'] . ', desenvolvedor Web Full Stack e estudante de Técnico Integrado em Informática no IFMS. Conheça projetos, formação e experiência de estágio.',
             'pagePath' => '/',
             'currentPage' => 'home',
             'projects' => $this->projects->featured(),
             'skillGroups' => $this->skills->all(),
             'contact' => $this->contact->all(),
+            'profile' => $profile,
         ]);
     }
 }

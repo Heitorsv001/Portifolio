@@ -1,15 +1,22 @@
 <?php
 /** @var list<array<string, mixed>> $projects */
 /** @var string $projectsUrl */
+/** @var array<string, mixed> $profile */
 ?>
 <section class="home-hero" aria-labelledby="apresentacao-titulo">
-    <p class="eyebrow">Portfólio em construção</p>
-    <p class="hero-name">[Nome de exibição a informar]</p>
-    <h1 id="apresentacao-titulo">Desenvolvedor <span class="hero-highlight">Full Stack</span></h1>
-    <p class="home-intro">Este é meu portfólio pessoal. Minha apresentação e trajetória serão adicionadas após a confirmação das informações.</p>
+    <p class="eyebrow"><?= htmlspecialchars($profile['headline'], ENT_QUOTES, 'UTF-8') ?></p>
+    <h1 id="apresentacao-titulo"><span class="hero-highlight"><?= htmlspecialchars($profile['name'], ENT_QUOTES, 'UTF-8') ?></span></h1>
+    <p class="hero-name"><?= htmlspecialchars($profile['student_status'], ENT_QUOTES, 'UTF-8') ?></p>
+    <p class="home-intro"><?= htmlspecialchars($profile['intro'], ENT_QUOTES, 'UTF-8') ?></p>
     <div class="hero-actions">
-        <a class="button" href="#projetos">Ir para projetos <span aria-hidden="true">&darr;</span></a>
+        <a class="button" href="#projetos">Conheça meus projetos <span aria-hidden="true">&darr;</span></a>
         <a class="button button--secondary" href="#sobre">Sobre mim</a>
+        <?php if ($contact['github_url'] !== null): ?>
+            <a class="button button--secondary" href="<?= htmlspecialchars($contact['github_url'], ENT_QUOTES, 'UTF-8') ?>">GitHub</a>
+        <?php endif; ?>
+        <?php if ($contact['linkedin_url'] !== null): ?>
+            <a class="button button--secondary" href="<?= htmlspecialchars($contact['linkedin_url'], ENT_QUOTES, 'UTF-8') ?>">LinkedIn</a>
+        <?php endif; ?>
     </div>
 </section>
 
@@ -19,17 +26,34 @@
         <h2 id="sobre-titulo">Sobre mim</h2>
     </div>
     <div class="section-content">
-        <p>Biografia em preparação. Este espaço apresentará minha trajetória pessoal e profissional com informações confirmadas.</p>
+        <?php foreach ($profile['about'] as $paragraph): ?>
+            <p><?= htmlspecialchars($paragraph, ENT_QUOTES, 'UTF-8') ?></p>
+        <?php endforeach; ?>
+        <h3>Formação</h3>
         <dl class="profile-details">
             <div>
-                <dt>Formação</dt>
-                <dd>A informar.</dd>
-            </div>
-            <div>
-                <dt>Interesses</dt>
-                <dd>A informar.</dd>
+                <dt><?= htmlspecialchars($profile['education']['course'], ENT_QUOTES, 'UTF-8') ?></dt>
+                <dd><?= htmlspecialchars($profile['education']['institution'], ENT_QUOTES, 'UTF-8') ?></dd>
+                <dd><?= htmlspecialchars($profile['education']['period'], ENT_QUOTES, 'UTF-8') ?></dd>
+                <dd><?= htmlspecialchars($profile['education']['status'], ENT_QUOTES, 'UTF-8') ?></dd>
             </div>
         </dl>
+        <h3>Experiência profissional</h3>
+        <dl class="profile-details">
+            <div>
+                <dt><?= htmlspecialchars($profile['experience']['role'], ENT_QUOTES, 'UTF-8') ?></dt>
+                <dd><?= htmlspecialchars($profile['experience']['institution'], ENT_QUOTES, 'UTF-8') ?></dd>
+                <dd><?= htmlspecialchars($profile['experience']['period'], ENT_QUOTES, 'UTF-8') ?></dd>
+                <dd><?= htmlspecialchars($profile['experience']['project'], ENT_QUOTES, 'UTF-8') ?></dd>
+                <dd><?= htmlspecialchars($profile['experience']['description'], ENT_QUOTES, 'UTF-8') ?></dd>
+            </div>
+        </dl>
+        <h3>Certificações</h3>
+        <ul class="skill-list">
+            <?php foreach ($profile['certifications'] as $certification): ?>
+                <li><?= htmlspecialchars($certification, ENT_QUOTES, 'UTF-8') ?></li>
+            <?php endforeach; ?>
+        </ul>
     </div>
 </section>
 
@@ -39,7 +63,7 @@
         <h2 id="objetivos-titulo">Objetivos profissionais</h2>
     </div>
     <div class="section-content">
-        <p>Objetivos profissionais a informar. As áreas de interesse e os próximos passos da minha carreira serão apresentados aqui.</p>
+        <p><?= htmlspecialchars($profile['goals'], ENT_QUOTES, 'UTF-8') ?></p>
     </div>
 </section>
 

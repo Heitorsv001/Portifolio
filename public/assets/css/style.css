@@ -379,14 +379,6 @@ img {
     border-bottom: 1px solid var(--color-border);
 }
 
-.project-image--placeholder {
-    display: grid;
-    place-items: center;
-    padding: var(--space-2);
-    color: var(--color-muted);
-    background: var(--color-background);
-}
-
 .project-card-content {
     display: flex;
     flex: 1;

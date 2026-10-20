@@ -1,8 +1,44 @@
 # Progresso e passagem de contexto
 
-Atualizado em **18/10/2026**. A seção 0 registra a conclusão da etapa 8 após a confirmação dos testes manuais pelo proprietário. As demais seções preservam o histórico e devem ser interpretadas como estados anteriores. Conferir novamente o ambiente na próxima sessão.
+Atualizado em **19/10/2026**. A seção 0 registra o povoamento autorizado. As demais seções preservam o histórico e devem ser interpretadas como estados anteriores. Conferir novamente o ambiente na próxima sessão.
 
-## 0. Estado atual — etapa 8 concluída
+## 0. Estado atual — conteúdo preenchido, publicação pendente
+
+Atualização solicitada pelo proprietário em 19/10/2026: Gerenciador de Permanências incluído nos destaques junto de Crowns. As cinco fichas passaram ao status “Finalizado · fora de produção”. Retirada a revisão de segurança como condição para o destaque, pois a solicitação trata da apresentação dos projetos, sem deploy. Mantidas as limitações funcionais verificadas e a ocultação do próprio portfólio até a publicação. Alterados nesta atualização: `config/projects.php`, `README.md`, `PROJECT_CONTEXT.md` e este registro. Nenhum commit ou push.
+
+Validação desta atualização: `php -l config/projects.php` sem erros; **986/986** verificações com `E_ALL`; `git diff --check` aprovado. Conferidos também os cinco status, a seleção de Gerenciador/Crowns e a renderização da home com dois cards em destaque. Os registros de povoamento e testes abaixo descrevem a entrega anterior a essa atualização editorial.
+
+Pedido executado: povoamento do MVC existente conforme o guia atualizado, sem commits. Lidos `AGENTS.md`, `PROJECT_CONTEXT.md`, este registro, README e `PORTFOLIO_CONTENT_GUIDE_ATUALIZADO.md`. O nome solicitado `PORTFOLIO_CONTENT_GUIDE.md` não existe; foi utilizado o arquivo atualizado já presente e não rastreado no início da tarefa, sem modificá-lo.
+
+### Conteúdo e integração
+
+- `config/profile.php` e Model `Profile` acrescentados para fornecer nome, título, biografia, formação, estágio, certificações e objetivos ao `HomeController`. Formação explicitamente em andamento (janeiro/2024 a dezembro/2026, previsão); estágio de março a outubro/2026, sem presumir continuidade. Arco Literário consta como estágio no IFMS, sem card ou link de código privado. Quatro certificações, somente nomes.
+- Atualizados `config/app.php`, `config/contact.php` e `config/skills.php`. GitHub/LinkedIn aprovados, sem e-mail público ou PDF; conhecimentos conforme as fontes, sem percentuais. Atualizados home, footer e texto introdutório do catálogo.
+- `config/projects.php`: cinco fichas, usando apenas repositórios ativos e os nomes públicos do guia. Quatro projetos visíveis. Portfólio MVC em PHP oculto até confirmar publicação; Gerenciador fora dos destaques enquanto não houver revisão de segurança, preservando a condição mais restritiva do guia. Crowns em destaque com persistência parcial; Festividades e Notícias secundários.
+- `Project` filtra `visible => false` antes de disponibilizar catálogo, destaques ou consulta por slug; a rota direta do projeto oculto retorna 404. Campo opcional `status` mostra ressalvas em cards e detalhes. Dados antigos sem `visible` continuam visíveis por padrão. Imagens ausentes omitidas; removidos o placeholder e seu CSS sem uso.
+- Sem alterações no Router, Core, dependências, Apache ou permissões. Nenhum `git add`, commit ou push executado. README e contexto atualizados.
+
+### Fontes e conferência
+
+Currículo lido em `/home/heitor/Documentos/CurriculoLinkedin.md`; READMEs dos cinco repositórios lidos em `/home/heitor/github-projects/repositorios-github/`. Conferidos os Controllers de login, permanências e alunos do Gerenciador, Maven e Controller de batalha do Crowns, scripts de Festividades e Notícias e implementação atual do próprio portfólio. As limitações documentadas são compatíveis com os trechos inspecionados; não houve nova auditoria integral ou execução dessas aplicações. Nenhuma credencial ou dado interno foi copiado para o site.
+
+O README de Festividades confirma que o tema é Ano Novo Chinês e indica a demo `https://heitorsv001.github.io/festividades/`; requisição GET nesta sessão retornou **200**. Link incluído, mantendo o aviso de formulário simulado, sem armazenamento/envio real e com campos na URL. Não foram inventadas demos nem capturas.
+
+### Testes desta entrega
+
+- Antes das mudanças: **979/979** verificações com `E_ALL`.
+- Após as mudanças: **986/986** com `php -d error_reporting=E_ALL tests/run.php`. Expectativas de placeholders atualizadas; novos testes para ocultação mesmo com `featured` ativo, 404 por URL direta, reativação via configuração e escaping do perfil/ressalvas. Fixtures temporárias, sem modificar dados reais.
+- Sintaxe dos **29 arquivos PHP** (`app`, `public`, `config`, `tests` e entrada raiz): sem erros. `git diff --check` aprovado.
+- Apache em `http://localhost/portifolio` e servidor PHP temporário em `http://127.0.0.1:8026` com `public/` como raiz: home, catálogo e quatro detalhes **200**; projeto oculto, slug desconhecido/inválido, segmento extra, rota inexistente e POST ao detalhe **404**. Autoload Composer existente funcionou com `Profile`.
+- HTML conferido nos dois servidores: h1/IDs únicos, destinos de âncoras e referências de headings válidos, metadados consistentes, quatro cards no catálogo e apenas Crowns em destaque, sem projetos excluídos, e-mail ou placeholders de imagens. CSS/favicon/preview **200**, bytes iguais aos arquivos locais. Configurações e View privadas **403** no Apache e **404** com raiz pública.
+- Nenhuma reinstalação/alteração do Composer. Servidor temporário encerrado após a verificação.
+- Inventário da ferramenta: `apps: []`, `browsers: []`. Revisão visual responsiva, console, teclado e zoom do conteúdo novo não executados; não foi repetido Lighthouse. O aceite da etapa 8 abaixo pertence ao layout anterior e não equivale a uma nova inspeção visual.
+
+### Pendências
+
+Revisão de segurança do Gerenciador antes de destaque/demo; compilação e persistência do Crowns; interações de Festividades/Notícias e responsividade dessas aplicações; capturas reais; dados complementares dos certificados; autorização específica do e-mail e PDF aprovado. Para o portfólio: revisão visual do conteúdo preenchido, domínio/hospedagem, `APP_ORIGIN`, publicação, habilitação do próprio projeto, robots/sitemap e preview público. Não habilitar demonstração do Gerenciador sem revisão nem declarar estágio ou formação concluída além das datas documentadas. Nenhum deploy realizado.
+
+## Histórico — etapa 8 concluída
 
 Em **18/10/2026**, o proprietário confirmou que realizou os testes e que a responsividade e a acessibilidade estão corretas. A pendência de aceite manual da etapa 8 foi encerrada com base nessa confirmação, complementando as auditorias Lighthouse e os testes automatizados registrados abaixo. Os testes manuais foram realizados pelo proprietário, sem nova execução pelo agente.
 

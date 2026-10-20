@@ -8,6 +8,7 @@ require dirname(__DIR__) . '/app/Core/Router.php';
 require dirname(__DIR__) . '/app/Models/Project.php';
 require dirname(__DIR__) . '/app/Models/Skill.php';
 require dirname(__DIR__) . '/app/Models/Contact.php';
+require dirname(__DIR__) . '/app/Models/Profile.php';
 require dirname(__DIR__) . '/app/Controllers/HomeController.php';
 require dirname(__DIR__) . '/app/Controllers/ProjectController.php';
 require dirname(__DIR__) . '/app/Controllers/ErrorController.php';
@@ -19,6 +20,7 @@ use App\Core\Router;
 use App\Models\Project;
 use App\Models\Skill;
 use App\Models\Contact;
+use App\Models\Profile;
 
 $failures = [];
 $checks = 0;
@@ -129,9 +131,9 @@ foreach (['', '/portifolio', '/outro/caminho/'] as $basePath) {
     $home->index();
     $html = ob_get_clean();
     $homeHtml = $html;
-    $expect(str_contains($html, '[Nome de exibição a informar]'), 'Nome pessoal pendente sinalizado');
-    $expect(str_contains($html, 'Biografia em preparação.'), 'Biografia pendente sinalizada');
-    $expect(str_contains($html, 'Objetivos profissionais a informar.'), 'Objetivos pendentes sinalizados');
+    $expect(str_contains($html, 'Heitor Silva Vareiro'), 'Nome profissional confirmado');
+    $expect(str_contains($html, 'Sou estudante do curso Técnico Integrado em Informática'), 'Biografia preserva condição de estudante ativo');
+    $expect(str_contains($html, 'Busco continuar evoluindo em desenvolvimento de software'), 'Objetivo profissional confirmado');
     $expect(str_contains($html, 'Nenhum projeto em destaque'), 'Estado vazio dos destaques sem projetos inventados');
     $expect(str_contains($html, 'Habilidades a confirmar.'), 'Habilidades pendentes explicitamente sinalizadas');
     $expect(!str_contains($html, 'class="skill-category"'), 'Estado vazio não atribui habilidades ao proprietário');
@@ -139,7 +141,7 @@ foreach (['', '/portifolio', '/outro/caminho/'] as $basePath) {
     $expect(!str_contains($html, 'mailto:') && !str_contains($html, ' download>'), 'Nenhum contato ou currículo fictício no estado vazio');
     $expect(str_contains($html, 'href="' . $root . '/projetos"'), 'Home permite acessar catálogo');
     $expect(substr_count($html, '<h1 ') === 1, 'Título principal único na home');
-    $expect(str_contains($html, 'Desenvolvedor <span class="hero-highlight">Full Stack</span>'), 'Posicionamento profissional confirmado');
+    $expect(str_contains($html, 'Desenvolvedor Web Full Stack'), 'Posicionamento profissional confirmado');
     foreach (['sobre', 'objetivos', 'projetos', 'habilidades', 'contato'] as $section) {
         $expect(str_contains($html, '<section id="' . $section . '"'), 'Seção disponível: ' . $section);
         if ($section !== 'projetos') {
@@ -251,7 +253,7 @@ try {
         $html = ob_get_clean();
         $expect(substr_count($html, 'class="project-card"') === 2, 'Catálogo renderiza todos os cards');
         $expect(str_contains($html, 'Teste sem opcionais'), 'Projeto sem links e imagem exibido');
-        $expect(str_contains($html, 'Imagem em preparação'), 'Fallback visual sem imagem');
+        $expect(!str_contains($html, 'Imagem em preparação') && !str_contains($html, 'project-image--placeholder'), 'Imagem ausente omitida sem placeholder');
         $expect(str_contains($html, 'src="' . $root . '/' . $imagePath . '"'), 'Imagem local respeita caminho-base');
         $expect(str_contains($html, 'alt="Prévia do projeto Teste &lt;script&gt;'), 'Alternativa textual escapada');
         $expect(str_contains($html, 'href="https://example.org/repo?a=1&amp;b=2"'), 'URL externa válida e escapada');
@@ -397,7 +399,8 @@ try {
         $html = ob_get_clean();
         $expect(http_response_code() === 200, 'Home com habilidades responde 200');
         $expect(substr_count($html, 'class="skill-category"') === 2, 'Home apresenta cada categoria preenchida');
-        $expect(substr_count($html, 'class="skill-list"') === 2, 'Habilidades usam listas por categoria');
+        preg_match('~<section id="habilidades".*?</section>~s', $html, $skillsSection);
+        $expect(substr_count($skillsSection[0], 'class="skill-list"') === 2, 'Habilidades usam listas por categoria');
         $expect(str_contains($html, '<h3>Linguagens de teste</h3>'), 'Categoria usa heading abaixo do título da seção');
         $expect(str_contains($html, '<li>PHP</li>') && str_contains($html, '<li>JavaScript</li>'), 'Itens vêm do arquivo sem editar layout');
         $expect(str_contains($html, 'Ferramentas &lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;'), 'Nome da categoria escapado');
@@ -707,6 +710,69 @@ if ($previousBasePath === false) {
     putenv('APP_BASE_PATH');
 } else {
     putenv('APP_BASE_PATH=' . $previousBasePath);
+}
+
+$visibilityFile = tempnam(sys_get_temp_dir(), 'portfolio-visibility-');
+$profileFile = tempnam(sys_get_temp_dir(), 'portfolio-profile-');
+try {
+    $hidden = [
+        'id' => 1,
+        'slug' => 'projeto-oculto',
+        'title' => 'Projeto oculto',
+        'summary' => 'Resumo privado de teste',
+        'description' => 'Descrição privada de teste',
+        'featured' => true,
+        'visible' => false,
+    ];
+    file_put_contents($visibilityFile, '<?php return ' . var_export([$hidden], true) . ';');
+    $projects = new Project($visibilityFile);
+    $expect($projects->all() === [] && $projects->featured() === [], 'Projeto oculto não vaza no catálogo ou destaques mesmo com featured ativo');
+    $expect($projects->findBySlug('projeto-oculto') === null, 'Projeto oculto não pode ser consultado por slug');
+    ob_start();
+    (new ProjectController(['name' => 'Teste', 'base_path' => ''], $projects))->show('projeto-oculto');
+    $html = ob_get_clean();
+    $expect(http_response_code() === 404 && !str_contains($html, $hidden['summary']), 'URL direta de projeto oculto retorna 404 sem expor dados');
+
+    $hidden['visible'] = true;
+    $hidden['status'] = 'Estado <script>alert("x")</script>';
+    file_put_contents($visibilityFile, '<?php return ' . var_export([$hidden], true) . ';');
+    $projects = new Project($visibilityFile);
+    $expect(count($projects->all()) === 1 && count($projects->featured()) === 1, 'Visibilidade pode ser habilitada pelo arquivo de dados');
+    foreach (['catalog', 'detail'] as $page) {
+        ob_start();
+        $controller = new ProjectController(['name' => 'Teste', 'base_path' => ''], $projects);
+        if ($page === 'catalog') {
+            $controller->index();
+        } else {
+            $controller->show('projeto-oculto');
+        }
+        $html = ob_get_clean();
+        $expect(str_contains($html, 'Estado &lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;') && !str_contains($html, '<script>'), 'Ressalva editorial escapada em ' . $page);
+    }
+
+    $profile = (new Profile())->all();
+    $escapeProfile = static function (array $values) use (&$escapeProfile): array {
+        foreach ($values as &$value) {
+            $value = is_array($value) ? $escapeProfile($value) : '<script>alert("perfil")</script>';
+        }
+        unset($value);
+        return $values;
+    };
+    file_put_contents($profileFile, '<?php return ' . var_export($escapeProfile($profile), true) . ';');
+    http_response_code(200);
+    ob_start();
+    (new HomeController(
+        ['name' => 'Teste', 'base_path' => ''],
+        $emptyProjects,
+        $emptySkills,
+        $emptyContact,
+        new Profile($profileFile)
+    ))->index();
+    $html = ob_get_clean();
+    $expect(!str_contains($html, '<script>') && str_contains($html, '&lt;script&gt;alert(&quot;perfil&quot;)&lt;/script&gt;'), 'Dados de perfil, formação, experiência e certificados escapados na home e metadados');
+} finally {
+    unlink($visibilityFile);
+    unlink($profileFile);
 }
 
 foreach ($failures as $failure) {

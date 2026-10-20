@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-// Preencha somente com contatos e currículo confirmados pelo proprietário.
-// Consulte o README para o formato e as regras de publicação do PDF.
 return [
-    'github_url' => null,
-    'linkedin_url' => null,
+    'github_url' => 'https://github.com/heitorsv001',
+    'linkedin_url' => 'https://www.linkedin.com/in/heitorvareiro/',
+    // Publicação do e-mail e disponibilização do PDF ainda pendentes.
     'email' => null,
     'resume' => null,
 ];

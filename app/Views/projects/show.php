@@ -8,6 +8,9 @@
     <div class="page-content">
         <p class="eyebrow">Portfólio / Projeto</p>
         <h1 id="projeto-titulo"><?= htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8') ?></h1>
+        <?php if ($project['status'] !== null): ?>
+            <p><?= htmlspecialchars($project['status'], ENT_QUOTES, 'UTF-8') ?></p>
+        <?php endif; ?>
         <p><?= htmlspecialchars($project['summary'], ENT_QUOTES, 'UTF-8') ?></p>
     </div>
     <?php if ($project['image'] !== null): ?>

@@ -12,6 +12,10 @@ final class Project
     public function __construct(?string $dataFile = null)
     {
         $projects = require ($dataFile ?? dirname(__DIR__, 2) . '/config/projects.php');
+        $projects = array_filter(
+            $projects,
+            static fn (array $project): bool => ($project['visible'] ?? true) === true
+        );
 
         foreach ($projects as &$project) {
             $project += [
@@ -20,6 +24,7 @@ final class Project
                 'github_url' => null,
                 'demo_url' => null,
                 'featured' => false,
+                'status' => null,
             ];
             $project['github_url'] = $this->externalUrl($project['github_url']);
             $project['demo_url'] = $this->externalUrl($project['demo_url']);
