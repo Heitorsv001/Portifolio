@@ -149,7 +149,7 @@ foreach (['', '/portifolio', '/outro/caminho/'] as $basePath) {
         }
     }
     $expect(str_contains($html, 'class="button" href="#projetos"'), 'Chamada principal leva à seção de projetos');
-    $expect(str_contains($html, 'class="button button--secondary" href="#sobre"'), 'Chamada secundária leva à apresentação');
+    $expect(!str_contains($html, 'class="button button--secondary" href="#sobre"'), 'Hero sem botão Sobre mim');
     $expect(str_contains($html, '&lt;script&gt;'), 'Escaping do título');
     $expect(!str_contains($html, '<script>'), 'Ausência de HTML arbitrário no título');
     $expectLayout($html, $root, $homeHtml);

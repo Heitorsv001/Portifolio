@@ -4,7 +4,7 @@
 /** @var string $basePath */
 ?>
 <article class="project-detail" aria-labelledby="projeto-titulo">
-    <a class="text-link" href="<?= htmlspecialchars($projectsUrl, ENT_QUOTES, 'UTF-8') ?>"><span aria-hidden="true">&larr;</span> Voltar aos projetos</a>
+    <a class="text-link" href="<?= htmlspecialchars($projectsUrl, ENT_QUOTES, 'UTF-8') ?>">Voltar aos projetos</a>
     <div class="page-content">
         <p class="eyebrow">Portfólio / Projeto</p>
         <h1 id="projeto-titulo"><?= htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8') ?></h1>

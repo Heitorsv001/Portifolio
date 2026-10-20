@@ -3,5 +3,5 @@
     <p class="eyebrow">Erro 404</p>
     <h1>Página não encontrada</h1>
     <p>O endereço solicitado não existe.</p>
-    <a class="button" href="<?= htmlspecialchars($homeUrl, ENT_QUOTES, 'UTF-8') ?>">Voltar ao início <span aria-hidden="true">&rarr;</span></a>
+    <a class="button" href="<?= htmlspecialchars($homeUrl, ENT_QUOTES, 'UTF-8') ?>">Voltar ao início</a>
 </div>

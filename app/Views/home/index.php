@@ -9,8 +9,7 @@
     <p class="hero-name"><?= htmlspecialchars($profile['student_status'], ENT_QUOTES, 'UTF-8') ?></p>
     <p class="home-intro"><?= htmlspecialchars($profile['intro'], ENT_QUOTES, 'UTF-8') ?></p>
     <div class="hero-actions">
-        <a class="button" href="#projetos">Conheça meus projetos <span aria-hidden="true">&darr;</span></a>
-        <a class="button button--secondary" href="#sobre">Sobre mim</a>
+        <a class="button" href="#projetos">Conheça meus projetos</a>
         <?php if ($contact['github_url'] !== null): ?>
             <a class="button button--secondary" href="<?= htmlspecialchars($contact['github_url'], ENT_QUOTES, 'UTF-8') ?>">GitHub</a>
         <?php endif; ?>
@@ -81,7 +80,7 @@
         <?php else: ?>
             <?php require dirname(__DIR__) . '/partials/project-list.php'; ?>
         <?php endif; ?>
-        <a class="button button--secondary" href="<?= htmlspecialchars($projectsUrl, ENT_QUOTES, 'UTF-8') ?>">Ver todos os projetos <span aria-hidden="true">&rarr;</span></a>
+        <a class="button button--secondary" href="<?= htmlspecialchars($projectsUrl, ENT_QUOTES, 'UTF-8') ?>">Ver todos os projetos</a>
     </div>
 </section>
 
