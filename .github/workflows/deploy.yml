@@ -1,0 +1,100 @@
+name: Deploy do portfólio no Workers
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: portfolio-workers-production
+  cancel-in-progress: false
+
+env:
+  APP_BASE_PATH: ''
+  APP_ORIGIN: https://heitorvareiro.heitorsvareiro.workers.dev
+
+jobs:
+  deploy:
+    if: github.repository == 'Heitorsv001/Portifolio' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: PHP 8.4, Composer 2 e DOM
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: dom
+          tools: composer:v2
+          coverage: none
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Dependências e autoload PHP
+        run: |
+          composer validate --no-check-publish
+          composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader
+          composer dump-autoload --optimize --strict-psr
+
+      - name: Sintaxe e testes PHP
+        run: |
+          find app public config tests scripts -name '*.php' -print0 | xargs -0 -n1 php -l
+          php -l index.php
+          php -d error_reporting=E_ALL tests/run.php
+          php -d error_reporting=E_ALL tests/static-export.php
+
+      - name: Testes JavaScript e proteção do destino
+        run: |
+          node tests/theme.js
+          node tests/navigation.js
+          node tests/particles.js
+          node --test tests/verify-worker.mjs
+
+      - name: Gerar versão estática de produção
+        run: php scripts/export-static.php --target=cloudflare
+
+      - name: Preparar navegador para testes
+        run: |
+          npm install --prefix "$RUNNER_TEMP/portfolio-browser" --no-save --package-lock=false playwright@1.64.1
+          "$RUNNER_TEMP/portfolio-browser/node_modules/.bin/playwright" install --with-deps chromium
+
+      - name: Testes HTTP, navegação e comparação visual
+        run: NODE_PATH="$RUNNER_TEMP/portfolio-browser/node_modules" node tests/static-browser.js
+
+      - name: Validar artefato final
+        run: php scripts/validate-static.php --target=cloudflare
+
+      - name: Guardar artefato validado por revisão
+        uses: actions/upload-artifact@v4
+        with:
+          name: portfolio-static-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Confirmar Worker existente e endereço de produção
+        run: node scripts/verify-worker.mjs
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Publicar no Worker existente
+        uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '4.152.0'
+          command: deploy --config wrangler.jsonc

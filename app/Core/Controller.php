@@ -8,7 +8,7 @@ use App\Models\Contact;
 
 abstract class Controller
 {
-    /** @param array{name: string, base_path: string, origin?: ?string} $config */
+    /** @param array{name: string, base_path: string, origin?: ?string, static_export?: bool} $config */
     public function __construct(protected readonly array $config)
     {
     }
@@ -24,8 +24,9 @@ abstract class Controller
 
         $appName = $this->config['name'];
         $basePath = rtrim($this->config['base_path'], '/');
-        $homeUrl = $basePath . '/';
-        $projectsUrl = $basePath . '/projetos';
+        $pageUrl = fn (string $path): string => $this->pageUrl($path);
+        $homeUrl = $pageUrl('/');
+        $projectsUrl = $pageUrl('/projetos');
         $stylesheetUrl = $this->versionedAssetUrl('assets/css/style.css');
         $themeScriptUrl = $this->versionedAssetUrl('assets/js/theme-init.js');
         $siteScriptUrl = $this->versionedAssetUrl('assets/js/site.js');
@@ -45,7 +46,7 @@ abstract class Controller
             : null;
         $siteOrigin = $this->siteOrigin();
         $canonicalUrl = !$data['noIndex'] && $siteOrigin !== null && $data['pagePath'] !== null
-            ? $siteOrigin . $basePath . $data['pagePath']
+            ? $siteOrigin . $pageUrl($data['pagePath'])
             : null;
         $shareImageUrl = null;
         $shareImageSize = false;
@@ -59,6 +60,15 @@ abstract class Controller
 
         extract($data, EXTR_SKIP);
         require dirname(__DIR__) . '/Views/layouts/main.php';
+    }
+
+    private function pageUrl(string $path): string
+    {
+        if ($this->config['static_export'] ?? false) {
+            $path = rtrim($path, '/') . '/';
+        }
+
+        return rtrim($this->config['base_path'], '/') . $path;
     }
 
     private function versionedAssetUrl(string $path): string

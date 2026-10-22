@@ -1,5 +1,21 @@
 # Progresso e passagem de contexto
 
+## Exportação estática — etapas 1–5 concluídas localmente em 22/10/2026
+
+Implementação solicitada com prioridade para Cloudflare Pages, preservando a aplicação MVC. `scripts/export-static.php` renderiza pelo front controller real, valida e substitui a árvore `dist/` somente após sucesso. Inclui saída 404, sitemap/robots e sete assets referenciados, com suporte a dependências de CSS/fontes. O perfil opcional GitHub inclui prefixo e `.nojekyll`. O projeto oculto permanece ausente e não foi habilitado na configuração real.
+
+A divergência de currículo foi investigada antes do exportador: o histórico do redesign mantém PDF e contatos na mesma lista. Corrigida somente a asserção em `tests/run.php`, exigindo um único item com download quando só há currículo. View de contato, CSS, scripts e PDF permaneceram intactos. Suíte passou de 1.600/1.601 para 1.601/1.601 ainda antes da adaptação das URLs.
+
+Mudanças da aplicação restritas a `config/app.php`, `app/Core/Controller.php` e href do card em `app/Views/partials/project-list.php`. Build usa função central para URLs com barra final; PHP normal mantém as formas anteriores. Infraestrutura em cinco arquivos de `scripts/`, com suporte compartilhado, adaptador de renderização e validador DOM; dois testes novos. `.gitignore`, README, contexto e plano atualizados; relatório em `STATIC_EXPORT_VALIDATION.md`.
+
+Validações executadas: **1.601/1.601 PHP** em cópia temporária, **135/135 testes de exportação**, **72/72 tema + 29/29 navegação + 38/38 partículas**, **36 arquivos PHP sem erro de sintaxe**. A integração testa raiz, `/Portifolio`, prefixo composto, reconstrução determinística, ocultação, CSS/fontes, falhas de renderização/configuração/links/assets, segurança do inventário, symlinks e lock; saídas anteriores preservadas nos erros.
+
+Chrome/Playwright: **172/172 verificações HTTP/navegador** e **32 comparações visuais PHP/estático idênticas** (home, catálogo, detalhe, 404 × 320/390/768/1440px × claro/escuro). Conferidos download e bytes, foco/Tab/Enter/Escape, menu, persistência de tema, conteúdo sem JS e desenho real do Canvas com movimento reduzido/retomada. Quatro capturas em `/tmp/portfolio-static-visual/`; duas amostras abertas para revisão. Servidores e navegador temporários encerrados ao fim do teste.
+
+PHP 8.4.27; extensão DOM do pacote Debian compatível extraída em `/tmp` e carregada temporariamente por `PHP_INI_SCAN_DIR`, sem instalação/configuração do sistema. Node 24.19.0 e Playwright encontrados no runtime de ferramentas; Chrome existente utilizado. Composer não executado; autoload local existente testado pelo front controller. O sandbox recusou portas locais, e o ensaio HTTP/navegador foi executado com permissão ampliada, restrito a localhost.
+
+`dist/` final contém **16 arquivos** para raiz, usando origem ilustrativa `https://portfolio.example`. Está pronto para revisão estática local; reconstruir com origem final para a futura validação no host. Não houve configuração da Cloudflare, workflow, deploy, git add, commit ou push. As etapas 6–7 do plano não foram iniciadas. Resultados históricos abaixo não se referem a esta execução.
+
 ## Estado atual — 21/10/2026
 
 O redesenho do portfólio e as alterações de conteúdo, contato, currículo e retrato foram reunidos no commit `b20aacf` (`style: layout do site reformulado`) e enviados para `main` no GitHub. A seção de contato exibe os perfis do GitHub e LinkedIn, o e-mail autorizado `heitorsvareiro@gmail.com` e o download de `public/assets/documents/CurriculoLinkedin.pdf`, com links no mesmo estilo e sem sublinhado. O arquivo `public/assets/images/meu-retrato.png` aparece no hero e como favicon, com zoom de 15% aplicado via CSS.

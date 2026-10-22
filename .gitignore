@@ -2,3 +2,7 @@
 .env
 /storage/logs/*
 !/storage/logs/.gitkeep
+/dist/
+/.static-build-*/
+/.static-backup-*/
+/.static-export.lock

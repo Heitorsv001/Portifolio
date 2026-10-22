@@ -2,11 +2,120 @@
 
 Site de portfólio pessoal em PHP, com arquitetura MVC própria, catálogo e páginas individuais de projetos. A aplicação renderiza HTML no servidor e utiliza arquivos PHP de configuração como fonte dos dados, sem framework ou banco de dados.
 
-Portfólio de Heitor Silva Vareiro, Desenvolvedor Web Full Stack e estudante de Técnico Integrado em Informática no IFMS. Conteúdo profissional preenchido; publicação ainda pendente.
+Portfólio de Heitor Silva Vareiro, Desenvolvedor Web Full Stack e estudante de Técnico Integrado em Informática no IFMS. Conteúdo profissional preenchido; site publicado em https://heitorvareiro.heitorsvareiro.workers.dev/.
 
 O avatar circular do início utiliza o retrato fornecido e autorizado pelo responsável, `public/assets/images/meu-retrato.png`, também usado como favicon PNG. O avatar recebe zoom de 15% por CSS, preservando o arquivo original. Conferido no Chrome em 390/1440px nos dois temas; [capturas com o retrato e zoom](design/validation/portrait-favicon). As capturas e medições da etapa 9 abaixo são anteriores à inclusão da imagem.
 
-Estado atual: o contato autorizado `heitorsvareiro@gmail.com` e o currículo `public/assets/documents/CurriculoLinkedin.pdf` estão configurados na seção de contato. Os perfis do GitHub e LinkedIn, o e-mail e o download do currículo usam links no mesmo estilo, sem sublinhado. O redesenho está registrado no commit `b20aacf` (`style: layout do site reformulado`) e enviado para `main` no GitHub. A publicação do site em hospedagem continua pendente. As seções de progresso abaixo registram o contexto histórico de cada etapa.
+Estado atual: o contato autorizado `heitorsvareiro@gmail.com` e o currículo `public/assets/documents/CurriculoLinkedin.pdf` estão configurados na seção de contato. Os perfis do GitHub e LinkedIn, o e-mail e o download do currículo usam links no mesmo estilo, sem sublinhado. O redesenho está registrado no commit `b20aacf` (`style: layout do site reformulado`) e enviado para `main` no GitHub. O site está publicado no Cloudflare Workers com Static Assets. As seções de progresso abaixo registram o contexto histórico de cada etapa.
+
+## Publicação automática no Cloudflare Workers
+
+Produção: **https://heitorvareiro.heitorsvareiro.workers.dev/**. O nome configurado do Worker é **`heitorvareiro`**; `heitorsvareiro` é o subdomínio da conta. Esse nome já constava no `wrangler.jsonc` local e foi confirmado pelo responsável, que também informou a configuração dos secrets no GitHub. O CI verifica o Worker e o subdomínio pela API antes da publicação. Não crie outra aplicação.
+
+O [workflow](.github/workflows/deploy.yml) publica somente em `Heitorsv001/Portifolio`, na branch `main`, por `push` ou **Run workflow** (`workflow_dispatch`). PHP MVC, configurações e assets continuam sendo a fonte; `dist/` é gerada e permanece ignorada pelo Git. O [wrangler.jsonc](wrangler.jsonc) aponta exclusivamente para `./dist`, preserva `workers_dev: true` e não contém credenciais, script PHP ou configuração de Pages.
+
+A entrega usa `force-trailing-slash` para páginas HTML e `404-page` para servir `dist/404.html` com status 404 em caminhos inexistentes. Essas opções seguem a [documentação de Static Assets](https://developers.cloudflare.com/workers/static-assets/routing/static-site-generation/).
+
+### Secrets e primeiro deploy
+
+1. Confira no painel o Worker **`heitorvareiro`**, o endereço acima e o **Account ID** da conta proprietária. Antes da primeira publicação, registre a versão/deployment atualmente saudável para eventual rollback.
+2. Crie um token da Cloudflare com **Account → Workers Scripts → Edit**, limitado à conta proprietária. Essa permissão permite publicar assets e consultar o Worker/subdomínio; não é necessário conceder permissões de Pages ou DNS para este endereço. Não use Global API Key.
+3. No repositório, abra **Settings → Secrets and variables → Actions → New repository secret** e configure:
+
+   | Secret | Valor |
+   | --- | --- |
+   | `CLOUDFLARE_API_TOKEN` | Token com permissão de Workers Scripts na conta correta |
+   | `CLOUDFLARE_ACCOUNT_ID` | ID de 32 caracteres da conta Cloudflare proprietária do Worker |
+
+4. Revise os arquivos antes de autorizar seu commit/push. O workflow só existe localmente nesta entrega; nenhuma execução remota foi iniciada. Para fazer a estreia manualmente, mantenha **Actions desabilitado durante o primeiro push** do workflow para `main`; depois habilite-o e abra **Actions → Deploy do portfólio no Workers → Run workflow → main**. Se Actions e os secrets já estiverem ativos nesse primeiro push, ele iniciará automaticamente o deploy.
+5. Acompanhe todas as etapas. Depois de uma execução concluída, confira home, `/projetos/`, todos os detalhes, PDF, temas e menu; `/projetos` deve redirecionar para `/projetos/` e uma URL inexistente deve retornar a página personalizada com HTTP 404. Confira também canonical, `robots.txt` e `sitemap.xml` no endereço público.
+
+Não há etapa de criação de Worker. Antes da publicação, `node scripts/verify-worker.mjs` faz apenas consultas GET à [API do Worker existente](https://developers.cloudflare.com/api/resources/workers/subresources/scripts/subresources/subdomain/methods/get/) e ao [subdomínio da conta](https://developers.cloudflare.com/api/resources/workers/subresources/subdomains/methods/get/). Worker ausente, conta/endereço divergente, `workers.dev` desabilitado, segredo ausente ou erro da API interrompem o job. Não copie os secrets para código, `.env`, saída estática ou logs.
+
+### Atualizações e verificações do CI
+
+Após a ativação, cada push na `main` executa, em sequência:
+
+1. PHP **8.4**, Composer **2**, extensão **DOM** e Node **24**; instalação pelo `composer.lock` e validação do autoload.
+2. Sintaxe PHP, `tests/run.php`, `tests/static-export.php`, os testes JavaScript de tema/navegação/partículas e `node --test tests/verify-worker.mjs`.
+3. `php scripts/export-static.php --target=cloudflare` com `APP_BASE_PATH=''` e `APP_ORIGIN='https://heitorvareiro.heitorsvareiro.workers.dev'`.
+4. Testes HTTP/visuais em Chromium com Playwright **1.64.1**, instalado apenas na pasta temporária do runner, e `php scripts/validate-static.php --target=cloudflare` sobre a saída final. O validador confere rotas, links, SEO, hashes dos assets e inventário permitido; recusa PHP, arquivos internos, extras e links simbólicos.
+5. Armazenamento do artefato validado `portfolio-static-<SHA>` por **30 dias**, verificação do destino existente e publicação com `cloudflare/wrangler-action` v3 fixada por SHA e Wrangler **4.152.0**, via `deploy --config wrangler.jsonc`.
+
+Todas as etapas exigem sucesso das anteriores. Credenciais da Cloudflare são disponibilizadas apenas na checagem remota e na publicação. O token do GitHub usa somente `contents: read`. A concorrência usa um grupo único de produção, com `cancel-in-progress: false`: uma publicação em andamento termina antes de outra execução começar. O GitHub pode substituir uma execução ainda pendente por outra mais recente; execuções em andamento não são canceladas. Evite outro mecanismo de deploy automático do mesmo Worker, inclusive integração de build da Cloudflare, para não haver disputa entre publicadores.
+
+Para atualizar o site, altere o PHP/configuração/assets, execute os testes locais descritos abaixo e, após revisão, envie a alteração à `main`. Não edite HTML em `dist/`. Para repetir o build da versão atual sem mudança de código, use **Run workflow**, sempre em `main`. O workflow recusa execução manual em outras branches.
+
+### Rollback
+
+1. Desabilite temporariamente este workflow em **Actions → Deploy do portfólio no Workers → Disable workflow** e verifique se há execução em andamento ou pendente. Aguarde a publicação em andamento terminar antes de reverter a produção.
+2. No painel **Workers & Pages → heitorvareiro → Deployments**, selecione uma versão saudável anterior e use **Rollback**. Confira o Worker e a versão antes de confirmar. O procedimento restaura uma versão do mesmo Worker e preserva seu endereço; veja [rollbacks de Workers](https://developers.cloudflare.com/workers/versions-and-deployments/rollbacks/).
+3. Valide novamente rotas, 404, redirects, assets e conteúdo público. Uma versão antiga pode voltar a expor conteúdo que foi ocultado depois.
+4. Corrija ou reverta também a alteração de origem na `main` em uma mudança revisada (por exemplo, `git revert <SHA_DO_COMMIT_COM_PROBLEMA>`). O rollback da Cloudflare não altera o Git: habilitar o workflow e publicar a mesma revisão defeituosa traria o problema de volta.
+5. Reabilite o workflow depois da correção e execute manualmente em `main`. Se a versão desejada não estiver mais disponível na Cloudflare, restaure o conteúdo de uma revisão saudável no código, teste e publique pela mesma sequência de CI. Os artefatos retidos no Actions servem para inspeção/comparação; este workflow sempre reconstrói da fonte e não possui entrada para publicar ZIP arbitrário.
+
+Validação desta automação em 22/10/2026: **1.601/1.601 PHP**, **135/135 exportação**, **139/139 JavaScript**, **4/4 testes da proteção do destino**, **172/172 HTTP/navegador**, **32 comparações visuais idênticas** e **36 arquivos PHP sem erros de sintaxe**. Build e validação final com a origem pública aprovados: seis páginas, 404, sete assets e 16 arquivos permitidos. Composer 2 validou o manifesto e gerou autoload otimizado com PSR-4 estrito; o único aviso do manifesto é a licença não declarada, já existente. `actionlint` 1.7.12 aprovou o workflow (sem ShellCheck); `git diff --check` aprovado. Os testes MVC foram executados em cópia temporária; os de exportação isolam suas próprias fixtures. A suíte HTTP usou Chrome local e Playwright disponível no runtime; a instalação de Chromium da versão fixada no CI ainda depende da primeira execução no GitHub. Não foi executado `wrangler deploy`, nem mesmo em dry-run, e não houve chamada autenticada à Cloudflare.
+
+O responsável confirmou o nome do Worker, informou a configuração dos dois secrets e autorizou commit e push para `main`. A primeira validação da entrega real deve ser acompanhada no GitHub Actions; o push inicia o workflow quando Actions está habilitado. [STATIC_DEPLOY_PLAN.md](STATIC_DEPLOY_PLAN.md) e [STATIC_EXPORT_VALIDATION.md](STATIC_EXPORT_VALIDATION.md) preservam o planejamento e as evidências anteriores; suas referências a Pages são históricas. A configuração atual é exclusivamente Workers.
+
+## Exportação estática — validação local em 22/10/2026
+
+As etapas 1–5 de [STATIC_DEPLOY_PLAN.md](STATIC_DEPLOY_PLAN.md) estão implementadas. O PHP MVC continua sendo a fonte de desenvolvimento; o exportador executa a entrada real `public/index.php` em processos PHP isolados e grava HTML. O destino atual é Cloudflare Workers com Static Assets. O perfil `--target=cloudflare` gera o artefato estático; ele não configura Cloudflare Pages nem executa deploy.
+
+Requisitos para geração: **PHP CLI 8.2+ com DOM (`ext-dom`), `proc_open()` habilitado e autoload Composer disponível**. A aplicação web original continua sem dependência de DOM. Em um checkout novo, execute `composer install`; não há pacotes externos no lock atual. Não há framework ou build JavaScript novo. Node e Playwright são ferramentas opcionais para os testes de navegador, não requisitos do site publicado.
+
+Execute na raiz com o endereço público atual:
+
+```sh
+APP_BASE_PATH='' APP_ORIGIN='https://heitorvareiro.heitorsvareiro.workers.dev' php scripts/export-static.php --target=cloudflare
+APP_BASE_PATH='' APP_ORIGIN='https://heitorvareiro.heitorsvareiro.workers.dev' php scripts/validate-static.php --target=cloudflare
+```
+
+`APP_ORIGIN` aceita apenas origem HTTPS, sem caminho, credenciais, query ou fragmento. `APP_BASE_PATH` precisa ser explícito: vazio ou `/` na raiz; `/Portifolio` para um site de projeto com esse nome confirmado. O gerador ativa `APP_STATIC_EXPORT` internamente e não exige alterações na configuração local. Essa opção não altera o funcionamento do PHP web.
+
+Para testar também a saída para GitHub Pages:
+
+```sh
+APP_BASE_PATH='/Portifolio' APP_ORIGIN='https://heitorsv001.github.io' php scripts/export-static.php --target=github
+APP_BASE_PATH='/Portifolio' APP_ORIGIN='https://heitorsv001.github.io' php scripts/validate-static.php --target=github
+```
+
+Cada geração substitui a saída completa. Não colocar arquivos manuais em `dist/`: páginas removidas/ocultadas e assets sem referência desaparecem na reconstrução. Alterações de conteúdo, view, asset, origem ou prefixo exigem novo build. Um erro retorna código diferente de zero, elimina a área temporária e preserva `dist/` anterior; não enviar essa saída antiga como se o build tivesse sido concluído. O lock impede exportações simultâneas.
+
+O artefato atual tem **16 arquivos**: seis páginas públicas, `404.html`, `sitemap.xml`, `robots.txt` e sete assets necessários. O PDF, os dois PNGs utilizados, CSS e três scripts mantêm seus bytes. SVGs não utilizados, `.gitkeep`, PHP, configurações, dependências, documentação e testes ficam fora da saída. Referências em HTML e dependências relativas de CSS determinam a cópia; futuras imagens/fontes referenciadas também serão incluídas. Recursos carregados dinamicamente por um futuro JavaScript exigirão revisão do coletor, pois ele não executa scripts para descobrir arquivos.
+
+As páginas estáticas usam `/projetos/` e `/projetos/{slug}/`. Os slugs permanecem iguais; o PHP habitual conserva suas URLs sem barra final. O projeto `portfolio-mvc-php` permanece oculto. O sitemap usa apenas páginas públicas, sem data de atualização inventada; canonical, `og:url`, navegação e sitemap incluem origem/prefixo corretos. O perfil GitHub acrescenta `.nojekyll`, sem criar `dist/Portifolio/`. Novas rotas fixas precisam ser incluídas em `pages()` de `scripts/static-support.php`; novos projetos visíveis entram automaticamente pelo Model.
+
+Para um preview HTTP simples na raiz, com Python disponível:
+
+```sh
+python3 -m http.server 8080 --bind 127.0.0.1 --directory dist
+```
+
+Abra `http://127.0.0.1:8080/`; não use `file://`. Esse servidor simples exibe sua própria página para URLs inexistentes. O teste de navegador abaixo fornece um servidor estático temporário com a `404.html` e o status 404, sem executar PHP no artefato. Para prefixos, use esse teste ou monte a árvore sob o caminho correspondente. O comportamento real de normalização e 404 no provedor ainda precisa de validação após publicação autorizada. No GitHub Pages de projeto, `robots.txt` dentro do prefixo não controla a raiz do domínio.
+
+Testes da exportação e interações existentes:
+
+```sh
+php tests/static-export.php
+node tests/theme.js
+node tests/navigation.js
+node tests/particles.js
+```
+
+`tests/static-export.php` cria uma cópia isolada em `/tmp`, testa builds/erros e remove suas fixtures. `tests/run.php` mantém a suíte MVC existente e cria arquivos temporários em `public/assets/`; executá-la em uma cópia temporária evita concorrência com o build real.
+
+Com Playwright disponível na resolução de módulos Node e Chrome/Chromium instalado:
+
+```sh
+CHROME_BIN=/caminho/para/chrome APP_BASE_PATH='' APP_ORIGIN='https://portfolio.example' node tests/static-browser.js
+```
+
+Se o módulo estiver instalado fora do projeto, defina `NODE_PATH` para essa pasta de ferramentas. Se usar o navegador instalado pelo Playwright, omita `CHROME_BIN`. O teste inicia e encerra seus próprios servidores restritos a localhost e seu navegador, compara PHP/estático sem animação e testa partículas separadamente. `STATIC_SCREENSHOT_DIR` permite guardar quatro capturas de home fora de `dist/`. Não usa contas ou faz deploy.
+
+Resultados locais: **1.601/1.601 PHP**, **135/135 exportação**, **139/139 JavaScript**, **172/172 HTTP/navegador**, **32 comparações visuais idênticas** e **36 arquivos PHP sem erros de sintaxe**. O teste antigo de currículo isolado foi alinhado à lista de contatos aprovada no redesign, verificando um único download na lista; a apresentação não foi alterada. Evidências e limitações em [STATIC_EXPORT_VALIDATION.md](STATIC_EXPORT_VALIDATION.md).
+
+O artefato reconstruído nesta tarefa usa `https://heitorvareiro.heitorsvareiro.workers.dev`. Reconstrua após qualquer alteração de conteúdo. O gerador não acessa a hospedagem; somente a etapa final do workflow abaixo publica.
 
 ## Redesign — etapa 9: revisão e validação local
 
@@ -192,7 +301,7 @@ O acesso em `http://localhost/portifolio/` é previsto pelo `.htaccess` da raiz,
 
 Para hospedagem, configure a raiz de documentos como `public/`, encaminhe rotas não correspondentes a arquivos para `public/index.php` e disponibilize as variáveis ao PHP. Mantenha `app/`, `config/`, `tests/`, `storage/` e `vendor/` fora da raiz pública. O `.htaccess` de `public/` já contém a regra de encaminhamento para Apache.
 
-Domínio, hospedagem, configuração real do servidor, `robots.txt`, `sitemap.xml` e preview público em redes sociais continuam pendentes. Não há endereço de demonstração confirmado no projeto.
+A produção usa a exportação estática no Cloudflare Workers em https://heitorvareiro.heitorsvareiro.workers.dev/, com `robots.txt` e `sitemap.xml` gerados no build. As instruções Apache acima se aplicam à execução PHP. Preview em redes sociais continua pendente.
 
 ## Rotas
 
@@ -280,7 +389,7 @@ Com as ferramentas instaladas, execute na raiz:
 composer validate --no-check-publish
 composer dump-autoload --optimize --strict-psr
 php -d error_reporting=E_ALL tests/run.php
-find app public config tests -name '*.php' -print0 | xargs -0 -n1 php -l
+find app public config tests scripts -name '*.php' -print0 | xargs -0 -n1 php -l
 php -l index.php
 ```
 
@@ -288,13 +397,13 @@ A suíte existente verifica roteamento, Controllers e Models, renderização, es
 
 Na revisão documental anterior ao povoamento, a suíte foi executada em cópia temporária com PHP 8.4.26 e aprovou **979/979 verificações**. Os **27 arquivos PHP** versionados passaram na checagem de sintaxe. Composer não estava disponível: instalação e validação do autoload não foram repetidas. Também não foram repetidos testes HTTP, Apache, Lighthouse ou inspeção visual no navegador.
 
-[PROGRESS.md](PROGRESS.md) e [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) preservam o histórico de desenvolvimento e validações anteriores, incluindo o aceite manual da etapa 8 informado pelo proprietário em 18/10/2026. Esses registros são históricos; não representam novas execuções nesta revisão. A publicação continua pendente.
+[PROGRESS.md](PROGRESS.md) e [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) preservam o histórico de desenvolvimento e validações anteriores, incluindo o aceite manual da etapa 8 informado pelo proprietário em 18/10/2026. Esses registros são históricos; não representam novas execuções nesta revisão. A automação de publicação aguarda a ativação descrita acima.
 
 ## Imagens e apresentação
 
 `public/assets/images/social-preview.png` e sua fonte SVG são artes para compartilhamento, não capturas de tela. O favicon também é um recurso de identidade visual. Capturas reais do próprio portfólio foram geradas na etapa 9 e estão em [design/validation/stage9](design/validation/stage9), com índice no [relatório](design/REDESIGN_VALIDATION.md). Elas não substituem as capturas ainda ausentes das aplicações apresentadas como projetos.
 
-O conteúdo foi preenchido; ainda é necessário validar a implantação no endereço público. A estrutura MVC, as regras de apresentação e a suíte de verificações já estão implementadas.
+O conteúdo foi preenchido e publicado; a entrega automática ainda precisa ser validada na primeira execução autorizada. A estrutura MVC, as regras de apresentação e a suíte de verificações já estão implementadas.
 
 ## Autoria e repositório
 

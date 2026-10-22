@@ -12,4 +12,5 @@ return [
     // Origem pública confirmada, sem caminho (ex.: https://portfolio.example).
     // Sem domínio definido, não emite URLs absolutas de SEO/compartilhamento.
     'origin' => $origin === false ? null : $origin,
+    'static_export' => PHP_SAPI === 'cli' && getenv('APP_STATIC_EXPORT') === '1',
 ];

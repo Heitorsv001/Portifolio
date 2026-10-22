@@ -657,7 +657,10 @@ try {
     ob_start();
     (new HomeController(['name' => 'Teste', 'base_path' => ''], $emptyProjects, $emptySkills, new Contact($contactFile)))->index();
     $html = ob_get_clean();
-    $expect(str_contains($html, ' download>') && !str_contains($html, 'class="contact-links"'), 'Currículo isolado não gera lista vazia de contatos');
+    preg_match('~<ul class="contact-links"[^>]*>(.*?)</ul>~s', $html, $resumeLinks);
+    $expect(substr_count($resumeLinks[1] ?? '', '<li>') === 1
+        && str_contains($resumeLinks[1] ?? '', 'href="/' . $resumePath . '" download>Baixar currículo (PDF)'),
+        'Currículo isolado mantém um único download na lista de contatos');
 
     unlink($resumeFile);
     clearstatcache();
