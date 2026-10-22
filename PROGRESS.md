@@ -1,5 +1,11 @@
 # Progresso e passagem de contexto
 
+## Estado atual — 21/10/2026
+
+O redesenho do portfólio e as alterações de conteúdo, contato, currículo e retrato foram reunidos no commit `b20aacf` (`style: layout do site reformulado`) e enviados para `main` no GitHub. A seção de contato exibe os perfis do GitHub e LinkedIn, o e-mail autorizado `heitorsvareiro@gmail.com` e o download de `public/assets/documents/CurriculoLinkedin.pdf`, com links no mesmo estilo e sem sublinhado. O arquivo `public/assets/images/meu-retrato.png` aparece no hero e como favicon, com zoom de 15% aplicado via CSS.
+
+O código está no repositório remoto; a publicação do site em hospedagem continua pendente. Os registros abaixo descrevem as etapas no momento em que foram concluídas e podem mencionar um estado anterior ao commit e ao push.
+
 ## Currículo PDF disponibilizado em Contato — 21/10/2026
 
 O responsável forneceu `public/assets/documents/CurriculoLinkedin.pdf`. Caminho cadastrado em `config/contact.php`, habilitando o botão “Baixar currículo (PDF)” já existente. Arquivo original de 44.592 bytes preservado; sem mudanças de layout, Models ou conteúdo profissional.

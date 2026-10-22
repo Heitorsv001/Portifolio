@@ -6,6 +6,8 @@ Portfólio de Heitor Silva Vareiro, Desenvolvedor Web Full Stack e estudante de 
 
 O avatar circular do início utiliza o retrato fornecido e autorizado pelo responsável, `public/assets/images/meu-retrato.png`, também usado como favicon PNG. O avatar recebe zoom de 15% por CSS, preservando o arquivo original. Conferido no Chrome em 390/1440px nos dois temas; [capturas com o retrato e zoom](design/validation/portrait-favicon). As capturas e medições da etapa 9 abaixo são anteriores à inclusão da imagem.
 
+Estado atual: o contato autorizado `heitorsvareiro@gmail.com` e o currículo `public/assets/documents/CurriculoLinkedin.pdf` estão configurados na seção de contato. Os perfis do GitHub e LinkedIn, o e-mail e o download do currículo usam links no mesmo estilo, sem sublinhado. O redesenho está registrado no commit `b20aacf` (`style: layout do site reformulado`) e enviado para `main` no GitHub. A publicação do site em hospedagem continua pendente. As seções de progresso abaixo registram o contexto histórico de cada etapa.
+
 ## Redesign — etapa 9: revisão e validação local
 
 Executada em 21/10/2026, após o aceite da etapa 8 e do contato por e-mail. Corrigida a atualização das partículas ao mudar preferências de movimento durante a visita: a permissão agora é atualizada por eventos, fora do ciclo de desenho. Acrescentado teste de regressão para evitar consultas de mídia a cada quadro. Nenhum texto, dado profissional, Model, rota ou dependência alterado nesta etapa.
