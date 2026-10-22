@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-21",
+  "php": {
+    "passed": 1601,
+    "total": 1601,
+    "errorReporting": "E_ALL",
+    "isolatedCopy": true
+  },
+  "javascript": {
+    "environment": "V8 pela ferramenta, com DOM/Canvas simulados",
+    "theme": 72,
+    "navigation": 29,
+    "particles": 38
+  },
+  "phpSyntaxFiles": 30,
+  "gitDiffCheck": true
+}

@@ -9,6 +9,6 @@ return [
     ['category' => 'Banco de dados e acesso a dados', 'items' => ['PostgreSQL', 'MongoDB', 'JDBC', 'PDO']],
     ['category' => 'Ferramentas', 'items' => ['Git', 'GitHub', 'Maven', 'Composer']],
     ['category' => 'Arquitetura e práticas', 'items' => ['MVC', 'POO', 'DAO', 'Refatoração', 'Correção de bugs']],
-    ['category' => 'Competências pessoais', 'items' => ['Aprendizado contínuo', 'Atenção a detalhes', 'Resolução de problemas', 'Comunicação']],
+    ['category' => 'Competências pessoais', 'items' => ['Aprendizado contínuo', 'Atenção a detalhes', 'Resolução de problemas', 'Comunicação', 'Liderança']],
     ['category' => 'Ferramentas e agentes de IA', 'items' => ['Claude code', 'Codex']],
 ];

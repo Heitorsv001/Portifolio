@@ -1,5 +1,229 @@
 # Progresso e passagem de contexto
 
+## Currículo PDF disponibilizado em Contato — 21/10/2026
+
+O responsável forneceu `public/assets/documents/CurriculoLinkedin.pdf`. Caminho cadastrado em `config/contact.php`, habilitando o botão “Baixar currículo (PDF)” já existente. Arquivo original de 44.592 bytes preservado; sem mudanças de layout, Models ou conteúdo profissional.
+
+Validação: **1.601/1.601 verificações PHP** com `E_ALL` em cópia temporária; sintaxe da configuração e `git diff --check` aprovados. Home HTTP 200 com um único link de download; PDF HTTP 200 com MIME `application/pdf` e bytes iguais ao original. README/contexto sincronizados. Sem commit/push.
+
+## Retrato renomeado, favicon e enquadramento — 21/10/2026
+
+A pedido do responsável, arquivo renomeado para `public/assets/images/meu-retrato.png`, preservando seus bytes. Referência do avatar atualizada; imagem também declarada como favicon PNG pelo Controller/layout compartilhados, atendendo home, catálogo, detalhes e 404. Avatar com zoom de 15% e posição vertical de 40% por CSS, mantendo o círculo de 80/112px. Original sem edição; testes existentes e referências atuais de documentação adaptados.
+
+Validação: **1.601/1.601 verificações PHP** com `E_ALL` em cópia temporária; sintaxe dos quatro arquivos PHP envolvidos e `git diff --check` aprovados. Chrome: quatro casos (390/1440px × claro/escuro), imagem carregada, zoom e recorte conferidos, sem overflow. Favicon confirmado na home, catálogo, detalhe e 404; PNG servido com HTTP 200, MIME e bytes corretos. Evidências em `design/validation/portrait-favicon/`; amostras abertas para revisão. Navegador temporário encerrado. Sem commit/push.
+
+## Retrato autorizado incluído no início — 21/10/2026
+
+O responsável forneceu `public/assets/images/Retrato Masculino com Luz Violeta.png` e solicitou sua inclusão. Substituído o símbolo neutro do avatar por essa imagem em `app/Views/home/index.php`, com URL codificada respeitando o caminho-base, texto alternativo, dimensões reais de 1122×1402 e prioridade de carregamento. CSS mantém o círculo em 80px no mobile e 112px no desktop, com `object-fit: cover` e enquadramento no rosto; arquivo original preservado. Expectativa antiga de avatar sem imagem adaptada na suíte existente.
+
+Validação: **1.601/1.601 verificações PHP** com `E_ALL` em cópia temporária; sintaxe da view e dos testes e `git diff --check` aprovados. Chrome: quatro casos (390/1440px × claro/escuro), imagem carregada, círculo com medidas esperadas e ausência de overflow. Apache serviu a imagem com **HTTP 200**, MIME PNG e bytes iguais ao original. Capturas e verificações em `design/validation/portrait/`; amostras abertas para inspeção visual. Navegador temporário encerrado. Documentação identifica que a medição de desempenho da etapa 9 antecede essa inclusão. Sem commit ou push.
+
+## Redesign — etapa 9 revisada e validada localmente em 21/10/2026
+
+O responsável aprovou a etapa 8 e o rótulo “E-mail de contato”, autorizando a revisão final. Além da ferramenta de navegação sem sessão conectada, foi encontrado Chrome instalado no sistema, utilizado em modo headless por CLI/DevTools com perfis temporários próprios. Assim, esta etapa inclui verificações no navegador e capturas reais do portfólio.
+
+- `public/assets/js/hero-particles.js`: permissão de movimento armazenada e atualizada nos eventos de mídia/resize, sem consultar preferências a cada quadro. Corrigido o caso observado em que o CSS ocultava o canvas após mudança de preferência, mas o buffer permanecia até resize. Conferidos liberação com movimento reduzido/toque e retomada após remoção da redução de movimento.
+- `tests/particles.js`: teste de regressão para impedir consultas repetidas de mídia no ciclo de desenho. Cores, tamanho dobrado no claro, limites e comportamento de pausa preservados.
+- `design/REDESIGN_VALIDATION.md` e `design/validation/stage9/`: relatório com critérios, limites, resultados, 30 PNGs e evidências JSON. Estado sincronizado em README, contexto e plano. Cinco arquivos de configuração comparados por SHA-256 permaneceram idênticos ao início da etapa; PHP MVC, Models, rotas, dados, textos e dependências preservados.
+
+Validações atuais: **1.601/1.601 PHP** com `E_ALL` em cópia temporária; **72/72 de tema**, **29/29 de navegação**, **38/38 de partículas** em V8 com simulação. Sintaxe dos **30 arquivos PHP** e `git diff --check` aprovados.
+
+Chrome 156.0.8078.47: **480/480 verificações** de matriz (quatro páginas × seis larguras × dois temas), **39/39 de interação** e **6/6 de desenho/partículas**. Sem overflow de 320 a 1440px nos casos avaliados; textos ampliados a 200% sem overflow nas quatro larguras testadas. Menor contraste calculado de texto: **6,38:1**. Conferidos skip link, Tab/Enter/Escape, foco, âncoras sob header, breakpoint, temas/persistência/sistema/armazenamento bloqueado, navegação sem JS e partículas com preferências em tempo real. Zero erros inesperados de console/rede; 12 mensagens de 404 esperadas nas visitas à rota de teste. Não foi testado zoom nativo ou tecnologia assistiva.
+
+HTTP: **20 GET e dois POST** com status esperado nos dois caminhos-base; **10 URLs de assets** com 200/MIME/bytes corretos, atualizadas após o ajuste do script. Mais oito casos de layout no Chrome com `public/` como raiz. Home, catálogo e quatro detalhes 200; projeto oculto, slugs inválidos/desconhecidos, rota inexistente e método não registrado 404. GitHub pessoal, quatro repositórios e duas demos responderam 200. LinkedIn retornou 999 por bloqueio da consulta automatizada; link preservado. Nenhum envio de e-mail/formulário.
+
+Amostras locais de performance: home FCP/LCP 108ms, catálogo 88ms, detalhe 84ms; CLS 0 e nenhuma tarefa longa na janela observada. Desenho medido em 25 quadros/1,1s, com pausa real fora do hero e em movimento reduzido. São amostras locais curtas, sem limitação de CPU/rede, não resultados Lighthouse ou garantia de desempenho em celular/hospedagem.
+
+Chrome e servidor PHP auxiliar encerrados; Apache preservado. Aceite visual final do responsável, Lighthouse, zoom nativo e dispositivos/tecnologias assistivas permanecem pendentes. Foto, capturas reais das aplicações e currículo PDF continuam ausentes/opcionais. Publicação e ativação do card do próprio portfólio não realizadas. Nenhum commit/push.
+
+## E-mail de contato disponibilizado — 21/10/2026
+
+O responsável autorizou explicitamente o contato `heitorsvareiro@gmail.com`. Endereço cadastrado em `config/contact.php`, usando o link `mailto:` já previsto na seção de contato. Guia, contexto e documentação de contatos sincronizados com a autorização. Currículo permanece ausente; nenhum envio de e-mail executado.
+
+Validação: **1.602/1.602 verificações PHP** com `E_ALL` em cópia temporária, sintaxe da configuração e `git diff --check` aprovados. Home **HTTP 200** no Apache, com endereço correto e um único link `mailto:` na seção de contato, sem PDF ou avisos PHP. Sem avanço de etapa, commit ou push.
+
+## Redesign — etapa 8 implementada em 21/10/2026
+
+O responsável aprovou os ajustes de redundância de Sobre mim e autorizou a próxima etapa. Etapa 7 aceita; implementados somente contato e rodapé.
+
+- `app/Core/Controller.php`: disponibiliza `Contact::all()` ao layout quando a página não fornece contatos. Usa os dados já normalizados pelo Model, mantendo o valor injetado pelo HomeController para hero, contato e rodapé; sem alterar Controllers específicos ou Models.
+- `app/Views/partials/footer.php`: nome/título em bloco discreto, `social-links.php` reutilizado e retorno ao topo. Mesmo rodapé em home, catálogo, detalhes e páginas de erro; redes ausentes não deixam listas vazias. Ícones de 22px e áreas de clique de 44px na fonte padrão, nomes acessíveis e foco existentes compartilhados com o hero.
+- `app/Views/partials/contact.php` e `public/assets/css/style.css`: lista com semântica preservada e grid fluido, links com borda, superfície dos tokens e áreas de clique ampliadas. Rodapé flexível com quebra de linha e cores dos dois temas. Caminhos condicionais de e-mail e currículo mantidos; configuração real continua sem ambos.
+- `tests/run.php`: verificações de rodapé nos caminhos-base já cobertos, contatos injetados sem substituição, URLs escapadas, nomes acessíveis, redes completas/parciais/ausentes, ausência de e-mail/PDF no rodapé, retorno ao topo e redes nos detalhes/erros por slug. Testes existentes de `mailto:` e PDF opcionais preservados.
+
+Validação: **1.602/1.602 verificações PHP** com `E_ALL` em cópia temporária; **72/72 de tema**, **29/29 de navegação** e **37/37 de partículas** em V8 com simulação. Sintaxe dos **30 arquivos PHP** e `git diff --check` aprovados.
+
+Apache: home, catálogo e quatro detalhes **200**; projeto oculto, slug inexistente e rota desconhecida **404**. Nove páginas com rodapé contendo as duas redes nomeadas e retorno ao topo, IDs únicos e sem e-mail/PDF ou avisos PHP. Home com links de contato esperados e parágrafo redundante do estágio ausente. CSS versionado **200**, MIME e conteúdo corretos.
+
+Ferramenta sem apps/navegadores conectados (`apps: []`, `browsers: []`). Revisão visual da etapa 8 em ambos os temas e larguras previstas, reflow/zoom, teclado, console e screenshots permanecem pendentes; não executado Lighthouse. Dados profissionais e ajustes editoriais anteriores preservados. Etapa 9 não iniciada; nenhum commit/push.
+
+## Revisão de redundâncias dos textos — 21/10/2026
+
+A pedido do responsável, removido de Sobre mim o parágrafo sobre o estágio que repetia Experiência profissional. A introdução foi reduzida à apresentação do trabalho com aplicações web e desktop, sem repetir a condição acadêmica, o estágio ou a lista de tecnologias. O parágrafo de projetos mantém tecnologias e práticas, sem repetir os planos de evolução, organização de código e compreensão das decisões técnicas apresentados em Objetivos profissionais. Título, condição de estudante, experiência completa, formação, certificações e objetivos preservados. Guia de conteúdo sincronizado.
+
+Também revisados os textos de projetos, habilidades, contato, rodapé e páginas internas. Resumos dos cards e descrições de detalhes cumprem funções de síntese e aprofundamento; listas de tecnologias e identificação acadêmica nas respectivas seções continuam úteis à leitura. Nenhuma alteração adicional nessas áreas.
+
+Validação: **1.356/1.356 verificações PHP** com `E_ALL` em cópia temporária, sintaxe de `config/profile.php` e `git diff --check` aprovados. A redução de três verificações acompanha a remoção de mais um parágrafo testado nos três caminhos-base. Alteração editorial, sem mudanças de layout, arquitetura ou avanço de etapa; nenhum commit/push.
+
+## Parágrafo redundante removido de Sobre mim — 21/10/2026
+
+A pedido do responsável, removido apenas o primeiro parágrafo de `profile.about`, que repetia a condição de estudante e a apresentação profissional já exibidas em Sobre mim. Introdução, título, condição acadêmica e demais parágrafos preservados. Guia de conteúdo sincronizado e verificação existente de estudante adaptada ao texto mantido.
+
+Validação: **1.359/1.359 verificações PHP** com `E_ALL` em cópia temporária, sintaxe de `config/profile.php` e `tests/run.php` e `git diff --check` aprovados. A contagem diminuiu em três verificações porque o laço de preservação de conteúdo testa um parágrafo a menos em cada caminho-base. Sem avanço de etapa ou commit/push.
+
+## Redesign — etapa 7 implementada em 21/10/2026
+
+O responsável confirmou a etapa 6 e autorizou a próxima. Implementadas somente habilidades, formação e certificações, conforme o plano.
+
+- `app/Views/partials/skills.php`: SVG decorativo por categoria junto de cada nome, mantendo as oito categorias e os 29 itens na ordem original. Ícones locais sem dependência ou download, ocultos de leitores de tela; nomes sempre disponíveis como texto, inclusive sem SVG. Categoria desconhecida recebe símbolo genérico.
+- `app/Views/home/index.php`: formação retirada de dentro de Sobre e apresentada em `#formacao`, após habilidades e antes de contato. Curso, IFMS, período com previsão, situação “Em andamento” e os quatro nomes de certificações vêm das mesmas chaves do perfil. Biografia e objetivos mantidos; nenhum emissor, data ou competência acrescentado.
+- `public/assets/css/style.css`: ícones com tamanho estável, alinhamento dos nomes e cores dos tokens; estilos de formação e lista discreta de certificações. Removidos estilos da ficha antiga de formação. `app/Views/partials/contact.php` teve apenas o número da seção alterado de 05 para 06.
+- `tests/run.php`: presença e ordem de formação/certificações, preservação dos dados, nomes independentes dos ícones, escaping e inclusão de categorias futuras pela configuração. Documentação de estado sincronizada em README, contexto e plano.
+
+Validações executadas: **1.362/1.362 verificações PHP** com `E_ALL` em cópia temporária; regressões JavaScript em V8 com simulação: **72/72 de tema**, **29/29 de navegação** e **37/37 de partículas**. Sintaxe dos **30 arquivos PHP** e `git diff --check` aprovados. Sem alteração de configurações, Controllers, Models, rotas ou dependências nesta etapa.
+
+Apache: home, catálogo e quatro detalhes **200**; portfólio oculto e rota inexistente **404**. Conferidos oito grupos, 29 nomes/ícones, quatro certificações, valores de formação, ordem habilidades → formação → contato, IDs únicos e âncora de formação nas páginas internas. CSS versionado **200**, MIME e conteúdo corretos.
+
+Ferramenta sem apps/navegadores conectados (`apps: []`, `browsers: []`). Revisão visual da etapa 7 nos dois temas e larguras previstas, reflow/zoom, teclado e console reais permanecem pendentes. Nenhum screenshot ou Lighthouse executado. Etapa 8 não iniciada; nenhum commit/push.
+
+## Conteúdo do Gerenciador de Permanências atualizado — 21/10/2026
+
+O responsável confirmou duas funcionalidades: geração de relatórios PDF com a relação de inscritos em cada permanência e envio automático de e-mail confirmando a inscrição. Atualizados resumo e descrição em `config/projects.php`, refletidos na home, catálogo e detalhe. Retirada a ressalva editorial antiga dessas integrações na apresentação, preservando os demais dados, status, links e limitações. Guia de conteúdo sincronizado com a confirmação do responsável, distinguindo-a de testes de integração pelo agente.
+
+Validação: **1.326/1.326 verificações PHP** com `E_ALL` em cópia temporária; sintaxe de `config/projects.php` e `git diff --check` aprovados. As três páginas responderam **200** no Apache e exibiram os novos textos; ressalva antiga ausente do detalhe. Não foram executadas geração real de PDF ou entrega de e-mail do projeto externo. Sem commit/push ou avanço de etapa do redesign.
+
+## Redesign — etapa 6 implementada em 21/10/2026
+
+O responsável confirmou a etapa 5 e autorizou a próxima. Implementados somente projetos e integração dos detalhes, conforme o plano; habilidades e formação continuam para a etapa 7.
+
+- `app/Controllers/HomeController.php`: uma consulta a `Project::all()` e separação dos registros já visíveis em destaques e secundários por `featured === true`. Ordem preservada; Model, normalização e regra de visibilidade intactos.
+- `app/Views/home/index.php`: seção de projetos ocupa a largura de conteúdo; grupos “Em destaque” e “Outros projetos” com hierarquia de headings própria. Estado sem destaque preservado; grupo secundário omitido quando vazio. Catálogo completo continua acessível fora do hero.
+- `app/Views/partials/project-list.php`: um único markup com apresentações `featured`, `compact` e `catalog`; reutilizados partials de tecnologias e links. Títulos h4 nos grupos da home e h3 no catálogo. Status/resumo escapados. Imagem real só nos layouts amplos/catálogo; lista compacta prioriza texto, mantendo a mídia acessível nas outras páginas. Sem imagem, nenhum espaço ou coluna fictícia.
+- `app/Views/projects/index.php`: catálogo preservado com quatro itens e link contextual para a home. `app/Views/projects/show.php`: retorno principal para `/#projetos` e link de catálogo completo; conteúdo integral, opcionais e ressalvas preservados.
+- `public/assets/css/style.css`: lista de destaques ampla, imagem lateral a partir de 64rem quando disponível, empilhamento no mobile, lista secundária compacta e catálogo em grid fluido. Tags, bordas e estados de foco/hover usam tokens dos dois temas. Detalhes com subtítulos menores e retornos que quebram linha quando necessário.
+- `tests/run.php`: classificação em grupos, ausência de duplicação, projeto secundário sem opcionais, estados sem destaques, imagens válidas/inválidas, escaping, projeto oculto nos dois grupos e retorno principal do detalhe à home.
+
+Validações executadas: **1.326/1.326 verificações PHP** com `E_ALL` em cópia temporária; regressões JavaScript em V8: **72/72 de tema**, **29/29 de navegação** e **37/37 de partículas**. Sintaxe dos **30 arquivos PHP** e `git diff --check` aprovados. Arquivos de dados de projetos, habilidades e contatos, Models, ProjectController, ErrorController, rotas e dependências sem alterações nesta etapa.
+
+Apache: home, catálogo e quatro detalhes **200**; portfólio oculto e rota inexistente **404**. Parser de HTML confirmou home com Gerenciador/Crowns em `featured` e Festividades/Notícias em `compact`, sem duplicação, sem imagem fictícia e com as duas demos. Catálogo com quatro itens; detalhes com retorno à home, catálogo e descrição completa. IDs únicos, projeto oculto ausente do HTML, CSS/scripts versionados **200**, MIME/bytes corretos. Demos já cadastradas de Festividades e Notícias verificadas via GET: ambas **HTTP 200**. Isso comprova disponibilidade da página, não execução/teste das interações dessas aplicações.
+
+Ferramenta novamente sem apps/navegadores conectados: não foram executados screenshots, revisão visual dos dois temas, responsividade real, teclado, zoom, console ou Lighthouse. Conferir cards sem imagem, mídia lateral com futura captura real, lista compacta e navegação dos detalhes nas larguras previstas. Imagens reais continuam pendentes de fornecimento/autorização.
+
+Conteúdo profissional, `config/projects.php`, regras de visibilidade e slugs preservados. Nenhum commit/push. Etapa 7 não iniciada.
+
+## Redesign — etapa 5 implementada em 21/10/2026
+
+O responsável aprovou os ajustes das partículas e autorizou a próxima etapa. Aceite da etapa 4 registrado com base nessa confirmação, sem nova medição visual/gráfica pelo agente. Implementada somente a etapa de Experiência e Sobre.
+
+- `app/Views/home/index.php`: seção `#experiencia` imediatamente após o hero, com heading próprio, período, cargo de estágio, instituição, Arco Literário, descrição integral e tecnologias em tags. Sobre mantém título profissional, condição acadêmica, introdução e todos os parágrafos da biografia. Objetivos integrados a Sobre com `#objetivos` e `#objetivos-titulo` preservados. Formação e certificações mantidas até a etapa 7. Retirada apenas a ficha duplicada de experiência de dentro de Sobre, sem retirar o parágrafo biográfico sobre o estágio.
+- `config/profile.php`: único acréscimo é `experience.technologies` com Node.js, Express, MongoDB, EJS e Bootstrap 5, já citados na descrição/guia. Comparação do array com uma cópia anterior à etapa, removendo apenas o novo campo, confirmou igualdade integral dos valores anteriores. Nenhuma data, descrição, status, objetivo ou competência foi reescrita.
+- `public/assets/css/style.css`: composição editorial do estágio, período monoespaçado e tags com estilos compartilhados; meta acima do texto no mobile/tablet e coluna lateral a partir de 64rem. Objetivos recebem espaçamento e margem de rolagem para o header. Temas, hero e partículas não foram alterados nesta etapa.
+- `tests/run.php`: ordem hero → experiência → Sobre, presença de todos os dados do estágio e tecnologias, ausência de ficha repetida em Sobre, preservação dos objetivos/formação/certificados e escaping das novas tags.
+
+Validações executadas: **1.297/1.297 verificações PHP** com `E_ALL` em cópia temporária; **72/72 de tema**, **29/29 de navegação** e **37/37 de partículas** em V8 com DOM/Canvas/eventos simulados. Sintaxe dos **30 arquivos PHP** e `git diff --check` aprovados. Apache: home, catálogo e quatro detalhes **200**; projeto oculto e rota inexistente **404**. Conferidos ordem, período do estágio, cargo, projeto, cinco tags, objetivos dentro de Sobre, formação/certificações, condição de estudante, IDs únicos e seis destinos de navegação. CSS e scripts versionados **200**, conteúdo/MIME corretos.
+
+Navegador da ferramenta novamente indisponível (`apps: []`, `browsers: []`). Permanecem pendentes inspeção visual nos dois temas e larguras previstas, leitura da coluna de período, reflow/zoom, teclado real e foco dos destinos. Não foram executados screenshots ou Lighthouse. O aceite da etapa 4 não representa medição de desempenho gráfico pelo agente.
+
+Models, Controllers, Router, projetos, habilidades, contatos, dependências, servidor e permissões preservados. Sem commit/push. Etapa 6 não iniciada.
+
+## Partículas mais escuras e maiores no tema claro — 21/10/2026
+
+A pedido do responsável, roxo escurecido para `#5b21b6` e tamanho das bolinhas dobrado no tema claro por `--particle-size-scale: 2`. Tema escuro mantém cor e tamanho originais (escala 1). A troca de tema aplica cor e escala sem reiniciar o efeito; conexões preservam espessura e opacidade. **37/37 verificações de partículas** em V8 com Canvas simulado e `git diff --check` aprovados, incluindo diâmetro dobrado no claro e tamanho original ao retornar ao escuro. Sem commit/push.
+
+## Cor roxa das partículas — 21/10/2026
+
+A pedido do responsável, `--color-particle` do tema claro passou para o roxo vibrante `#7c3aed`, substituindo o tom escuro anterior. Tema escuro, opacidades e movimento preservados. Fixture de cor atualizada; 35/35 verificações de partículas em V8 com Canvas simulado e `git diff --check` aprovados. Sem commit/push.
+
+## Contraste das partículas no tema claro — 21/10/2026
+
+A pedido do responsável, partículas e conexões agora usam `--color-particle`: `#211b2d` no tema claro, mais escuro que o cinza anterior; tema escuro preservado em `#b6b2c1`. Textos, opacidades e animação permanecem iguais. Alterados CSS, leitura do token no script e fixture de cor do teste existente. **35/35 verificações de partículas** aprovadas em V8 com Canvas simulado; revisão visual pelo agente não executada por falta de navegador conectado. Sem commit/push ou avanço de etapa.
+
+## Redesign — etapa 4 implementada em 21/10/2026
+
+O responsável confirmou que o hero estava certo e autorizou prosseguir. Aceite da etapa 3 registrado com base nessa confirmação, sem nova revisão visual pelo agente. Implementadas somente partículas; Experiência/Sobre permanecem para a etapa 5.
+
+- `app/Views/home/index.php`: canvas decorativo no hero com `aria-hidden`, sem foco ou conteúdo semântico. Textos e demais blocos intactos.
+- `app/Core/Controller.php` e `app/Views/layouts/main.php`: URL do novo script com versão pelo conteúdo, carregado com `defer` exclusivamente na home. Catálogo, detalhes e 404 não carregam o efeito.
+- `public/assets/css/style.css`: canvas absoluto atrás do conteúdo, sem eventos de ponteiro; contexto de empilhamento próprio no hero. Canvas oculto no mobile, ponteiro impreciso e movimento reduzido. Nenhuma alteração das dimensões ou alinhamento do hero aceito.
+- Novo `public/assets/js/hero-particles.js`: Canvas 2D sem dependências, até 64 pontos proporcionais à área, conexões a distâncias curtas e baixa opacidade; movimento de até 3px/s por eixo, afastamento suave ao mouse limitado a 8px. Teto de desenho de 30fps, DPR até 2 e buffer de aproximadamente 6 milhões de pixels.
+- Efeito desativado abaixo de 56.25rem ou sem ponteiro preciso, e com `prefers-reduced-motion`. Alterações de mídia durante a visita cancelam/retomam a animação. Aba oculta e hero fora da viewport pausam `requestAnimationFrame`; retomada preserva um único loop. `IntersectionObserver` com fallback de rolagem, observação de tamanho e atualização de cores por mudança de `data-theme`. Falha/ausência de Canvas ou APIs essenciais deixa o fundo sem animação e o conteúdo utilizável.
+- Novo `tests/particles.js`: limites de pontos/buffer/DPR/frequência, pausa/retomada, preferências iniciais/dinâmicas, tema, reação de mouse, ausência de reação ao toque e falhas de API. `tests/run.php`: canvas decorativo, script versionado com caminho-base/escaping e efeito ausente das páginas internas.
+
+Verificações efetivamente executadas: **1.251/1.251 PHP** com `E_ALL` em cópia temporária; **72/72 de tema**, **29/29 de navegação** e **35/35 de partículas** em V8 com DOM/Canvas/eventos simulados; sintaxe dos **30 arquivos PHP** e `git diff --check` aprovados. Apache: home, catálogo e quatro detalhes **200**; projeto oculto e rota inexistente **404**. Canvas e script presentes somente na home; CSS e três scripts versionados **200**, MIME e bytes corretos.
+
+Ferramenta novamente sem apps/navegadores conectados. Não foram executados screenshots, teclado/seleção/rolagem reais, medição de FPS, comparação gráfica com efeito desligado, inspeção de tarefas longas ou Lighthouse. Os limites e o ciclo de animação foram verificados por simulação; não representam medição de fluidez/bateria no dispositivo do responsável. Revisar intensidade e legibilidade nos dois temas, reação ao mouse e desempenho em desktop; confirmar ausência do efeito no mobile e com movimento reduzido.
+
+Dados profissionais, Controllers, Models, Router, dependências, configuração de servidor e permissões preservados. Sem commit/push. Etapa 5 não iniciada.
+
+## Redesign — etapa 3 implementada em 21/10/2026
+
+O responsável informou que realizou a revisão visual da etapa 2, confirmou que estava tudo certo e autorizou o próximo passo. Esse aceite é do responsável; não houve execução visual pelo agente. Implementado somente o novo hero, sem antecipar partículas ou reorganização da experiência.
+
+- `app/Views/home/index.php`: avatar circular neutro com símbolo de código decorativo, nome central, subtítulo exato “Desenvolvedor Web e estudante” e redes sociais. Removidos os CTAs do hero; título Full Stack, condição acadêmica e introdução realocados para Sobre mim com escaping, sem alterar nenhum valor do perfil. Biografia, objetivos e demais dados continuam presentes.
+- Novo `app/Views/partials/social-links.php`: GitHub/LinkedIn condicionais, URLs normalizadas recebidas do HomeController, nomes acessíveis, SVGs decorativos locais e áreas de acionamento de 44px. Sem contatos, não renderiza uma lista vazia. Não inclui e-mail ou currículo no hero. Reutilização no rodapé permanece para a etapa 8.
+- `app/Views/layouts/main.php`: home com classe própria e largura independente; demais páginas mantêm o contêiner original.
+- `public/assets/css/style.css`: hero central, avatar de 80px no mobile e 112px no desktop, nome fluido e subtítulo menor. Mínimo de 75svh no mobile, viewport descontando header entre 900 e 1199px, e 100svh com espaço para header fixo acima de 1200px; fallbacks em vh. Uso de altura mínima permite crescer em viewports curtas. Demais seções continuam em contêiner de 1100px; sem efeitos ou animações nesta etapa.
+- Não foi necessário alterar o Controller base ou o HomeController: o hero já recebe `Contact::all()` pelo fluxo existente. A preparação de contatos compartilhados para páginas internas permanece para a etapa do rodapé, evitando dependência sem uso nesta etapa. Nenhuma foto ou campo biográfico novo foi adicionado.
+- `tests/run.php`: subtítulo exato, ausência de CTA/foto fictícia, redes acessíveis e escapadas, estado sem contatos, conservação dos textos em Sobre e separação do layout de home/internas.
+
+Verificações: **1.232/1.232 PHP** com `E_ALL` em cópia temporária; **72/72 de tema** e **29/29 de navegação** em V8 com DOM/eventos simulados; sintaxe dos **30 arquivos PHP** e `git diff --check` aprovados. Apache: home, catálogo e quatro detalhes **200**; projeto oculto e rota inexistente **404**. Na home, confirmados nome, subtítulo, fallback e exatamente duas redes no hero, sem botões, e-mail, currículo ou IFMS no subtítulo. IDs únicos e layout próprio das páginas internas conferidos; CSS/scripts versionados **200**, bytes e MIME corretos.
+
+Ferramenta continua com `apps: []`, `browsers: []`: não foram executadas revisão visual, teclado real, zoom, console ou screenshots desta etapa. Validar composição e altura em desktop, mobile e viewport curta, foco das redes, dois temas e convivência com o header. Foto pessoal segue pendente de fornecimento/autorização; o fallback é a entrega atual. Não foi executado Lighthouse.
+
+Configurações de conteúdo, Models, Controllers, Router, dependências, servidor e permissões preservados. Nenhum commit/push. Etapa 4 (partículas) não iniciada.
+
+## Redesign — etapa 2 implementada em 21/10/2026
+
+O responsável confirmou “tudo certo” após a correção do botão de tema e autorizou a próxima etapa. Esse aceite é do responsável, sem teste visual pelo agente. Implementados somente header e navegação conforme a etapa 2 do plano.
+
+- `app/Views/partials/header.php`: marca com indicação de página atual na home, controles de tema/menu agrupados e seis destinos (Experiência, Sobre, Projetos, Habilidades, Formação e Contato). Hambúrguer com `aria-expanded`, `aria-controls`, rótulos de abrir/fechar e ícones decorativos. Link de catálogo preservado na seção de projetos; nenhuma rota removida.
+- `app/Views/home/index.php`: somente IDs e `tabindex="-1"` nos títulos existentes de formação e experiência para os links funcionarem já nesta etapa. Nenhum dado ou bloco foi movido, apagado ou reescrito.
+- `public/assets/css/style.css`: header aderente, home transparente no topo desktop e opaca ao rolar, fundo sólido nas internas; painel compacto não modal, controles com mínimo de 44px, contêiner flexível e margem de rolagem baseada na altura medida do header. Breakpoint de 75rem para acomodar nome completo, controles e seis links; em 1024px o menu é compacto. Sem animação nova, bloqueio de rolagem ou alteração de cursor fora dos controles.
+- `public/assets/js/site.js`: abertura/fechamento, Escape com retorno de foco, seleção com foco no destino local, fechamento por clique externo/saída de foco, transição de breakpoint sem foco em controles ocultos e atualização de altura/estado ao rolar. Inicialização da navegação independente da do tema. Sem JS/API de breakpoint, links continuam visíveis e o hambúrguer fica oculto.
+- `tests/run.php`: contratos do menu, âncoras nas páginas internas e semântica; retiradas expectativas antigas de link de catálogo marcado como página atual, pois o menu agora aponta à seção da home. `tests/theme.js` adaptado aos seletores da nova inicialização. Novo `tests/navigation.js` cobre comportamento com DOM/eventos simulados, sem substituir teste de teclado real.
+
+Verificações executadas: **1.181/1.181 PHP** com `E_ALL` em cópia temporária; **72/72 de tema** e **29/29 de navegação** em V8, executando os arquivos reais; sintaxe dos **29 arquivos PHP** e `git diff --check` aprovados. HTTP no Apache: home, catálogo e quatro detalhes **200**; projeto oculto e rota inexistente **404**. Confirmados IDs únicos, relação do botão com o painel, seis destinos existentes na home, navegação visível no HTML sem JS, classe da home restrita à home e três assets versionados **200**, MIME/bytes corretos.
+
+Ferramenta de navegador retornou novamente `apps: []`, `browsers: []`. Permanecem pendentes revisão visual em 360, 390, 768, 1024 e 1440px nos dois temas, teclado real (Tab/Shift+Tab, Enter/Espaço e Escape), foco não encoberto, zoom, console e rolagem em viewport curta. Não foram geradas screenshots nem executado Lighthouse nesta etapa. Estado aberto/fechado e foco foram testados por eventos simulados, não por interação real no navegador.
+
+Configurações profissionais, Models, Controllers, rotas, dependências e servidor preservados. Nenhum commit/push. Etapa 3 (hero) não iniciada; aguardar nova solicitação.
+
+## Correção do controle de tema — 21/10/2026
+
+Relato do responsável: botão fino, ícones quase invisíveis e ausência de mudança de cores na página inicial. Sem navegador conectado, não foi possível reproduzir visualmente o sintoma nem confirmar sua causa. Os arquivos entregues pelo Apache correspondiam aos arquivos locais; cache antigo no cliente permanece uma hipótese, não uma causa comprovada.
+
+- Botão com largura/altura mínimas de 44px no tamanho de fonte padrão, base flex fixa e sem padding que comprima os ícones; SVGs de 22px sem encolhimento e traço de 2px, com dimensões também declaradas no HTML.
+- `app/Core/Controller.php` compõe URLs de CSS e scripts com versão baseada no SHA-256 do conteúdo. Alterações nesses arquivos produzem novas URLs, evitando reaproveitamento de uma versão anterior em cache. Layout usa essas URLs com escaping e mantém o script de inicialização anterior ao CSS.
+- A meta `theme-color` acompanha o fundo definido nos tokens. Sugere cor à barra dos navegadores que a suportam; não altera configurações ou tema global do navegador. A alternância principal continua aplicando as cores à página.
+- Testes atualizados para URLs versionadas, caminhos-base, escaping e sincronização da cor sugerida. **1.073/1.073 verificações PHP** em cópia temporária e **72/72 verificações JavaScript** em V8 com DOM simulado aprovadas; sintaxe dos **29 arquivos PHP** e `git diff --check` aprovados.
+- Apache agora confirmado em `/portifolio/`: home, catálogo e detalhe Crowns **200**; projeto oculto e rota desconhecida **404**. As três URLs versionadas retornam **200**, MIME correto e bytes idênticos aos arquivos locais.
+- Tentativa de abrir a página pelo navegador da ferramenta retornou `Browser is not available: iab`. Tamanho e interação reais ainda precisam de confirmação visual; não foi alegada reprodução da falha. Nenhuma alteração em conteúdo, Models, rotas, servidor ou permissões; sem commit/push.
+
+## Redesign — etapa 1 implementada em 21/10/2026
+
+Pedido: executar a próxima etapa de `design/REDESIGN_PLAN.md`. Implementados somente tokens e temas. Reconsultados AGENTS, contexto, guia de conteúdo, plano e guia visual. Nesta execução, o guia e a captura já estavam em `design/`, em vez de `config/design/`; nenhuma movimentação foi realizada pelo agente.
+
+- `public/assets/css/style.css`: paleta do guia para escuro/claro e variantes de hover, foco, texto sobre acento; tipografia monoespaçada em rótulos e tecnologias, contêiner de 1100px, padding de 20/24px, raio de 12px e entrelinha 1,7. Todas as cores dos componentes continuam por tokens.
+- `app/Views/layouts/main.php`: script externo de inicialização anterior ao CSS e interações com `defer`, ambos com caminho-base escapado. SEO, skip link e layout MVC preservados.
+- `app/Views/partials/header.php`: botão nativo de 44 × 44px com ícones decorativos, foco compartilhado e nome/tooltip que anunciam o tema de destino. Fica oculto até o script habilitar o controle.
+- Novos `public/assets/js/theme-init.js` e `site.js`: preferência salva válida, sistema e fallback escuro; tratamento de falha do armazenamento e de `matchMedia`; mudanças do sistema sem sobrepor escolha manual. Sem JS, tema escuro e navegação existente continuam disponíveis.
+- `tests/run.php`: contraste separado por tema/superfície, presença/ordem/caminho-base dos scripts, escaping e controle em todas as páginas. Novo `tests/theme.js`: comportamento da preferência, alternância, persistência entre páginas, rótulos, falhas e APIs de sistema ausentes/legadas.
+- README, contexto e plano atualizados com o estado desta etapa. Nenhuma mudança em dados profissionais, Models, Controllers, rotas, dependências, configuração Apache ou permissões. Novo hero/menu não implementados. Nenhum commit ou push.
+
+Verificações efetivamente executadas:
+
+- **1.073/1.073** verificações PHP com `E_ALL` em cópia temporária, sem fixtures na árvore original.
+- **59/59** verificações JavaScript em V8 pelo executor de ferramentas, com DOM e armazenamento simulados, executando os arquivos reais. `node` não estava disponível no shell; não foi instalado. O mesmo arquivo pode ser executado com `node tests/theme.js` em ambiente com Node.js.
+- Sintaxe dos **29 arquivos PHP** aprovada. Contraste dos tokens de texto/links/foco sobre fundo, superfície e hover, além dos botões, aprovado nos dois temas.
+- Servidor PHP temporário em `127.0.0.1:8026`, `APP_BASE_PATH=''` e raiz `public/`: home, catálogo e quatro detalhes **200**; próprio portfólio oculto, slug desconhecido e rota desconhecida **404**. Todas as respostas com HTML executado, um controle e scripts corretos; CSS e os dois scripts **200**, bytes idênticos aos locais e MIME correto. Sem CSP retornada nesse servidor. Caminhos-base diferentes e escaping cobertos pela suíte PHP.
+- Apache em `http://localhost/portifolio/`: **404**, sem validação da aplicação nessa instalação. Nenhuma tentativa de alterar o servidor. A verificação HTTP em Python precisou de execução fora do sandbox por bloqueio de sockets.
+- Ferramenta de navegador retornou `apps: []`, `browsers: []`. Não foram executados testes visuais, teclado real, console, zoom, flash ou Lighthouse. O carregamento do script antes do CSS foi verificado no HTML; isso não comprova ausência visual de flash.
+- `git diff --check` aprovado; dados, Models, Controllers, Core, front controllers e configuração sem diferenças. Servidor PHP temporário encerrado após as verificações.
+
+Aceite automatizado e integração no servidor PHP aprovados; aceite visual da etapa 1 permanece pendente. Conferir home, catálogo, detalhe e 404 nos dois temas e em mobile/desktop, foco/ativação por teclado e recargas antes de considerar o aceite integral. Não avançar automaticamente para a etapa 2.
+
+---
+
 Atualizado em **19/10/2026**. A seção 0 registra o povoamento autorizado. As demais seções preservam o histórico e devem ser interpretadas como estados anteriores. Conferir novamente o ambiente na próxima sessão.
 
 ## 0. Estado atual — conteúdo preenchido, publicação pendente

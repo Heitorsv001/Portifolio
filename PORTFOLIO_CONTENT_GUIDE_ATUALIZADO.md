@@ -15,7 +15,7 @@
 **Links de referência:**
 - GitHub: https://github.com/heitorsv001
 - LinkedIn: https://www.linkedin.com/in/heitorvareiro/
-- Contato profissional informado no currículo: `heitorsvareiro@gmail.com` (**confirmar autorização antes de torná-lo público no site**).
+- Contato profissional: `heitorsvareiro@gmail.com` (**publicação na seção de contato autorizada pelo responsável em 21/10/2026**).
 
 Não divulgar credenciais, hashes, dados de estudantes, informações internas do estágio ou conteúdo obtido de áreas privadas.
 
@@ -51,13 +51,13 @@ Não divulgar credenciais, hashes, dados de estudantes, informações internas d
 
 ### 2.2 Sobre mim — proposta pronta
 
-> Sou estudante do curso Técnico Integrado em Informática no Instituto Federal de Mato Grosso do Sul (IFMS) e desenvolvedor Web Full Stack, com experiência prática na construção de aplicações web e desktop.
+> Desenvolvo aplicações web e desktop com foco em soluções bem estruturadas.
 >
-> Durante meu estágio de Desenvolvimento Web no IFMS, atuei no desenvolvimento e na manutenção do site institucional do **Arco Literário — Clube de Leitura Caio Fernando de Abreu**. Trabalhei com **Node.js, Express, MongoDB, EJS e Bootstrap 5**, incluindo refatoração de código, correção de bugs e melhorias de segurança.
->
-> Nos meus projetos acadêmicos e pessoais, utilizo tecnologias como **PHP, Java, JavaScript e PostgreSQL**, aplicando conceitos de programação orientada a objetos, arquitetura MVC e organização de código. Gosto de compreender as decisões técnicas por trás das soluções e busco continuar evoluindo na área de desenvolvimento de software.
+> Nos meus projetos acadêmicos e pessoais, utilizo **PHP, Java, JavaScript e PostgreSQL**, aplicando conceitos de programação orientada a objetos e arquitetura MVC.
 
 O Codex pode adaptar tamanho e fluidez sem remover a condição de **estudante em atividade**, transformar estágio em emprego efetivo ou inventar resultados mensuráveis.
+
+No redesign, título profissional e condição de estudante aparecem uma vez em Sobre mim, antes dos parágrafos acima. A pedido do responsável, foram removidas as repetições de apresentação, estágio, tecnologias e objetivos. Os detalhes do estágio permanecem em Experiência; evolução profissional, organização de código e compreensão das decisões técnicas permanecem em Objetivos profissionais. Não reintroduzir esses parágrafos duplicados.
 
 ## 3. Formação, experiência e certificações
 
@@ -150,18 +150,19 @@ Os textos abaixo são sugestões fiéis **ao relatório fornecido**, não provas
 - **Slug:** `gerenciador-de-permanencias`
 - **Classificação:** destaque condicionado.
 - **Stack auditada:** PHP, PostgreSQL, PDO, Bootstrap, Dompdf, PHPMailer.
-- **Funcionalidades apontadas:** cadastros, horários, inscrições, geração de PDF e notificações.
-- **Restrições:** integrações não executadas; autenticação problemática; matrícula e foto parciais.
+- **Funcionalidades:** cadastros, horários, inscrições, relatórios PDF com a relação de inscritos em cada permanência e e-mail automático de confirmação de inscrição.
+- **Atualização do responsável em 21/10/2026:** confirmadas as funcionalidades de relatórios PDF dos inscritos e confirmação automática de inscrição por e-mail. Esta confirmação atualiza a descrição editorial; não representa nova execução das integrações pelo agente.
+- **Restrições da auditoria anterior:** autenticação problemática; matrícula e foto parciais.
 
 **Card:**
 
-> Sistema web para organização de permanências acadêmicas, com gerenciamento de cadastros, horários e inscrições, além de recursos de documentos PDF e notificações.
+> Sistema web para organização de permanências acadêmicas, com cadastros, horários, inscrições, relatórios PDF dos inscritos por permanência e e-mail automático de confirmação de inscrição.
 
 **Descrição longa:**
 
-> Aplicação web desenvolvida em PHP com arquitetura MVC e PostgreSQL, voltada à organização de permanências acadêmicas. O sistema reúne cadastros, gerenciamento de horários e inscrições, além de recursos para geração de documentos com Dompdf e notificações com PHPMailer. A persistência utiliza PDO. A auditoria também identificou pontos que ainda exigem revisão, especialmente na autenticação e em funcionalidades parciais relacionadas a matrícula e foto.
+> Aplicação web desenvolvida em PHP com arquitetura MVC e PostgreSQL, voltada à organização de permanências acadêmicas. O sistema reúne cadastros, gerenciamento de horários e inscrições, com persistência por PDO. Gera relatórios em PDF com a relação de inscritos em cada permanência, utilizando Dompdf, e envia automaticamente um e-mail de confirmação ao realizar uma inscrição, com PHPMailer. A auditoria anterior também identificou pontos que exigem revisão, especialmente na autenticação e em funcionalidades parciais relacionadas a matrícula e foto.
 
-**Publicação:** antes de oferecer demonstração pública, revisar autenticação, acesso a dados, credenciais e conteúdo sensível. Não afirmar que e-mail/PDF foram verificados em execução.
+**Publicação:** antes de oferecer demonstração pública, revisar autenticação, acesso a dados, credenciais e conteúdo sensível. Não afirmar que e-mail/PDF foram verificados em execução pelo agente nesta atualização.
 
 ### 5.2 Crowns
 
@@ -306,7 +307,7 @@ Adaptar às chaves existentes no Model. Nunca exibir `null`, placeholder de imag
 - **Projetos secundários:** Festividades de Fim de Ano, Notícias.
 - **Habilidades:** agrupamento por categoria, conforme seção 6.
 - **Certificações:** nomes do currículo; emissor e links apenas se confirmados.
-- **Contato:** GitHub e LinkedIn; e-mail após aprovação.
+- **Contato:** GitHub, LinkedIn e `heitorsvareiro@gmail.com`, com publicação autorizada pelo responsável.
 
 **Rotas sugeridas (adaptar ao roteador existente):**
 - `/projetos/gerenciador-de-permanencias`
@@ -322,7 +323,7 @@ Adaptar às chaves existentes no Model. Nunca exibir `null`, placeholder de imag
 ## 9. Segurança e limitações importantes
 
 1. **Gerenciador:** autenticação problemática; não divulgar a aplicação como pronta para produção nem publicar ambiente com dados sensíveis antes da revisão. A auditoria removeu uma conta padrão do README, mas isso **não comprova** que eventuais credenciais foram removidas do código ou invalidadas.
-2. **Gerenciador:** geração de PDFs e notificações identificadas no código, porém integrações não executadas; usar linguagem cuidadosa.
+2. **Gerenciador:** relatórios PDF dos inscritos por permanência e e-mail automático de confirmação de inscrição confirmados pelo responsável em 21/10/2026. Não apresentar essa confirmação editorial como execução das integrações pelo agente.
 3. **Crowns:** compilação não verificada; salvamento de resultados incompleto. Não afirmar estabilidade em produção.
 4. **Festividades:** formulário simulado, sem envio real.
 5. **Notícias:** site estático; não sugerir API ou banco de dados.

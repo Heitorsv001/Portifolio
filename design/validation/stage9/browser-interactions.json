@@ -1,0 +1,206 @@
+{
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/156.0.8078.47",
+    "revision": "@1d17a2e2ee147bb7d6ae2ab6abdb3a2510c17775",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "jsVersion": "15.6.75.19"
+  },
+  "checks": [
+    {
+      "label": "Primeiro Tab alcança skip link com foco visível",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Enter no skip link leva o foco ao conteúdo",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Tema alterado por teclado e salvo",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Tema atualiza a cor do navegador",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Tema persiste após recarga",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Tema persiste no catálogo",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Menu abre por teclado e anuncia expansão",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Tab entra no primeiro link do menu",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Escape fecha o menu e restaura o foco",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Âncora acionada por teclado fecha menu e foca a seção",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Destino da âncora não fica sob o header",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Saída de foco fecha o menu sem aprisionar teclado",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Clique externo fecha o menu",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Mudança para desktop preserva foco em link visível",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Mudança para mobile transfere foco do menu recolhido",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Header desktop transparente no topo da home",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Header ganha superfície ao rolar",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Rodapé retorna ao topo",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Contato preserva rótulo e endereço aprovados, sem envio",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Texto ampliado a 200% sem overflow em 320px",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Texto ampliado a 200% sem overflow em 390px",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Texto ampliado a 200% sem overflow em 768px",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Texto ampliado a 200% sem overflow em 1440px",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Sem JavaScript: navegação visível, controles inativos ocultos em 390px",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Sem JavaScript: sem overflow em 390px",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Sem JavaScript: navegação visível, controles inativos ocultos em 1440px",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Sem JavaScript: sem overflow em 1440px",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Sem escolha salva: preferência escura do sistema aplicada",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Mudança do sistema atualiza o tema sem escolha manual",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Escolha manual prevalece sobre mudança do sistema",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Valor salvo inválido usa preferência do sistema",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Armazenamento bloqueado não impede tema inicial",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Armazenamento bloqueado não impede alternância manual",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Partículas ativas em desktop com mouse",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Preferência por movimento reduzido desativa as partículas",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Partículas retomam ao remover redução de movimento",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Partículas desativadas no mobile",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Canvas ativo limita buffer de pixels em tela 4K",
+      "passed": true,
+      "value": true
+    },
+    {
+      "label": "Ponteiro impreciso desativa partículas mesmo em tela larga",
+      "passed": true,
+      "value": true
+    }
+  ]
+}

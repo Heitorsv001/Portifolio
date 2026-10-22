@@ -2,7 +2,11 @@
 
 > Documento de referência para desenvolvimento incremental com Codex. Deve ser consultado antes de implementar qualquer etapa.
 
+> **Redesign — 21/10/2026:** etapas 1–8 confirmadas pelo responsável; etapa 9 executada e validada localmente, com aceite visual final e Lighthouse pendentes. Chrome instalado usado por CLI/DevTools com perfis temporários, permitindo capturas reais e verificações de layout, teclado, contraste, temas, rede e movimento. Corrigida a atualização das preferências das partículas fora do ciclo de desenho. PHP MVC, Models, rotas, dependências e cinco configurações preservados integralmente nesta etapa. E-mail autorizado `heitorsvareiro@gmail.com` mantém rótulo “E-mail de contato”; currículo `CurriculoLinkedin.pdf` fornecido pelo responsável e disponível para download em Contato. Resultados: 1.601 PHP, 139 JavaScript, 480 verificações de matriz no Chrome, 39 de interação e seis de partículas aprovadas; HTTP em ambos os caminhos-base. Relatório, 30 capturas e limites em `design/REDESIGN_VALIDATION.md`. LinkedIn bloqueou a consulta automatizada; endereço mantido. Servidores de teste e perfis temporários encerrados. Não publicar, habilitar o projeto oculto ou criar commits sem solicitação. O roadmap do MVP abaixo é histórico e independente deste redesign.
+
 ## 1. Visão geral
+
+Atualização após a revisão final: retrato fornecido pelo responsável em `public/assets/images/meu-retrato.png` incluído no avatar circular da home, também usado como favicon PNG em todas as páginas, com texto alternativo no avatar e zoom de 15% por CSS. Validado nos dois temas em 390/1440px; evidências atuais em `design/validation/portrait-favicon/`. As capturas e métricas da etapa 9 registram o estado anterior à inclusão do retrato.
 
 Desenvolver um **site de portfólio pessoal** para apresentar o desenvolvedor, seus projetos, habilidades e meios de contato. O endereço será divulgado no **LinkedIn, GitHub e currículo**. A experiência deve ser profissional, acessível, responsiva, rápida e simples de manter.
 
@@ -342,7 +346,8 @@ Situação após o povoamento autorizado em 19/10/2026:
 - [x] Nome exibido: Heitor Silva Vareiro.
 - [x] Texto “Sobre mim”, formação em andamento, estágio, certificações e objetivos.
 - [x] URLs reais de GitHub e LinkedIn.
-- [ ] Autorização de divulgação do e-mail e currículo PDF aprovado.
+- [x] Divulgação de `heitorsvareiro@gmail.com` autorizada e link disponível em Contato (21/10/2026).
+- [x] Currículo `CurriculoLinkedin.pdf` fornecido e disponibilizado para download (21/10/2026).
 - [x] Lista de projetos, textos, tecnologias e repositórios ativos.
 - [ ] Capturas reais dos projetos.
 - [x] Habilidades confirmadas pelo currículo e guia.

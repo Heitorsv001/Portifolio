@@ -26,12 +26,22 @@ final class HomeController extends Controller
     public function index(): void
     {
         $profile = $this->profile->all();
+        $featuredProjects = [];
+        $otherProjects = [];
+        foreach ($this->projects->all() as $project) {
+            if ($project['featured'] === true) {
+                $featuredProjects[] = $project;
+            } else {
+                $otherProjects[] = $project;
+            }
+        }
         $this->view('home/index', [
             'title' => $profile['headline'] . ' — ' . $profile['name'],
             'description' => 'Portfólio de ' . $profile['name'] . ', desenvolvedor Web Full Stack e estudante de Técnico Integrado em Informática no IFMS. Conheça projetos, formação e experiência de estágio.',
             'pagePath' => '/',
             'currentPage' => 'home',
-            'projects' => $this->projects->featured(),
+            'projects' => $featuredProjects,
+            'otherProjects' => $otherProjects,
             'skillGroups' => $this->skills->all(),
             'contact' => $this->contact->all(),
             'profile' => $profile,

@@ -88,25 +88,77 @@ foreach (['', '/portifolio', '/outro/caminho/'] as $basePath) {
     $expect(count($received) === $calls, 'Rotas inválidas não executam handler dinâmico');
 }
 
+$expectFooter = static function (string $html, array $contact) use ($expect): void {
+    preg_match('~<footer class="site-footer">(.*?)</footer>~s', $html, $match);
+    $footer = $match[1] ?? '';
+    $expect($footer !== '' && str_contains($footer, 'Desenvolvedor Web Full Stack'), 'Rodapé mantém identificação profissional');
+    $networks = ['github_url' => 'GitHub', 'linkedin_url' => 'LinkedIn'];
+    $count = 0;
+    foreach ($networks as $key => $label) {
+        if ($contact[$key] === null) {
+            $expect(!str_contains($footer, 'aria-label="Perfil no ' . $label . '"'), 'Rede ausente não gera link no rodapé: ' . $label);
+            continue;
+        }
+        $count++;
+        $expect(str_contains($footer, 'href="' . htmlspecialchars($contact[$key], ENT_QUOTES, 'UTF-8') . '" aria-label="Perfil no ' . $label . '"'), 'Rodapé usa rede normalizada, escapada e nomeada: ' . $label);
+    }
+    $expect(substr_count($footer, 'class="social-links"') === ($count > 0 ? 1 : 0), 'Rodapé omite lista de redes quando vazia');
+    $expect(substr_count($footer, '<a ') === $count + 1, 'Rodapé contém somente redes disponíveis e retorno ao topo');
+    $expect(str_contains($footer, 'href="#topo"') && str_contains($html, 'id="topo"'), 'Rodapé retorna ao topo da própria página');
+    $expect(!str_contains($footer, 'mailto:') && !str_contains($footer, ' download') && !str_contains($footer, 'Contatos a confirmar.'), 'Rodapé sem e-mail, currículo ou aviso de contatos pendentes');
+};
+
 // Todas as páginas devem manter links e assets válidos na raiz ou em subdiretórios.
-$expectLayout = static function (string $html, string $basePath, string $homeHtml) use ($expect): void {
+$expectLayout = static function (string $html, string $basePath, string $homeHtml, ?array $contact = null) use ($expect, $expectFooter): void {
+    $contact ??= (new Contact())->all();
+    $expectFooter($html, $contact);
     foreach (['<!doctype html>', '<html ', '<head>', '<body ', '<header ', '<main ', '<footer '] as $tag) {
         $expect(substr_count($html, $tag) === 1, 'Layout único: ' . $tag . ' em ' . $basePath);
     }
-    $expect(str_contains($html, 'href="' . $basePath . '/assets/css/style.css"'), 'CSS compartilhado em ' . $basePath);
-    $expect(str_contains($html, '<link rel="icon" type="image/svg+xml" href="' . $basePath . '/assets/images/favicon.svg">'), 'Favicon local respeita caminho-base em ' . $basePath);
+    $stylesheetUrl = $basePath . '/assets/css/style.css?v=' . substr(hash_file('sha256', dirname(__DIR__) . '/public/assets/css/style.css'), 0, 12);
+    $themeScriptUrl = $basePath . '/assets/js/theme-init.js?v=' . substr(hash_file('sha256', dirname(__DIR__) . '/public/assets/js/theme-init.js'), 0, 12);
+    $siteScriptUrl = $basePath . '/assets/js/site.js?v=' . substr(hash_file('sha256', dirname(__DIR__) . '/public/assets/js/site.js'), 0, 12);
+    $expect(str_contains($html, 'href="' . $stylesheetUrl . '"'), 'CSS compartilhado e versão do conteúdo em ' . $basePath);
+    $themeScript = '<script src="' . $themeScriptUrl . '"></script>';
+    $siteScript = '<script src="' . $siteScriptUrl . '" defer></script>';
+    $expect(str_contains($html, $themeScript), 'Inicialização de tema respeita caminho-base');
+    $expect(str_contains($html, $siteScript), 'Interações carregadas com defer e caminho-base');
+    $expect(strpos($html, $themeScript) < strpos($html, '<link rel="stylesheet"'), 'Tema inicializado antes do CSS');
+    $expect(substr_count($html, 'data-theme-toggle') === 1, 'Um controle de tema por página');
+    $expect(str_contains($html, 'aria-label="Alternar para tema claro" title="Alternar para tema claro" hidden'), 'Controle de tema nomeado e oculto até o JS estar disponível');
+    $expect(str_contains($html, '<link rel="icon" type="image/png" href="' . $basePath . '/assets/images/meu-retrato.png">'), 'Retrato como favicon PNG respeita caminho-base em ' . $basePath);
     $expect(str_contains($html, 'href="#conteudo"'), 'Link para pular navegação');
     $expect(str_contains($html, 'id="conteudo"'), 'Destino do link para conteúdo');
     $expect(str_contains($html, '<html lang="pt-BR"'), 'Idioma da página declarado');
     $expect(!preg_match('/tabindex="[1-9]/', $html), 'Sem ordem de foco artificial por tabindex positivo');
     $expect(str_contains($html, '<ul class="nav-list" role="list">'), 'Semântica da lista de navegação preservada');
+    $expect(substr_count($html, 'data-menu-toggle') === 1, 'Um acionador de menu por página');
+    $expect(str_contains($html, 'aria-expanded="false" aria-controls="navegacao-principal" aria-label="Abrir menu" hidden'), 'Menu recolhido e acionador oculto antes do JS');
+    $expect(str_contains($html, '<nav id="navegacao-principal" class="site-navigation" aria-label="Navegação principal">'), 'Navegação permanece visível sem JS');
+    foreach (['experiencia', 'sobre', 'projetos', 'habilidades', 'formacao', 'contato'] as $section) {
+        $expect(str_contains($html, 'href="' . $basePath . '/#' . $section . '"'), 'Menu aponta para seção da home: ' . $section);
+    }
     $expect(str_contains($html, 'href="#topo"') && str_contains($html, 'id="topo"'), 'Navegação para o topo');
+    if (str_contains($html, 'class="home-hero"')) {
+        $expect(str_contains($html, 'class="site-main site-main--home"'), 'Home permite hero com largura própria');
+        $particlesUrl = $basePath . '/assets/js/hero-particles.js?v=' . substr(hash_file('sha256', dirname(__DIR__) . '/public/assets/js/hero-particles.js'), 0, 12);
+        $expect(str_contains($html, '<script src="' . $particlesUrl . '" defer></script>'), 'Partículas carregadas apenas na home, com caminho-base e versão');
+        $expect(str_contains($html, '<canvas class="hero-particles" data-hero-particles aria-hidden="true"></canvas>'), 'Canvas decorativo não recebe foco nem conteúdo semântico');
+    } else {
+        $expect(str_contains($html, 'class="site-main container"'), 'Páginas internas mantêm contêiner próprio');
+        $expect(!str_contains($html, 'hero-particles'), 'Páginas internas não carregam efeito de partículas');
+    }
 
     preg_match_all('/href="([^"]+)"/', $html, $links);
     preg_match_all('/\bid="([^"]+)"/', $html, $ids);
     preg_match_all('/\bid="([^"]+)"/', $homeHtml, $homeIds);
     $expect(count($ids[1]) === count(array_unique($ids[1])), 'Identificadores únicos na página');
-    $allowedLinks = [$basePath . '/', $basePath . '/projetos', $basePath . '/assets/css/style.css', $basePath . '/assets/images/favicon.svg'];
+    $allowedLinks = [$basePath . '/', $basePath . '/projetos', $stylesheetUrl, $basePath . '/assets/images/meu-retrato.png'];
+    foreach (['github_url', 'linkedin_url'] as $key) {
+        if ($contact[$key] !== null) {
+            $allowedLinks[] = htmlspecialchars($contact[$key], ENT_QUOTES, 'UTF-8');
+        }
+    }
     foreach ($ids[1] as $id) {
         $allowedLinks[] = '#' . $id;
     }
@@ -132,9 +184,10 @@ foreach (['', '/portifolio', '/outro/caminho/'] as $basePath) {
     $html = ob_get_clean();
     $homeHtml = $html;
     $expect(str_contains($html, 'Heitor Silva Vareiro'), 'Nome profissional confirmado');
-    $expect(str_contains($html, 'Sou estudante do curso Técnico Integrado em Informática'), 'Biografia preserva condição de estudante ativo');
+    $expect(str_contains($html, 'Estudante de Técnico Integrado em Informática no IFMS'), 'Apresentação preserva condição de estudante ativo');
     $expect(str_contains($html, 'Busco continuar evoluindo em desenvolvimento de software'), 'Objetivo profissional confirmado');
     $expect(str_contains($html, 'Nenhum projeto em destaque'), 'Estado vazio dos destaques sem projetos inventados');
+    $expect(!str_contains($html, 'id="outros-projetos-titulo"'), 'Catálogo vazio não cria grupo secundário sem conteúdo');
     $expect(str_contains($html, 'Habilidades a confirmar.'), 'Habilidades pendentes explicitamente sinalizadas');
     $expect(!str_contains($html, 'class="skill-category"'), 'Estado vazio não atribui habilidades ao proprietário');
     $expect(str_contains($html, 'Contatos a confirmar.'), 'Contatos pendentes explicitamente sinalizados');
@@ -142,17 +195,45 @@ foreach (['', '/portifolio', '/outro/caminho/'] as $basePath) {
     $expect(str_contains($html, 'href="' . $root . '/projetos"'), 'Home permite acessar catálogo');
     $expect(substr_count($html, '<h1 ') === 1, 'Título principal único na home');
     $expect(str_contains($html, 'Desenvolvedor Web Full Stack'), 'Posicionamento profissional confirmado');
-    foreach (['sobre', 'objetivos', 'projetos', 'habilidades', 'contato'] as $section) {
+    foreach (['experiencia', 'sobre', 'projetos', 'habilidades', 'contato'] as $section) {
         $expect(str_contains($html, '<section id="' . $section . '"'), 'Seção disponível: ' . $section);
-        if ($section !== 'projetos') {
-            $expect(str_contains($html, 'href="' . $root . '/#' . $section . '"'), 'Navegação para a seção: ' . $section);
+        $expect(str_contains($html, 'href="' . $root . '/#' . $section . '"'), 'Navegação para a seção: ' . $section);
+    }
+    preg_match('~<section class="home-hero"[^>]*>(.*?)</section>~s', $html, $heroMatch);
+    $hero = $heroMatch[1] ?? '';
+    $expect(str_contains($hero, '<p class="hero-subtitle">Desenvolvedor Web e estudante</p>'), 'Hero com subtítulo exato aprovado');
+    $expect(!str_contains($hero, 'IFMS') && !str_contains($hero, 'Full Stack'), 'Hero não mistura subtítulo com formação ou título profissional');
+    $expect(!str_contains($hero, 'class="button') && !str_contains($hero, '<button'), 'Hero sem botões CTA');
+    $expect(str_contains($hero, 'src="' . $root . '/assets/images/meu-retrato.png"') && str_contains($hero, 'alt="Retrato de Heitor Silva Vareiro"') && str_contains($hero, 'width="1122" height="1402" decoding="async" fetchpriority="high"'), 'Retrato renomeado tem caminho-base, texto alternativo e dimensões reais');
+    $expect(!str_contains($hero, 'class="social-links"'), 'Sem contatos, hero não cria links ou espaços vazios de redes');
+    preg_match('~<section id="sobre"[^>]*>(.*?)</section>~s', $html, $aboutMatch);
+    $profile = (new Profile())->all();
+    foreach (array_merge([$profile['headline'], $profile['student_status'], $profile['intro']], $profile['about']) as $text) {
+        $expect(str_contains($aboutMatch[1] ?? '', htmlspecialchars($text, ENT_QUOTES, 'UTF-8')), 'Texto profissional preservado em Sobre mim');
+    }
+    $expect(str_contains($aboutMatch[1] ?? '', 'id="objetivos"') && str_contains($aboutMatch[1] ?? '', htmlspecialchars($profile['goals'], ENT_QUOTES, 'UTF-8')), 'Objetivos preservados dentro de Sobre, com âncora antiga');
+    $expect(!str_contains($aboutMatch[1] ?? '', 'id="formacao"') && !str_contains($aboutMatch[1] ?? '', 'certification-list'), 'Formação não é duplicada dentro de Sobre');
+    preg_match('~<section id="formacao"[^>]*>(.*?)</section>~s', $html, $educationMatch);
+    foreach ($profile['education'] as $text) {
+        $expect(str_contains($educationMatch[1] ?? '', htmlspecialchars($text, ENT_QUOTES, 'UTF-8')), 'Dado de formação preservado na seção própria');
+    }
+    foreach ($profile['certifications'] as $text) {
+        $expect(str_contains($educationMatch[1] ?? '', htmlspecialchars($text, ENT_QUOTES, 'UTF-8')), 'Nome de certificado preservado sem novos campos');
+    }
+    $expect(substr_count($educationMatch[1] ?? '', '<li>') === count($profile['certifications']), 'Certificações mantêm apenas os registros confirmados');
+    $expect(strpos($html, 'id="formacao"') > strpos($html, 'id="habilidades"') && strpos($html, 'id="formacao"') < strpos($html, 'id="contato"'), 'Formação segue habilidades e antecede contato');
+    preg_match_all('~<section\b[^>]*>~', $html, $sectionTags);
+    $expect(str_contains($sectionTags[0][0] ?? '', 'class="home-hero"') && str_contains($sectionTags[0][1] ?? '', 'id="experiencia"') && str_contains($sectionTags[0][2] ?? '', 'id="sobre"'), 'Experiência é primeira seção após o hero, seguida de Sobre');
+    preg_match('~<section id="experiencia"[^>]*>(.*?)</section>~s', $html, $experienceMatch);
+    foreach ($profile['experience'] as $key => $value) {
+        foreach (is_array($value) ? $value : [$value] as $text) {
+            $expect(str_contains($experienceMatch[1] ?? '', htmlspecialchars($text, ENT_QUOTES, 'UTF-8')), 'Dado profissional preservado na experiência: ' . $key);
         }
     }
-    $expect(str_contains($html, 'class="button" href="#projetos"'), 'Chamada principal leva à seção de projetos');
-    $expect(!str_contains($html, 'class="button button--secondary" href="#sobre"'), 'Hero sem botão Sobre mim');
+    $expect(!str_contains($aboutMatch[1] ?? '', 'id="estagio-titulo"'), 'Ficha de estágio não é duplicada em Sobre');
     $expect(str_contains($html, '&lt;script&gt;'), 'Escaping do título');
     $expect(!str_contains($html, '<script>'), 'Ausência de HTML arbitrário no título');
-    $expectLayout($html, $root, $homeHtml);
+    $expectLayout($html, $root, $homeHtml, $emptyContact->all());
     $expect(str_contains($html, 'aria-current="page"'), 'Home identificada na navegação');
     $expect(str_contains($html, '<span>Teste &lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;</span>'), 'Nome escapado no header');
 
@@ -178,8 +259,8 @@ foreach (['', '/portifolio', '/outro/caminho/'] as $basePath) {
     $expect(str_contains($html, 'Nenhum projeto cadastrado.'), 'Catálogo vazio explícito');
     $expect(str_contains($html, '<title>Projetos — Teste &lt;script&gt;'), 'Título próprio escapado do catálogo');
     $expect(substr_count($html, '<h1>') === 1, 'Título principal único no catálogo');
-    $expect(str_contains($html, 'href="' . $root . '/projetos" aria-current="page"'), 'Catálogo identificado na navegação');
-    $expect(substr_count($html, 'aria-current="page"') === 1, 'Apenas catálogo marcado como página atual');
+    $expect(str_contains($html, 'href="' . $root . '/#projetos"'), 'Catálogo permite retornar à seção de projetos da home');
+    $expect(!str_contains($html, 'aria-current="page"'), 'Âncoras da home não marcam catálogo como página atual');
     $expectLayout($html, $root, $homeHtml);
 
     $router = new Router($basePath);
@@ -278,6 +359,7 @@ try {
             $expect(str_contains($detail, '<h1 id="projeto-titulo">' . htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8') . '</h1>'), 'H1 mostra título correto');
             $expect(str_contains($detail, htmlspecialchars($project['description'], ENT_QUOTES, 'UTF-8')), 'Descrição completa escapada preserva quebras');
             $expect(str_contains($detail, 'href="' . $root . '/projetos"'), 'Detalhe permite retornar ao catálogo');
+            $expect(str_contains($detail, 'href="' . $root . '/#projetos">Voltar aos projetos</a>'), 'Retorno principal do detalhe vai à seção da home');
             $expect(!str_contains($detail, '<script>') && !str_contains($detail, '<img src=x'), 'Detalhe não executa HTML dos dados');
             $expect(!str_contains($detail, 'aria-current="page"'), 'Detalhe não marca catálogo ou home como página atual');
             foreach (['<!doctype html>', '<header ', '<main ', '<footer ', '<h1 '] as $tag) {
@@ -315,8 +397,15 @@ try {
         ob_start();
         (new HomeController($config, $model, $emptySkills, $emptyContact))->index();
         $html = ob_get_clean();
-        $expect(substr_count($html, 'class="project-card"') === 1, 'Home exibe somente destaque');
-        $expect(!str_contains($html, 'Teste sem opcionais'), 'Home omite item não destacado');
+        $expect(substr_count($html, 'class="project-card"') === 2, 'Home apresenta destaques e secundários');
+        preg_match('~<section class="project-group" aria-labelledby="destaques-titulo">(.*?)</section>~s', $html, $featuredMatch);
+        preg_match('~<section class="project-group" aria-labelledby="outros-projetos-titulo">(.*?)</section>~s', $html, $otherMatch);
+        $expect(substr_count($featuredMatch[1] ?? '', 'class="project-card"') === 1 && !str_contains($featuredMatch[1] ?? '', 'Teste sem opcionais'), 'Grupo amplo contém somente destaque');
+        $expect(substr_count($otherMatch[1] ?? '', 'class="project-card"') === 1 && str_contains($otherMatch[1] ?? '', 'Teste sem opcionais'), 'Item não destacado aparece na lista secundária');
+        $expect(str_contains($featuredMatch[1] ?? '', 'project-list--featured') && str_contains($otherMatch[1] ?? '', 'project-list--compact'), 'Grupos usam apresentações diferentes');
+        $expect(substr_count($html, 'href="' . $root . '/projetos/teste-destaque"') === 1 && substr_count($html, 'href="' . $root . '/projetos/teste-sem-opcionais"') === 1, 'Projeto aparece uma vez na home sem duplicação entre grupos');
+        $expect(str_contains($featuredMatch[1] ?? '', 'data-project-image') && !str_contains($otherMatch[1] ?? '', '<img'), 'Imagem real habilita mídia do destaque; secundário continua compacto');
+        $expect(!str_contains($html, '<script>') && !str_contains($html, '<img src=x'), 'As duas apresentações escapam conteúdo dinâmico');
         $expect(!str_contains($html, 'Nenhum projeto em destaque'), 'Estado vazio omitido com destaques');
         $expect(str_contains($html, 'href="' . $root . '/projetos/teste-destaque"'), 'Destaque na home aponta para página individual');
         $expect(str_contains($html, 'Habilidades a confirmar.') && !str_contains($html, 'class="skill-category"'), 'Tecnologias de projetos não são inferidas como habilidades pessoais');
@@ -359,6 +448,7 @@ try {
         (new HomeController(['name' => 'Teste', 'base_path' => ''], $model, $emptySkills, $emptyContact))->index();
         $html = ob_get_clean();
         $expect(str_contains($html, 'Nenhum projeto em destaque'), 'Home trata catálogo preenchido sem featured');
+        $expect(str_contains($html, 'project-list--compact') && !str_contains($html, 'data-project-image'), 'Sem destaques, demais projetos continuam na lista e sem áreas de imagem inválida');
     }
 } finally {
     unlink($fixtureFile);
@@ -402,9 +492,13 @@ try {
         preg_match('~<section id="habilidades".*?</section>~s', $html, $skillsSection);
         $expect(substr_count($skillsSection[0], 'class="skill-list"') === 2, 'Habilidades usam listas por categoria');
         $expect(str_contains($html, '<h3>Linguagens de teste</h3>'), 'Categoria usa heading abaixo do título da seção');
-        $expect(str_contains($html, '<li>PHP</li>') && str_contains($html, '<li>JavaScript</li>'), 'Itens vêm do arquivo sem editar layout');
+        $expect(str_contains($html, '<span class="skill-name">PHP</span>') && str_contains($html, '<span class="skill-name">JavaScript</span>'), 'Itens vêm do arquivo sem editar layout e mantêm nomes legíveis');
         $expect(str_contains($html, 'Ferramentas &lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;'), 'Nome da categoria escapado');
-        $expect(str_contains($html, '<li>Git &amp; revisão</li>') && str_contains($html, '&lt;img src=x onerror=alert(1)&gt;'), 'Habilidades escapadas como texto');
+        $expect(str_contains($html, '<span class="skill-name">Git &amp; revisão</span>') && str_contains($html, '&lt;img src=x onerror=alert(1)&gt;'), 'Habilidades escapadas como texto');
+        $itemCount = array_sum(array_map(static fn (array $group): int => count($group['items']), $skills->all()));
+        $expect(substr_count($skillsSection[0], 'class="skill-icon"') === $itemCount && substr_count($skillsSection[0], 'class="skill-name"') === $itemCount, 'Cada habilidade tem ícone decorativo e nome independente');
+        $withoutIcons = preg_replace('~<svg\b.*?</svg>~s', '', $skillsSection[0]);
+        $expect(str_contains($withoutIcons, '>PHP</span>') && str_contains($withoutIcons, '>Git &amp; revisão</span>'), 'Nomes continuam disponíveis sem os ícones');
         $expect(!str_contains($html, '<script>') && !str_contains($html, '<img src=x'), 'Dados de habilidades não injetam HTML');
         $expect(!str_contains($html, 'Habilidades a confirmar.') && !str_contains($html, 'Categoria vazia'), 'Sem aviso pendente ou categoria vazia quando há habilidades');
         $expect(str_contains($html, 'id="habilidades" class="home-section" aria-labelledby="habilidades-titulo" tabindex="-1"'), 'Seção tem heading associado e destino focável por fragmento');
@@ -413,7 +507,7 @@ try {
         preg_match_all('/\bid="([^"]+)"/', $html, $ids);
         preg_match_all('/aria-labelledby="([^"]+)"/', $html, $labels);
         $expect(array_diff($labels[1], $ids[1]) === [], 'Headings referenciados existem na home com habilidades');
-        $expectLayout($html, $root, $html);
+        $expectLayout($html, $root, $html, $emptyContact->all());
 
         foreach (['catalog', 'detail', 'error'] as $page) {
             ob_start();
@@ -434,7 +528,7 @@ try {
     ob_start();
     (new HomeController(['name' => 'Teste', 'base_path' => ''], $emptyProjects, new Skill($skillFile), $emptyContact))->index();
     $html = ob_get_clean();
-    $expect(str_contains($html, '<h3>Nova categoria</h3>') && str_contains($html, '<li>Nova habilidade de teste</li>'), 'Atualizar apenas o arquivo inclui categoria e habilidade na home');
+    $expect(str_contains($html, '<h3>Nova categoria</h3>') && str_contains($html, '<span class="skill-name">Nova habilidade de teste</span>'), 'Atualizar apenas o arquivo inclui categoria e habilidade na home');
 } finally {
     unlink($skillFile);
 }
@@ -492,24 +586,51 @@ try {
         $expect(str_contains($html, 'href="https://github.com/exemplo-de-teste?tab=repositories&amp;sort=updated"'), 'GitHub validado e atributo escapado');
         $expect(str_contains($html, 'href="https://www.linkedin.com/in/exemplo-de-teste/"'), 'LinkedIn disponível');
         $expect(str_contains($html, 'href="mailto:teste%2Bportfolio@example.org"'), 'Mailto codifica caracteres especiais do endereço');
-        $expect(str_contains($html, 'Enviar e-mail para teste+portfolio@example.org'), 'Endereço tem texto acessível e legível');
+        $expect(str_contains($html, '>E-mail de contato</a>'), 'Link de e-mail tem rótulo acessível aprovado');
         $expect(str_contains($html, 'href="' . $root . '/' . $resumePath . '" download>Baixar currículo (PDF)'), 'Download do PDF respeita caminho-base');
         $expect(!str_contains($html, 'Contatos a confirmar.'), 'Aviso pendente omitido com conteúdo disponível');
+        preg_match('~<section class="home-hero"[^>]*>(.*?)</section>~s', $html, $heroMatch);
+        $hero = $heroMatch[1] ?? '';
+        $expect(substr_count($hero, '<a ') === 2, 'Hero exibe somente as duas redes aprovadas');
+        $expect(str_contains($hero, 'aria-label="Perfil no GitHub"') && str_contains($hero, 'aria-label="Perfil no LinkedIn"'), 'Ícones sociais têm nomes acessíveis');
+        $expect(str_contains($hero, htmlspecialchars($fixture['github_url'], ENT_QUOTES, 'UTF-8')) && str_contains($hero, htmlspecialchars($fixture['linkedin_url'], ENT_QUOTES, 'UTF-8')), 'Hero reutiliza contatos injetados e escapados');
+        $expect(!str_contains($hero, 'mailto:') && !str_contains($hero, 'download') && !str_contains($hero, 'class="button'), 'E-mail, PDF e CTA não entram no hero');
+        $expectFooter($html, $contact->all());
+        $expect(!str_contains($html, 'https://github.com/heitorsv001'), 'Contatos injetados na home não são substituídos pela configuração padrão');
         $expect(!str_contains($html, 'target=') && !str_contains($html, '<form'), 'Links na mesma aba e sem formulário de contato');
         $expect(strpos($html, 'id="contato"') > strpos($html, 'id="habilidades"'), 'Contato segue habilidades');
         preg_match_all('/\bid="([^"]+)"/', $html, $ids);
         preg_match_all('/aria-labelledby="([^"]+)"/', $html, $labels);
         $expect(count($ids[1]) === count(array_unique($ids[1])) && array_diff($labels[1], $ids[1]) === [], 'IDs e headings válidos na home com contatos');
 
-        foreach (['catalog', 'error'] as $page) {
+        foreach (['catalog', 'detail', 'error', 'unknown-slug', 'hidden-slug'] as $page) {
             ob_start();
             if ($page === 'catalog') {
                 (new ProjectController($config, $emptyProjects))->index();
+            } elseif ($page === 'detail') {
+                (new ProjectController($config))->show('gerenciador-de-permanencias');
+            } elseif ($page === 'unknown-slug') {
+                (new ProjectController($config, $emptyProjects))->show('inexistente');
+            } elseif ($page === 'hidden-slug') {
+                (new ProjectController($config))->show('portfolio-mvc-php');
             } else {
                 (new ErrorController($config))->notFound();
             }
-            $expect(str_contains(ob_get_clean(), 'href="' . $root . '/#contato"'), 'Retorno à seção de contato a partir de ' . $page);
+            $otherHtml = ob_get_clean();
+            $expect(str_contains($otherHtml, 'href="' . $root . '/#contato"'), 'Retorno à seção de contato a partir de ' . $page);
+            $expectFooter($otherHtml, (new Contact())->all());
         }
+    }
+
+    foreach ([$expectedEmpty, ['github_url' => $fixture['github_url']], ['linkedin_url' => $fixture['linkedin_url']]] as $partialContact) {
+        $writeContact($partialContact);
+        $model = new Contact($contactFile);
+        ob_start();
+        (new HomeController(['name' => 'Teste', 'base_path' => ''], $emptyProjects, $emptySkills, $model))->index();
+        $html = ob_get_clean();
+        $expectFooter($html, $model->all());
+        preg_match('~<section class="home-hero"[^>]*>(.*?)</section>~s', $html, $heroMatch);
+        $expect(substr_count($heroMatch[1] ?? '', '<a ') === count(array_filter([$model->all()['github_url'], $model->all()['linkedin_url']])), 'Hero e rodapé respeitam os mesmos contatos parciais ou ausentes');
     }
 
     foreach (['', 'endereço inválido', '//github.com/teste', 'javascript:alert(1)', 'data:text/html,teste', 'ftp://example.org', 'https://user:pass@example.org', 'https://example.org/" onclick="alert(1)', "https://example.org/\r\n"] as $url) {
@@ -526,7 +647,6 @@ try {
     (new HomeController(['name' => 'Teste', 'base_path' => ''], $emptyProjects, $emptySkills, new Contact($contactFile)))->index();
     $html = ob_get_clean();
     $expect(str_contains($html, 'href="mailto:teste%3F%26%250A@example.org"'), 'Caracteres especiais no local-part não viram parâmetros ou cabeçalhos de mailto');
-    $expect(str_contains($html, 'teste?&amp;%0A@example.org'), 'Endereço exibido com escaping HTML');
     $expect(!str_contains($html, 'Perfil no GitHub') && !str_contains($html, ' download>'), 'Contato parcial não cria links ausentes');
 
     foreach (['assets/documents/inexistente.pdf', '../config/app.php', 'assets/documents/../../config/app.php', 'https://example.org/curriculo.pdf', '/assets/documents/curriculo.pdf', 'assets/documents/curriculo.php', 'assets/documents/curriculo.pdf?download=1'] as $path) {
@@ -558,8 +678,11 @@ $home = new HomeController(['name' => 'Teste', 'base_path' => '/teste" onclick="
 ob_start();
 $home->index();
 $html = ob_get_clean();
-$expect(str_contains($html, 'href="/teste&quot; onclick=&quot;alert(1)/assets/css/style.css"'), 'Escaping do atributo de stylesheet');
+$expect(str_contains($html, 'href="/teste&quot; onclick=&quot;alert(1)/assets/css/style.css?v='), 'Escaping do atributo de stylesheet');
 $expect(str_contains($html, 'href="/teste&quot; onclick=&quot;alert(1)/"'), 'Escaping do caminho-base na navegação');
+$expect(str_contains($html, 'src="/teste&quot; onclick=&quot;alert(1)/assets/js/theme-init.js?v='), 'Escaping do caminho-base no script de tema');
+$expect(str_contains($html, 'src="/teste&quot; onclick=&quot;alert(1)/assets/js/site.js?v='), 'Escaping do caminho-base no script de interações');
+$expect(str_contains($html, 'src="/teste&quot; onclick=&quot;alert(1)/assets/js/hero-particles.js?v='), 'Escaping do caminho-base no script de partículas');
 
 // SEO e imagens: fixtures isoladas, sem domínio ou projetos reais inventados.
 $seoFile = tempnam(sys_get_temp_dir(), 'portfolio-seo-');
@@ -663,26 +786,31 @@ try {
 
 // Contrastes dos tokens usados em texto, botões e foco; não substitui auditoria visual.
 $css = file_get_contents(dirname(__DIR__) . '/public/assets/css/style.css');
-preg_match_all('/--color-([a-z-]+):\s*#([0-9a-f]{6});/i', $css, $colorMatches, PREG_SET_ORDER);
-$luminance = [];
-foreach ($colorMatches as $color) {
-    $rgb = array_map(static function (string $channel): float {
-        $value = hexdec($channel) / 255;
-        return $value <= 0.04045 ? $value / 12.92 : (($value + 0.055) / 1.055) ** 2.4;
-    }, str_split($color[2], 2));
-    $luminance[$color[1]] = 0.2126 * $rgb[0] + 0.7152 * $rgb[1] + 0.0722 * $rgb[2];
-}
-foreach (['background', 'surface'] as $background) {
-    foreach (['text', 'muted', 'accent', 'accent-hover', 'focus'] as $foreground) {
-        $ratio = (max($luminance[$foreground], $luminance[$background]) + 0.05)
-            / (min($luminance[$foreground], $luminance[$background]) + 0.05);
-        $expect($ratio >= ($foreground === 'focus' ? 3 : 4.5), 'Contraste suficiente: ' . $foreground . ' sobre ' . $background);
+$expect(str_contains($css, ':root,' . "\n" . '[data-theme="dark"]'), 'Tema escuro como fallback sem JavaScript');
+foreach (['dark', 'light'] as $theme) {
+    preg_match('/\[data-theme="' . $theme . '"\]\s*\{([^}]+)\}/', $css, $themeBlock);
+    $expect(isset($themeBlock[1]), 'Tokens definidos para o tema ' . $theme);
+    preg_match_all('/--color-([a-z-]+):\s*#([0-9a-f]{6});/i', $themeBlock[1] ?? '', $colorMatches, PREG_SET_ORDER);
+    $luminance = [];
+    foreach ($colorMatches as $color) {
+        $rgb = array_map(static function (string $channel): float {
+            $value = hexdec($channel) / 255;
+            return $value <= 0.04045 ? $value / 12.92 : (($value + 0.055) / 1.055) ** 2.4;
+        }, str_split($color[2], 2));
+        $luminance[$color[1]] = 0.2126 * $rgb[0] + 0.7152 * $rgb[1] + 0.0722 * $rgb[2];
     }
-}
-foreach (['accent', 'accent-hover'] as $background) {
-    $ratio = (max($luminance['on-accent'], $luminance[$background]) + 0.05)
-        / (min($luminance['on-accent'], $luminance[$background]) + 0.05);
-    $expect($ratio >= 4.5, 'Texto do botão com contraste suficiente sobre ' . $background);
+    foreach (['background', 'surface', 'surface-hover'] as $background) {
+        foreach (['text', 'muted', 'accent', 'accent-hover', 'focus'] as $foreground) {
+            $ratio = (max($luminance[$foreground], $luminance[$background]) + 0.05)
+                / (min($luminance[$foreground], $luminance[$background]) + 0.05);
+            $expect($ratio >= ($foreground === 'focus' ? 3 : 4.5), 'Contraste em ' . $theme . ': ' . $foreground . ' sobre ' . $background);
+        }
+    }
+    foreach (['accent', 'accent-hover'] as $background) {
+        $ratio = (max($luminance['on-accent'], $luminance[$background]) + 0.05)
+            / (min($luminance['on-accent'], $luminance[$background]) + 0.05);
+        $expect($ratio >= 4.5, 'Texto do botão em ' . $theme . ' sobre ' . $background);
+    }
 }
 
 $previousOrigin = getenv('APP_ORIGIN');
@@ -732,6 +860,10 @@ try {
     (new ProjectController(['name' => 'Teste', 'base_path' => ''], $projects))->show('projeto-oculto');
     $html = ob_get_clean();
     $expect(http_response_code() === 404 && !str_contains($html, $hidden['summary']), 'URL direta de projeto oculto retorna 404 sem expor dados');
+    ob_start();
+    (new HomeController(['name' => 'Teste', 'base_path' => ''], $projects, $emptySkills, $emptyContact))->index();
+    $html = ob_get_clean();
+    $expect(!str_contains($html, $hidden['summary']) && !str_contains($html, $hidden['title']), 'Projeto oculto não aparece em nenhum grupo da home');
 
     $hidden['visible'] = true;
     $hidden['status'] = 'Estado <script>alert("x")</script>';
@@ -770,6 +902,7 @@ try {
     ))->index();
     $html = ob_get_clean();
     $expect(!str_contains($html, '<script>') && str_contains($html, '&lt;script&gt;alert(&quot;perfil&quot;)&lt;/script&gt;'), 'Dados de perfil, formação, experiência e certificados escapados na home e metadados');
+    $expect(str_contains($html, '<li>&lt;script&gt;alert(&quot;perfil&quot;)&lt;/script&gt;</li>'), 'Novas tags de tecnologia do estágio são escapadas');
 } finally {
     unlink($visibilityFile);
     unlink($profileFile);

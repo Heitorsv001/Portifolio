@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Models\Contact;
+
 abstract class Controller
 {
     /** @param array{name: string, base_path: string, origin?: ?string} $config */
@@ -24,8 +26,10 @@ abstract class Controller
         $basePath = rtrim($this->config['base_path'], '/');
         $homeUrl = $basePath . '/';
         $projectsUrl = $basePath . '/projetos';
-        $stylesheetUrl = $basePath . '/assets/css/style.css';
-        $faviconUrl = $basePath . '/assets/images/favicon.svg';
+        $stylesheetUrl = $this->versionedAssetUrl('assets/css/style.css');
+        $themeScriptUrl = $this->versionedAssetUrl('assets/js/theme-init.js');
+        $siteScriptUrl = $this->versionedAssetUrl('assets/js/site.js');
+        $faviconUrl = $basePath . '/assets/images/meu-retrato.png';
         $data += [
             'title' => $appName,
             'description' => 'Portfólio de um Desenvolvedor Full Stack.',
@@ -34,7 +38,11 @@ abstract class Controller
             'noIndex' => false,
             'shareImageAlt' => 'Portfólio — Desenvolvedor Full Stack',
         ];
+        $data['contact'] ??= (new Contact())->all();
         $data['description'] = trim(preg_replace('/\s+/u', ' ', $data['description']) ?? '');
+        $particlesScriptUrl = $data['currentPage'] === 'home'
+            ? $this->versionedAssetUrl('assets/js/hero-particles.js')
+            : null;
         $siteOrigin = $this->siteOrigin();
         $canonicalUrl = !$data['noIndex'] && $siteOrigin !== null && $data['pagePath'] !== null
             ? $siteOrigin . $basePath . $data['pagePath']
@@ -51,6 +59,15 @@ abstract class Controller
 
         extract($data, EXTR_SKIP);
         require dirname(__DIR__) . '/Views/layouts/main.php';
+    }
+
+    private function versionedAssetUrl(string $path): string
+    {
+        $file = dirname(__DIR__, 2) . '/public/' . $path;
+        $version = is_file($file) ? hash_file('sha256', $file) : false;
+
+        return rtrim($this->config['base_path'], '/') . '/' . $path
+            . ($version === false ? '' : '?v=' . substr($version, 0, 12));
     }
 
     private function siteOrigin(): ?string

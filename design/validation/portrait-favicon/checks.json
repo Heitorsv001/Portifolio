@@ -1,0 +1,58 @@
+[
+  {
+    "theme": "dark",
+    "width": 390,
+    "loaded": true,
+    "source": "http://localhost/portifolio/assets/images/meu-retrato.png",
+    "diameter": 80,
+    "radius": "50%",
+    "clip": "hidden",
+    "transform": "matrix(1.15, 0, 0, 1.15, 0, 0)",
+    "position": "50% 40%",
+    "favicon": "http://localhost/portifolio/assets/images/meu-retrato.png",
+    "faviconType": "image/png",
+    "overflow": false
+  },
+  {
+    "theme": "dark",
+    "width": 1440,
+    "loaded": true,
+    "source": "http://localhost/portifolio/assets/images/meu-retrato.png",
+    "diameter": 112,
+    "radius": "50%",
+    "clip": "hidden",
+    "transform": "matrix(1.15, 0, 0, 1.15, 0, 0)",
+    "position": "50% 40%",
+    "favicon": "http://localhost/portifolio/assets/images/meu-retrato.png",
+    "faviconType": "image/png",
+    "overflow": false
+  },
+  {
+    "theme": "light",
+    "width": 390,
+    "loaded": true,
+    "source": "http://localhost/portifolio/assets/images/meu-retrato.png",
+    "diameter": 80,
+    "radius": "50%",
+    "clip": "hidden",
+    "transform": "matrix(1.15, 0, 0, 1.15, 0, 0)",
+    "position": "50% 40%",
+    "favicon": "http://localhost/portifolio/assets/images/meu-retrato.png",
+    "faviconType": "image/png",
+    "overflow": false
+  },
+  {
+    "theme": "light",
+    "width": 1440,
+    "loaded": true,
+    "source": "http://localhost/portifolio/assets/images/meu-retrato.png",
+    "diameter": 112,
+    "radius": "50%",
+    "clip": "hidden",
+    "transform": "matrix(1.15, 0, 0, 1.15, 0, 0)",
+    "position": "50% 40%",
+    "favicon": "http://localhost/portifolio/assets/images/meu-retrato.png",
+    "faviconType": "image/png",
+    "overflow": false
+  }
+]

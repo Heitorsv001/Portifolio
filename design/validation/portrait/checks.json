@@ -1,0 +1,54 @@
+[
+  {
+    "theme": "dark",
+    "width": 390,
+    "loaded": true,
+    "source": "http://localhost/portifolio/assets/images/Retrato%20Masculino%20com%20Luz%20Violeta.png",
+    "alt": "Retrato de Heitor Silva Vareiro",
+    "diameter": 80,
+    "height": 80,
+    "radius": "50%",
+    "fit": "cover",
+    "position": "50% 30%",
+    "overflow": false
+  },
+  {
+    "theme": "dark",
+    "width": 1440,
+    "loaded": true,
+    "source": "http://localhost/portifolio/assets/images/Retrato%20Masculino%20com%20Luz%20Violeta.png",
+    "alt": "Retrato de Heitor Silva Vareiro",
+    "diameter": 112,
+    "height": 112,
+    "radius": "50%",
+    "fit": "cover",
+    "position": "50% 30%",
+    "overflow": false
+  },
+  {
+    "theme": "light",
+    "width": 390,
+    "loaded": true,
+    "source": "http://localhost/portifolio/assets/images/Retrato%20Masculino%20com%20Luz%20Violeta.png",
+    "alt": "Retrato de Heitor Silva Vareiro",
+    "diameter": 80,
+    "height": 80,
+    "radius": "50%",
+    "fit": "cover",
+    "position": "50% 30%",
+    "overflow": false
+  },
+  {
+    "theme": "light",
+    "width": 1440,
+    "loaded": true,
+    "source": "http://localhost/portifolio/assets/images/Retrato%20Masculino%20com%20Luz%20Violeta.png",
+    "alt": "Retrato de Heitor Silva Vareiro",
+    "diameter": 112,
+    "height": 112,
+    "radius": "50%",
+    "fit": "cover",
+    "position": "50% 30%",
+    "overflow": false
+  }
+]

@@ -1,0 +1,156 @@
+[
+  {
+    "url": "http://127.0.0.1:8099/",
+    "width": 390,
+    "overflow": false,
+    "assets": [
+      "http://127.0.0.1:8099/assets/js/theme-init.js?v=6ea416ec61f7",
+      "http://127.0.0.1:8099/assets/css/style.css?v=ec7e00cfb714",
+      "http://127.0.0.1:8099/assets/js/site.js?v=9943d1d14666",
+      "http://127.0.0.1:8099/assets/js/hero-particles.js?v=666be53e36ed"
+    ],
+    "navigation": [
+      "/#experiencia",
+      "/#sobre",
+      "/#projetos",
+      "/#habilidades",
+      "/#formacao",
+      "/#contato"
+    ],
+    "footer": 2
+  },
+  {
+    "url": "http://127.0.0.1:8099/projetos",
+    "width": 390,
+    "overflow": false,
+    "assets": [
+      "http://127.0.0.1:8099/assets/js/theme-init.js?v=6ea416ec61f7",
+      "http://127.0.0.1:8099/assets/css/style.css?v=ec7e00cfb714",
+      "http://127.0.0.1:8099/assets/js/site.js?v=9943d1d14666"
+    ],
+    "navigation": [
+      "/#experiencia",
+      "/#sobre",
+      "/#projetos",
+      "/#habilidades",
+      "/#formacao",
+      "/#contato"
+    ],
+    "footer": 2
+  },
+  {
+    "url": "http://127.0.0.1:8099/projetos/gerenciador-de-permanencias",
+    "width": 390,
+    "overflow": false,
+    "assets": [
+      "http://127.0.0.1:8099/assets/js/theme-init.js?v=6ea416ec61f7",
+      "http://127.0.0.1:8099/assets/css/style.css?v=ec7e00cfb714",
+      "http://127.0.0.1:8099/assets/js/site.js?v=9943d1d14666"
+    ],
+    "navigation": [
+      "/#experiencia",
+      "/#sobre",
+      "/#projetos",
+      "/#habilidades",
+      "/#formacao",
+      "/#contato"
+    ],
+    "footer": 2
+  },
+  {
+    "url": "http://127.0.0.1:8099/rota-inexistente",
+    "width": 390,
+    "overflow": false,
+    "assets": [
+      "http://127.0.0.1:8099/assets/js/theme-init.js?v=6ea416ec61f7",
+      "http://127.0.0.1:8099/assets/css/style.css?v=ec7e00cfb714",
+      "http://127.0.0.1:8099/assets/js/site.js?v=9943d1d14666"
+    ],
+    "navigation": [
+      "/#experiencia",
+      "/#sobre",
+      "/#projetos",
+      "/#habilidades",
+      "/#formacao",
+      "/#contato"
+    ],
+    "footer": 2
+  },
+  {
+    "url": "http://127.0.0.1:8099/",
+    "width": 1440,
+    "overflow": false,
+    "assets": [
+      "http://127.0.0.1:8099/assets/js/theme-init.js?v=6ea416ec61f7",
+      "http://127.0.0.1:8099/assets/css/style.css?v=ec7e00cfb714",
+      "http://127.0.0.1:8099/assets/js/site.js?v=9943d1d14666",
+      "http://127.0.0.1:8099/assets/js/hero-particles.js?v=666be53e36ed"
+    ],
+    "navigation": [
+      "/#experiencia",
+      "/#sobre",
+      "/#projetos",
+      "/#habilidades",
+      "/#formacao",
+      "/#contato"
+    ],
+    "footer": 2
+  },
+  {
+    "url": "http://127.0.0.1:8099/projetos",
+    "width": 1440,
+    "overflow": false,
+    "assets": [
+      "http://127.0.0.1:8099/assets/js/theme-init.js?v=6ea416ec61f7",
+      "http://127.0.0.1:8099/assets/css/style.css?v=ec7e00cfb714",
+      "http://127.0.0.1:8099/assets/js/site.js?v=9943d1d14666"
+    ],
+    "navigation": [
+      "/#experiencia",
+      "/#sobre",
+      "/#projetos",
+      "/#habilidades",
+      "/#formacao",
+      "/#contato"
+    ],
+    "footer": 2
+  },
+  {
+    "url": "http://127.0.0.1:8099/projetos/gerenciador-de-permanencias",
+    "width": 1440,
+    "overflow": false,
+    "assets": [
+      "http://127.0.0.1:8099/assets/js/theme-init.js?v=6ea416ec61f7",
+      "http://127.0.0.1:8099/assets/css/style.css?v=ec7e00cfb714",
+      "http://127.0.0.1:8099/assets/js/site.js?v=9943d1d14666"
+    ],
+    "navigation": [
+      "/#experiencia",
+      "/#sobre",
+      "/#projetos",
+      "/#habilidades",
+      "/#formacao",
+      "/#contato"
+    ],
+    "footer": 2
+  },
+  {
+    "url": "http://127.0.0.1:8099/rota-inexistente",
+    "width": 1440,
+    "overflow": false,
+    "assets": [
+      "http://127.0.0.1:8099/assets/js/theme-init.js?v=6ea416ec61f7",
+      "http://127.0.0.1:8099/assets/css/style.css?v=ec7e00cfb714",
+      "http://127.0.0.1:8099/assets/js/site.js?v=9943d1d14666"
+    ],
+    "navigation": [
+      "/#experiencia",
+      "/#sobre",
+      "/#projetos",
+      "/#habilidades",
+      "/#formacao",
+      "/#contato"
+    ],
+    "footer": 2
+  }
+]

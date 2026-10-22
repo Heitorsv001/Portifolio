@@ -7,6 +7,9 @@
 /** @var array|false $shareImageSize */
 /** @var string $shareImageAlt */
 /** @var string $stylesheetUrl */
+/** @var string $themeScriptUrl */
+/** @var string $siteScriptUrl */
+/** @var string|null $particlesScriptUrl */
 /** @var string $faviconUrl */
 /** @var string $file Caminho interno da view, definido pelo Controller. */
 ?>
@@ -15,6 +18,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#17171c">
     <title><?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?></title>
     <meta name="description" content="<?= htmlspecialchars($description, ENT_QUOTES, 'UTF-8') ?>">
     <?php if ($noIndex): ?>
@@ -37,13 +41,18 @@
             <meta property="og:image:type" content="<?= htmlspecialchars($shareImageSize['mime'], ENT_QUOTES, 'UTF-8') ?>">
         <?php endif; ?>
     <?php endif; ?>
-    <link rel="icon" type="image/svg+xml" href="<?= htmlspecialchars($faviconUrl, ENT_QUOTES, 'UTF-8') ?>">
+    <link rel="icon" type="image/png" href="<?= htmlspecialchars($faviconUrl, ENT_QUOTES, 'UTF-8') ?>">
+    <script src="<?= htmlspecialchars($themeScriptUrl, ENT_QUOTES, 'UTF-8') ?>"></script>
     <link rel="stylesheet" href="<?= htmlspecialchars($stylesheetUrl, ENT_QUOTES, 'UTF-8') ?>">
+    <script src="<?= htmlspecialchars($siteScriptUrl, ENT_QUOTES, 'UTF-8') ?>" defer></script>
+    <?php if ($particlesScriptUrl !== null): ?>
+        <script src="<?= htmlspecialchars($particlesScriptUrl, ENT_QUOTES, 'UTF-8') ?>" defer></script>
+    <?php endif; ?>
 </head>
 <body id="topo">
     <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
     <?php require dirname(__DIR__) . '/partials/header.php'; ?>
-    <main id="conteudo" class="site-main container" tabindex="-1">
+    <main id="conteudo" class="site-main<?= $currentPage === 'home' ? ' site-main--home' : ' container' ?>" tabindex="-1">
         <?php require $file; ?>
     </main>
     <?php require dirname(__DIR__) . '/partials/footer.php'; ?>

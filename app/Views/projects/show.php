@@ -1,10 +1,14 @@
 <?php
 /** @var array<string, mixed> $project */
 /** @var string $projectsUrl */
+/** @var string $homeUrl */
 /** @var string $basePath */
 ?>
 <article class="project-detail" aria-labelledby="projeto-titulo">
-    <a class="text-link" href="<?= htmlspecialchars($projectsUrl, ENT_QUOTES, 'UTF-8') ?>">Voltar aos projetos</a>
+    <nav class="project-return" aria-label="Navegação do projeto">
+        <a class="text-link" href="<?= htmlspecialchars($homeUrl . '#projetos', ENT_QUOTES, 'UTF-8') ?>">Voltar aos projetos</a>
+        <a class="text-link" href="<?= htmlspecialchars($projectsUrl, ENT_QUOTES, 'UTF-8') ?>">Catálogo completo</a>
+    </nav>
     <div class="page-content">
         <p class="eyebrow">Portfólio / Projeto</p>
         <h1 id="projeto-titulo"><?= htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8') ?></h1>

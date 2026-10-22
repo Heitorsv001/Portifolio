@@ -1,0 +1,161 @@
+{
+  "expected404": [
+    {
+      "method": "Log.entryAdded",
+      "params": {
+        "entry": {
+          "source": "network",
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "timestamp": 1792628581248.881,
+          "url": "http://localhost/portifolio/rota-inexistente",
+          "networkRequestId": "B093B8B416F64C66628EE4E4AFC68075"
+        }
+      }
+    },
+    {
+      "method": "Log.entryAdded",
+      "params": {
+        "entry": {
+          "source": "network",
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "timestamp": 1792628581795.182,
+          "url": "http://localhost/portifolio/rota-inexistente",
+          "networkRequestId": "121943958D8B1153BC68FC174B494B2D"
+        }
+      }
+    },
+    {
+      "method": "Log.entryAdded",
+      "params": {
+        "entry": {
+          "source": "network",
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "timestamp": 1792628582896.825,
+          "url": "http://localhost/portifolio/rota-inexistente",
+          "networkRequestId": "E15EE59993F47255682D1612784B45D5"
+        }
+      }
+    },
+    {
+      "method": "Log.entryAdded",
+      "params": {
+        "entry": {
+          "source": "network",
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "timestamp": 1792628583900.782,
+          "url": "http://localhost/portifolio/rota-inexistente",
+          "networkRequestId": "4968DC7E604A3A0295102BAE01E4C7DA"
+        }
+      }
+    },
+    {
+      "method": "Log.entryAdded",
+      "params": {
+        "entry": {
+          "source": "network",
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "timestamp": 1792628584433.97,
+          "url": "http://localhost/portifolio/rota-inexistente",
+          "networkRequestId": "0E9D238CB7574699E601F537D0183B0D"
+        }
+      }
+    },
+    {
+      "method": "Log.entryAdded",
+      "params": {
+        "entry": {
+          "source": "network",
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "timestamp": 1792628585993.266,
+          "url": "http://localhost/portifolio/rota-inexistente",
+          "networkRequestId": "5414D47DD2D6932AF133453DBFF0EED2"
+        }
+      }
+    },
+    {
+      "method": "Log.entryAdded",
+      "params": {
+        "entry": {
+          "source": "network",
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "timestamp": 1792628586749.638,
+          "url": "http://localhost/portifolio/rota-inexistente",
+          "networkRequestId": "EFAF2EEB6B1FEEDE3E444CB223BAC542"
+        }
+      }
+    },
+    {
+      "method": "Log.entryAdded",
+      "params": {
+        "entry": {
+          "source": "network",
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "timestamp": 1792628587300.799,
+          "url": "http://localhost/portifolio/rota-inexistente",
+          "networkRequestId": "23899AC429DAF9FADF5949A3592A88BA"
+        }
+      }
+    },
+    {
+      "method": "Log.entryAdded",
+      "params": {
+        "entry": {
+          "source": "network",
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "timestamp": 1792628588390.545,
+          "url": "http://localhost/portifolio/rota-inexistente",
+          "networkRequestId": "11D1FEBF82A60DC7D279851D65B58D56"
+        }
+      }
+    },
+    {
+      "method": "Log.entryAdded",
+      "params": {
+        "entry": {
+          "source": "network",
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "timestamp": 1792628589347.209,
+          "url": "http://localhost/portifolio/rota-inexistente",
+          "networkRequestId": "F816DFFD787F9226075572D0FF67E8A6"
+        }
+      }
+    },
+    {
+      "method": "Log.entryAdded",
+      "params": {
+        "entry": {
+          "source": "network",
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "timestamp": 1792628589883.119,
+          "url": "http://localhost/portifolio/rota-inexistente",
+          "networkRequestId": "5A3082A029FC506CE1F07DE06785DB6A"
+        }
+      }
+    },
+    {
+      "method": "Log.entryAdded",
+      "params": {
+        "entry": {
+          "source": "network",
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "timestamp": 1792628591428.824,
+          "url": "http://localhost/portifolio/rota-inexistente",
+          "networkRequestId": "16AE4AB4E5DCEC53659E955F46788D1A"
+        }
+      }
+    }
+  ],
+  "unexpected": []
+}

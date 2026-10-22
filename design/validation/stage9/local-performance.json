@@ -1,0 +1,153 @@
+{
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/156.0.8078.47",
+    "revision": "@1d17a2e2ee147bb7d6ae2ab6abdb3a2510c17775",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "jsVersion": "15.6.75.19"
+  },
+  "environment": "Chrome headless local, 1440x900, DPR 1, sem limitação de CPU/rede; amostra única por página; sem Lighthouse",
+  "samples": [
+    {
+      "lcp": 108,
+      "cls": 0,
+      "longTasks": [],
+      "draws": 26,
+      "radii": [
+        1.0512399009867153,
+        0.9923599050212747,
+        1.3082746723873933,
+        1.5790592370259182,
+        1.2241855993211228,
+        0.9282140981934893,
+        0.9412671515902492,
+        1.1359700639641552,
+        1.284548368862516,
+        1.276881665194764,
+        1.4011430335377866,
+        0.9456377469467782,
+        1.370420259151437,
+        1.1300850947683814,
+        1.4864682541341447,
+        1.258476801071336,
+        1.5086655744229849,
+        0.9859711799325032,
+        0.8394552158086094,
+        0.9523996933853087,
+        1.430454959852109,
+        1.1139423293428476,
+        1.2734794128293767,
+        1.2952544000533537,
+        1.082573108388158,
+        1.5427797208469192,
+        0.9425678097184909,
+        0.8486224269140994,
+        1.2170872692335124,
+        1.2346166148719184,
+        1.247831094016582,
+        1.2100203570700956,
+        0.8817035203710344,
+        1.1357472352188525,
+        1.4712946039146932,
+        1.0107869832971543,
+        1.0280501339439503,
+        1.292028169623957,
+        0.9412707148941327,
+        0.8445023516332067,
+        1.0692387666392404,
+        1.4847279943286442,
+        1.2262006718158265,
+        1.2106230346955598,
+        0.9110517374976292,
+        0.965633142315771,
+        0.9366140754071858,
+        1.2655351052343704,
+        1.3057090524217654,
+        0.9651186388292868,
+        1.0988525480505658,
+        1.4895381908610168,
+        1.4508424883074231
+      ],
+      "fcp": 108,
+      "domContentLoaded": 74.30000000074506,
+      "load": 74.5,
+      "resourceBytes": 8670,
+      "page": "home",
+      "metrics": {
+        "Nodes": 2055,
+        "LayoutCount": 3,
+        "RecalcStyleCount": 5,
+        "ScriptDuration": 0.023843,
+        "TaskDuration": 0.216274,
+        "JSHeapUsedSize": 1228024
+      }
+    },
+    {
+      "lcp": 88,
+      "cls": 0,
+      "longTasks": [],
+      "draws": 0,
+      "radii": [],
+      "fcp": 88,
+      "domContentLoaded": 57.90000000037253,
+      "load": 58.09999999962747,
+      "resourceBytes": 6381,
+      "page": "catalog",
+      "metrics": {
+        "Nodes": 2429,
+        "LayoutCount": 1,
+        "RecalcStyleCount": 4,
+        "ScriptDuration": 0.002206,
+        "TaskDuration": 0.049118,
+        "JSHeapUsedSize": 1590316
+      }
+    },
+    {
+      "lcp": 84,
+      "cls": 0,
+      "longTasks": [],
+      "draws": 0,
+      "radii": [],
+      "fcp": 84,
+      "domContentLoaded": 51,
+      "load": 51.30000000074506,
+      "resourceBytes": 6381,
+      "page": "detail",
+      "metrics": {
+        "Nodes": 2691,
+        "LayoutCount": 1,
+        "RecalcStyleCount": 4,
+        "ScriptDuration": 0.002381,
+        "TaskDuration": 0.04444,
+        "JSHeapUsedSize": 1858040
+      }
+    }
+  ],
+  "particleChecks": [
+    {
+      "passed": true,
+      "label": "Partículas mantêm cores aprovadas nos temas"
+    },
+    {
+      "passed": true,
+      "label": "Tema claro mantém o dobro do tamanho das partículas"
+    },
+    {
+      "passed": true,
+      "label": "Desenho limitado a aproximadamente 30 quadros por segundo"
+    },
+    {
+      "passed": true,
+      "label": "Hero fora da viewport pausa desenho real do canvas"
+    },
+    {
+      "passed": true,
+      "label": "Retorno ao hero retoma desenho"
+    },
+    {
+      "passed": true,
+      "label": "Movimento reduzido interrompe desenhos e libera buffer"
+    }
+  ],
+  "drawsIn1100ms": 25
+}
