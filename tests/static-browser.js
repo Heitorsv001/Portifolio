@@ -10,7 +10,7 @@ const root = path.resolve(__dirname, '..');
 const dist = path.join(root, 'dist');
 const base = (process.env.APP_BASE_PATH || '').replace(/\/$/, '');
 const routes = ['/', '/projetos/', '/projetos/crowns/', '/inexistente/profundo/'];
-const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.png': 'image/png', '.pdf': 'application/pdf', '.xml': 'application/xml', '.txt': 'text/plain' };
+const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.png': 'image/png', '.svg': 'image/svg+xml', '.pdf': 'application/pdf', '.xml': 'application/xml', '.txt': 'text/plain' };
 let checks = 0;
 let browser;
 let php;
