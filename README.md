@@ -19,7 +19,7 @@ A entrega usa `force-trailing-slash` para páginas HTML e `404-page` para servir
 ### Secrets e primeiro deploy
 
 1. Confira no painel o Worker **`heitorvareiro`**, o endereço acima e o **Account ID** da conta proprietária. Antes da primeira publicação, registre a versão/deployment atualmente saudável para eventual rollback.
-2. Crie um token da Cloudflare com **Account → Workers Scripts → Edit**, limitado à conta proprietária. Essa permissão permite publicar assets e consultar o Worker/subdomínio; não é necessário conceder permissões de Pages ou DNS para este endereço. Não use Global API Key.
+2. No modelo legado, use um token com **Account → Workers Scripts → Edit/Write**, limitado à conta proprietária. Essa permissão é aceita pelas duas consultas usadas na verificação. No modelo atual de papéis, o deploy de um Worker existente requer **Editor** para esse Worker; há uma limitação documentada abaixo para a consulta do subdomínio da conta. Não acrescente permissões administrativas, de Pages ou DNS para diagnosticar este endereço. Não use Global API Key.
 3. No repositório, abra **Settings → Secrets and variables → Actions → New repository secret** e configure:
 
    | Secret | Valor |
@@ -31,6 +31,60 @@ A entrega usa `force-trailing-slash` para páginas HTML e `404-page` para servir
 5. Acompanhe todas as etapas. Depois de uma execução concluída, confira home, `/projetos/`, todos os detalhes, PDF, temas e menu; `/projetos` deve redirecionar para `/projetos/` e uma URL inexistente deve retornar a página personalizada com HTTP 404. Confira também canonical, `robots.txt` e `sitemap.xml` no endereço público.
 
 Não há etapa de criação de Worker. Antes da publicação, `node scripts/verify-worker.mjs` faz apenas consultas GET à [API do Worker existente](https://developers.cloudflare.com/api/resources/workers/subresources/scripts/subresources/subdomain/methods/get/) e ao [subdomínio da conta](https://developers.cloudflare.com/api/resources/workers/subresources/subdomains/methods/get/). Worker ausente, conta/endereço divergente, `workers.dev` desabilitado, segredo ausente ou erro da API interrompem o job. Não copie os secrets para código, `.env`, saída estática ou logs.
+
+### Diagnóstico de falhas em `verify-worker.mjs`
+
+A mensagem antiga “Verificação interrompida. Confira os secrets…” ocultava todas as exceções, inclusive o status HTTP. Portanto, o log antigo com exit code 1 não permite determinar a causa remota. A correção preserva o bloqueio do deploy e informa o recurso consultado, o status HTTP e, quando disponíveis, apenas os códigos numéricos da API. Não imprime valores dos secrets, corpos HTTP, mensagens da API nem exceções de rede, que podem conter dados sensíveis.
+
+O workflow `.github/workflows/deploy.yml` já fornece `CLOUDFLARE_API_TOKEN` e `CLOUDFLARE_ACCOUNT_ID` pelo `env` da etapa que executa Node.js. `APP_ORIGIN` é herdado do `env` global. Os mesmos secrets são passados aos inputs `apiToken` e `accountId` da etapa Wrangler. Não foi identificado erro nesse mapeamento; os valores e a disponibilidade real dos secrets dependem da configuração no GitHub. O workflow e `wrangler.jsonc` foram preservados.
+
+Condições de falha e interpretação:
+
+| Condição | Diagnóstico e ação |
+| --- | --- |
+| Secret ausente, vazio ou apenas espaços | Identifica o nome do secret. Cadastre-o em **Secrets**, não em **Variables**. |
+| Account ID fora do formato de 32 caracteres hexadecimais | Account ID inválido. Use o ID da conta proprietária, sem espaços; um Zone ID pode ter o mesmo formato e só será distinguido por conferência no painel ou pela consulta remota. |
+| Token com espaços, quebra de linha ou prefixo `Bearer ` | Secret malformado. Armazene apenas o token. |
+| `name` diferente de `heitorvareiro` | Nome do Worker incorreto. `heitorsvareiro` é o subdomínio da conta, não o Worker. |
+| `account_id` no arquivo diferente do secret | Account ID divergente. Evita verificar uma conta e publicar em outra. A configuração atual omite esse campo e usa o secret. |
+| `APP_ORIGIN` ausente ou divergente | Deve ser `https://heitorvareiro.heitorsvareiro.workers.dev`, sem barra final. |
+| Configuração divergente | Exige objeto JSON, `workers_dev: true`, assets em `./dist`, `force-trailing-slash` e `404-page`; bloqueia `main`, `routes`, `route` e `env` conforme a proteção existente. |
+| Arquivo ilegível ou JSON inválido | Erro local antes das consultas. Apesar da extensão `.jsonc`, o verificador mantém a leitura de JSON estrito: não acrescente comentários nem vírgulas finais. O arquivo versionado já atende a esse formato. |
+| HTTP 401 | Falha de autenticação. Confira token ativo, validade e expiração. |
+| HTTP 403 | Permissão insuficiente para o recurso. Confira escopo e conta; Account ID incorreto também pode produzir 403. Não comprova, sozinho, que o token é inválido. |
+| HTTP 404 na consulta do subdomínio da conta | Conta/subdomínio não encontrado. Confira Account ID e cadastro de `workers.dev`; não é possível afirmar apenas por esse status que a conta não existe. |
+| HTTP 404 na consulta do Worker | Worker `heitorvareiro` não encontrado na conta cujo subdomínio já foi confirmado. Confira existência e nome exato no painel. Não crie outro Worker. |
+| Outros HTTP sem sucesso, como 400, 429 e 5xx | Falha da API, limitação de chamadas ou indisponibilidade. HTTP 400 também exige conferir Account ID e escopo. O status continua visível mesmo se o corpo não for JSON. |
+| HTTP de sucesso com `success: false` | A API recusou a operação. HTTP 200 sozinho não autoriza deploy; consulte os códigos numéricos exibidos. |
+| HTTP/JSON inválido ou campos ausentes/tipos inesperados | Resposta inválida. Exige `success` booleano, `result` objeto, `result.subdomain` string não vazia e `result.enabled` booleano, conforme cada endpoint. |
+| `result.subdomain` diferente de `heitorsvareiro` | Subdomínio inesperado: Account ID pode indicar outra conta ou o subdomínio foi alterado. Não imprime o valor recebido. |
+| `result.enabled: false` | URL de produção `workers.dev` desabilitada. Confira **Domains & Routes**; `previews_enabled` trata de URLs de preview e não substitui `enabled`. |
+| Falha de rede, DNS, TLS, redirecionamento ou timeout de 30 segundos | Interrompe a verificação. JSON ilegível ou leitura do corpo interrompida também bloqueiam o deploy. |
+| Falha interna inesperada | Interrompe com mensagem segura, sem imprimir a exceção original. |
+
+Os endpoints atuais são `GET /accounts/{account_id}/workers/subdomain` (`result.subdomain`) e `GET /accounts/{account_id}/workers/scripts/{script_name}/subdomain` (`result.enabled`). O primeiro é consultado antes do segundo para conferir a conta antes de diagnosticar Worker ausente. A autenticação usa `Authorization: Bearer …`; não há consulta a `/user/tokens/verify`, listagem de contas ou alteração remota.
+
+**Limite de permissões:** as referências dos dois endpoints aceitam `Workers Scripts Write`, portanto o token legado de publicação não precisa de uma permissão Read separada. Entretanto, a [documentação atual de papéis Workers](https://developers.cloudflare.com/workers/authorization/workers/) permite deploy com `Editor` restrito ao Worker, enquanto a [referência do subdomínio da conta](https://developers.cloudflare.com/api/resources/workers/subresources/subdomains/methods/get/) lista somente permissões legadas no nível da conta. Assim, não é possível garantir essa consulta com o escopo mínimo por Worker. Se apenas essa consulta retornar 403 com um token granular, confirme o subdomínio no painel e registre essa limitação; não conceda Admin, Account Settings ou acesso a todas as contas para contorná-la. A proteção permanece bloqueada enquanto não puder confirmar o destino. Uma verificação independente da identidade da conta via API de Accounts também exigiria permissões fora do objetivo; por isso não foi adicionada. Um Account ID bem formado, porém incorreto, não pode ser diagnosticado com certeza a partir de todo 403/404.
+
+Confira manualmente:
+
+1. Em **GitHub → Heitorsv001/Portifolio → Settings → Secrets and variables → Actions**, confirme os nomes dos dois **repository secrets**. Secrets de organização precisam permitir este repositório. Secrets de environment não são carregados por este job, que não declara `environment`; use repository secrets conforme a configuração existente. Uma referência a [secret indisponível resulta em string vazia](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).
+2. No painel Cloudflare, selecione a conta proprietária, confira seu Account ID e a presença de **heitorvareiro**. Confirme o subdomínio **heitorsvareiro**, a URL de produção e a habilitação de `workers.dev`.
+3. Confira o token ativo e seu escopo sobre essa mesma conta/Worker. Se houver restrições de IP ou de validade, confira sua compatibilidade com o runner do GitHub. Nunca cole o token em logs ou comandos compartilhados.
+
+Para testar localmente sem credenciais ou chamadas reais à Cloudflare:
+
+```sh
+node --check scripts/verify-worker.mjs
+node --test tests/verify-worker.mjs
+git diff --check
+```
+
+A suíte usa respostas simuladas, credenciais fictícias e subprocessos isolados para conferir códigos de saída e mensagens sem executar deploy. Não comprova o acesso real da conta ou do token.
+
+Validação desta correção em 24/10/2026, com Node.js 24.21.0: **33/33 testes aprovados**, sintaxe dos dois arquivos JavaScript aprovada e `git diff --check` sem erros. O sandbox local bloqueou subprocessos na primeira tentativa; a suíte completa foi executada com essa restrição removida. Nenhuma chamada autenticada à Cloudflare, deploy, commit ou push foi realizado.
+
+Depois de revisar e enviar a correção à `main` em uma etapa autorizada, use **Actions → Deploy do portfólio no Workers → Run workflow → main**. Um push na `main` com Actions habilitado já dispara o workflow; evite iniciar uma execução duplicada. **Re-run jobs** da execução antiga reutiliza a revisão antiga e não testa esta correção. O workflow completo publica se todas as verificações passarem; não foi executado nesta tarefa.
 
 ### Atualizações e verificações do CI
 
