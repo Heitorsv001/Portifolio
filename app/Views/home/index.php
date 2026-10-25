@@ -107,9 +107,11 @@
         <div class="section-content">
             <article class="education" aria-labelledby="curso-titulo">
                 <p class="education-period"><?= htmlspecialchars($profile['education']['period'], ENT_QUOTES, 'UTF-8') ?></p>
-                <h3 id="curso-titulo"><?= htmlspecialchars($profile['education']['course'], ENT_QUOTES, 'UTF-8') ?></h3>
+                <div class="education-heading">
+                    <h3 id="curso-titulo"><?= htmlspecialchars($profile['education']['course'], ENT_QUOTES, 'UTF-8') ?></h3>
+                    <p class="education-status"><?= htmlspecialchars($profile['education']['status'], ENT_QUOTES, 'UTF-8') ?></p>
+                </div>
                 <p class="education-institution"><?= htmlspecialchars($profile['education']['institution'], ENT_QUOTES, 'UTF-8') ?></p>
-                <p class="education-status"><?= htmlspecialchars($profile['education']['status'], ENT_QUOTES, 'UTF-8') ?></p>
             </article>
             <?php if ($profile['certifications'] !== []): ?>
                 <section class="certifications" aria-labelledby="certificacoes-titulo">

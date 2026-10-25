@@ -593,6 +593,13 @@ img {
     min-width: 0;
 }
 
+.education-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) var(--space-2);
+}
+
 .education-status {
     color: var(--color-accent);
     font-weight: 600;
