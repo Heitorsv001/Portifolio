@@ -519,7 +519,8 @@ img {
     scroll-margin-top: calc(var(--header-height) + var(--space-3));
 }
 
-.home-section.home-section--projects {
+.home-section.home-section--projects,
+.home-section.home-section--skills {
     grid-template-columns: minmax(0, 1fr);
 }
 
@@ -794,11 +795,24 @@ img {
     white-space: pre-line;
 }
 
-.skills-grid {
+.skills-carousel {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    gap: var(--space-2);
+    width: 100%;
+    min-width: 0;
+}
+
+.skills-track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 100%;
     gap: var(--space-3);
     width: 100%;
+    padding-block: var(--space-1);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-accent) var(--color-surface);
 }
 
 .skill-category {
@@ -875,6 +889,10 @@ img {
 }
 
 @media (min-width: 48rem) {
+    .skills-track {
+        grid-auto-columns: calc((100% - var(--space-3)) / 2);
+    }
+
     :root {
         --container-padding: 1.5rem;
     }
@@ -904,8 +922,8 @@ img {
 }
 
 @media (min-width: 64rem) {
-    .skills-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+    .skills-track {
+        grid-auto-columns: calc((100% - var(--space-3) * 2) / 3);
     }
 
     .experience-item {

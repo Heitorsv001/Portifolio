@@ -501,7 +501,7 @@ try {
         $expect(str_contains($withoutIcons, '>PHP</span>') && str_contains($withoutIcons, '>Git &amp; revisão</span>'), 'Nomes continuam disponíveis sem os ícones');
         $expect(!str_contains($html, '<script>') && !str_contains($html, '<img src=x'), 'Dados de habilidades não injetam HTML');
         $expect(!str_contains($html, 'Habilidades a confirmar.') && !str_contains($html, 'Categoria vazia'), 'Sem aviso pendente ou categoria vazia quando há habilidades');
-        $expect(str_contains($html, 'id="habilidades" class="home-section" aria-labelledby="habilidades-titulo" tabindex="-1"'), 'Seção tem heading associado e destino focável por fragmento');
+        $expect(str_contains($html, 'id="habilidades" class="home-section home-section--skills" aria-labelledby="habilidades-titulo" tabindex="-1"'), 'Seção tem heading associado e destino focável por fragmento');
         $expect(str_contains($html, 'href="' . $root . '/#habilidades"'), 'Menu acessa habilidades com caminho-base');
         $expect(strpos($html, 'id="habilidades"') > strpos($html, 'id="projetos"'), 'Seção de habilidades segue os projetos');
         preg_match_all('/\bid="([^"]+)"/', $html, $ids);

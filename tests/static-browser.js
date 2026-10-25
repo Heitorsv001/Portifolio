@@ -137,17 +137,22 @@ async function main() {
             await document.fonts.ready;
             await Promise.all(Array.from(document.images, (image) => image.decode()));
           });
-          const state = await page.evaluate(() => ({
-            theme: document.documentElement.dataset.theme,
-            overflow: document.documentElement.scrollWidth > window.innerWidth,
-            headings: document.querySelectorAll('h1').length,
-            skillColumns: document.querySelector('.skills-grid')
-              ? getComputedStyle(document.querySelector('.skills-grid')).gridTemplateColumns.split(/\s+/).length
-              : 0,
-          }));
+          const state = await page.evaluate(() => {
+            const track = document.querySelector('.skills-track');
+            const gap = track ? parseFloat(getComputedStyle(track).columnGap) : 0;
+            return {
+              theme: document.documentElement.dataset.theme,
+              overflow: document.documentElement.scrollWidth > window.innerWidth,
+              headings: document.querySelectorAll('h1').length,
+              skillColumns: track
+                ? Math.round((track.clientWidth + gap) / (track.firstElementChild.getBoundingClientRect().width + gap))
+                : 0,
+            };
+          });
           expect(state.theme === theme && !state.overflow && state.headings === 1, `Layout ${width}px/${theme}/${route}`);
-          if (width >= 1024 && route === '/') {
-            expect(state.skillColumns === 3, `Habilidades em três colunas: ${width}px/${theme}`);
+          if (route === '/') {
+            const visibleCards = width >= 1024 ? 3 : width >= 768 ? 2 : 1;
+            expect(state.skillColumns === visibleCards, `Carrossel com ${visibleCards} cards visíveis: ${width}px/${theme}`);
           }
           screenshots.push(await page.screenshot({ fullPage: true, animations: 'disabled' }));
         }
@@ -186,6 +191,35 @@ async function main() {
   const [download] = await Promise.all([page.waitForEvent('download'), page.locator('a[download]').click()]);
   expect(download.suggestedFilename() === 'CurriculoLinkedin.pdf', 'Download mantém nome do currículo');
   expect((await fs.readFile(await download.path())).equals(await fs.readFile(path.join(root, 'public/assets/documents/CurriculoLinkedin.pdf'))), 'Download mantém bytes do PDF');
+  const track = page.locator('[data-carousel-track]');
+  await track.scrollIntoViewIfNeeded();
+  expect(await page.locator('#habilidades button').count() === 0, 'Carrossel utiliza somente a barra de rolagem, sem botões');
+  await track.hover();
+  await page.mouse.wheel(320, 0);
+  await page.waitForFunction(() => document.querySelector('[data-carousel-track]').scrollLeft > 0);
+  expect(true, 'Rolagem horizontal nativa permanece disponível com movimento reduzido');
+  await track.focus();
+  await page.keyboard.press('End');
+  await page.waitForFunction(() => {
+    const element = document.querySelector('[data-carousel-track]');
+    return element.scrollLeft >= element.scrollWidth - element.clientWidth - 1;
+  });
+  expect(true, 'Tecla End alcança os últimos cards');
+  await page.keyboard.press('Home');
+  await page.waitForFunction(() => document.querySelector('[data-carousel-track]').scrollLeft < 1);
+  await page.keyboard.press('ArrowRight');
+  await page.waitForFunction(() => document.querySelector('[data-carousel-track]').scrollLeft > 0);
+  await page.keyboard.press('ArrowLeft');
+  await page.waitForFunction(() => document.querySelector('[data-carousel-track]').scrollLeft < 1);
+  expect(true, 'Home e setas permitem navegação pelo teclado');
+  await page.keyboard.press('ArrowLeft');
+  await page.waitForFunction(() => {
+    const element = document.querySelector('[data-carousel-track]');
+    return element.scrollLeft >= element.scrollWidth - element.clientWidth - 1;
+  });
+  await page.keyboard.press('ArrowRight');
+  await page.waitForFunction(() => document.querySelector('[data-carousel-track]').scrollLeft < 1);
+  expect(true, 'Teclado permite circular entre o início e o fim');
   await context.close();
 
   const particles = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'no-preference' });
@@ -203,11 +237,39 @@ async function main() {
   await particlesPage.emulateMedia({ reducedMotion: 'no-preference' });
   await particlesPage.waitForFunction(() => document.querySelector('[data-hero-particles]').width > 0);
   expect(true, 'Partículas retomam após mudança de preferência');
+  const automaticTrack = particlesPage.locator('[data-carousel-track]');
+  await automaticTrack.scrollIntoViewIfNeeded();
+  await automaticTrack.hover();
+  await automaticTrack.focus();
+  const initialPosition = await automaticTrack.evaluate(element => element.scrollLeft);
+  await particlesPage.waitForFunction(position => document.querySelector('[data-carousel-track]').scrollLeft > position + 10, initialPosition);
+  expect(true, 'Rolagem automática avança mesmo com ponteiro e foco no carrossel');
+  await particlesPage.mouse.down();
+  const heldPosition = await automaticTrack.evaluate(element => element.scrollLeft);
+  await particlesPage.waitForTimeout(400);
+  expect(await automaticTrack.evaluate(element => element.scrollLeft) === heldPosition, 'Interação manual suspende a rolagem automática');
+  await particlesPage.mouse.up();
+  await particlesPage.waitForFunction(position => document.querySelector('[data-carousel-track]').scrollLeft > position + 10, heldPosition);
+  expect(true, 'Rolagem automática retoma após a interação manual');
+  await particlesPage.keyboard.press('End');
+  await particlesPage.waitForFunction(() => {
+    const element = document.querySelector('[data-carousel-track]');
+    return element.scrollLeft >= element.scrollWidth - element.clientWidth - 1;
+  });
+  await particlesPage.waitForFunction(() => document.querySelector('[data-carousel-track]').scrollLeft < 10);
+  expect(true, 'Rolagem automática volta ao início quando alcança o final');
+  await particlesPage.emulateMedia({ reducedMotion: 'reduce' });
+  await particlesPage.waitForTimeout(100);
+  const reducedPosition = await automaticTrack.evaluate(element => element.scrollLeft);
+  await particlesPage.waitForTimeout(400);
+  expect(await automaticTrack.evaluate(element => element.scrollLeft) === reducedPosition, 'Movimento reduzido interrompe a rolagem automática');
   await particles.close();
   const noScript = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 900 } });
   const fallback = await noScript.newPage();
   await fallback.goto(`${staticOrigin}${base}/`);
   expect(await fallback.locator('h1').isVisible() && await fallback.locator('a[download]').isVisible(), 'Conteúdo e currículo disponíveis sem JavaScript');
+  expect(await fallback.locator('.skill-category').count() > 0
+    && await fallback.locator('#habilidades button').count() === 0, 'Cards e rolagem nativa continuam disponíveis sem JavaScript e sem botões');
   await noScript.close();
   expect(errors.length === 0, `Sem erros inesperados de console/rede: ${errors.join('; ')}`);
   console.log(`${checks}/${checks} verificações HTTP/navegador aprovadas; 32 comparações visuais PHP/estático idênticas.`);

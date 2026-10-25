@@ -146,3 +146,122 @@
     new window.ResizeObserver(updateHeight).observe(header);
   }
 })();
+
+(() => {
+  const carousel = document.querySelector('[data-skills-carousel]');
+  if (carousel === null) {
+    return;
+  }
+
+  const track = carousel.querySelector('[data-carousel-track]');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let frame = null;
+  let previousTime = null;
+  let position = track.scrollLeft;
+  let interactionTimer = null;
+  let interacting = false;
+  let dragging = false;
+  let visible = typeof window.IntersectionObserver !== 'function';
+
+  const stopPlayback = () => {
+    window.cancelAnimationFrame(frame);
+    frame = null;
+    previousTime = null;
+  };
+
+  const advance = (time) => {
+    const elapsed = previousTime === null ? 0 : Math.min(time - previousTime, 64);
+    previousTime = time;
+    position += elapsed * 0.03;
+    if (position >= track.scrollWidth - track.clientWidth) {
+      position = 0;
+    }
+    track.scrollLeft = position;
+    frame = window.requestAnimationFrame(advance);
+  };
+
+  const updatePlayback = () => {
+    stopPlayback();
+    const scrollable = track.scrollWidth > track.clientWidth + 1;
+    track.tabIndex = scrollable ? 0 : -1;
+    if (scrollable && visible && !interacting && !document.hidden && !reducedMotion.matches) {
+      position = track.scrollLeft;
+      frame = window.requestAnimationFrame(advance);
+    }
+  };
+
+  const pauseForInteraction = () => {
+    interacting = true;
+    stopPlayback();
+    window.clearTimeout(interactionTimer);
+    if (!dragging) {
+      interactionTimer = window.setTimeout(() => {
+        interacting = false;
+        updatePlayback();
+      }, 1800);
+    }
+  };
+
+  const move = (direction) => {
+    const maximum = track.scrollWidth - track.clientWidth;
+    const step = track.firstElementChild.getBoundingClientRect().width
+      + parseFloat(window.getComputedStyle(track).columnGap);
+    let left = track.scrollLeft + direction * step;
+    if (direction > 0 && track.scrollLeft >= maximum - 1) {
+      left = 0;
+    } else if (direction < 0 && track.scrollLeft <= 1) {
+      left = maximum;
+    }
+    track.scrollTo({
+      left: Math.max(0, Math.min(maximum, left)),
+      behavior: reducedMotion.matches ? 'auto' : 'smooth',
+    });
+  };
+
+  track.addEventListener('keydown', (event) => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
+      return;
+    }
+    event.preventDefault();
+    pauseForInteraction();
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      move(event.key === 'ArrowLeft' ? -1 : 1);
+    } else {
+      track.scrollTo({
+        left: event.key === 'Home' ? 0 : track.scrollWidth - track.clientWidth,
+        behavior: reducedMotion.matches ? 'auto' : 'smooth',
+      });
+    }
+  });
+  track.addEventListener('pointerdown', () => {
+    dragging = true;
+    pauseForInteraction();
+  });
+  const finishDragging = () => {
+    if (dragging) {
+      dragging = false;
+      pauseForInteraction();
+    }
+  };
+  document.addEventListener('pointerup', finishDragging);
+  document.addEventListener('pointercancel', finishDragging);
+  track.addEventListener('wheel', pauseForInteraction, { passive: true });
+  document.addEventListener('visibilitychange', updatePlayback);
+  if (typeof reducedMotion.addEventListener === 'function') {
+    reducedMotion.addEventListener('change', updatePlayback);
+  } else if (typeof reducedMotion.addListener === 'function') {
+    reducedMotion.addListener(updatePlayback);
+  }
+  if (typeof window.ResizeObserver === 'function') {
+    new window.ResizeObserver(updatePlayback).observe(track);
+  } else {
+    window.addEventListener('resize', updatePlayback);
+  }
+  if (typeof window.IntersectionObserver === 'function') {
+    new window.IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      updatePlayback();
+    }).observe(carousel);
+  }
+  updatePlayback();
+})();
