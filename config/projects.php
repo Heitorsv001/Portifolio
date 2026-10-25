@@ -13,7 +13,7 @@ return [
         'image' => null,
         'github_url' => 'https://github.com/heitorsv001/Gerenciador',
         'demo_url' => null,
-        'status' => 'Finalizado · projeto academico',
+        'status' => 'Finalizado · projeto acadêmico',
         'featured' => true,
     ],
     [
@@ -26,7 +26,7 @@ return [
         'image' => null,
         'github_url' => 'https://github.com/heitorsv001/Crowns',
         'demo_url' => null,
-        'status' => 'Descontinuado · Projeto academico',
+        'status' => 'Descontinuado · projeto acadêmico',
         'featured' => true,
     ],
     [
@@ -34,12 +34,12 @@ return [
         'slug' => 'portfolio-mvc-php',
         'title' => 'Portfólio MVC em PHP',
         'summary' => 'Portfólio pessoal desenvolvido em PHP com arquitetura MVC, catálogo de projetos, páginas de detalhes e apresentação de habilidades profissionais.',
-        'description' => 'Aplicação web em PHP 8.2+ com Composer e organização MVC, desenvolvida para apresentar projetos, competências e informações profissionais. Conta com roteamento, catálogo e detalhes de projetos, seções de habilidades e contato, além de metadados por página. O conteúdo foi preenchido; a publicação permanece pendente de confirmação.',
+        'description' => 'Aplicação web em PHP 8.2+ com Composer e organização MVC, desenvolvida para apresentar projetos, competências e informações profissionais. Conta com roteamento, catálogo e detalhes de projetos, seções de habilidades e contato, além de metadados por página. O conteúdo foi preenchido e o site está publicado.',
         'technologies' => ['PHP 8.2+', 'Composer', 'HTML', 'CSS'],
         'image' => null,
         'github_url' => 'https://github.com/heitorsv001/Portifolio',
         'demo_url' => null,
-        'status' => 'Finalizado ',
+        'status' => 'Finalizado',
         'featured' => false,
         // Habilitar somente após a confirmação de publicação do portfólio.
         'visible' => false,
@@ -54,7 +54,7 @@ return [
         'image' => null,
         'github_url' => 'https://github.com/heitorsv001/festividades',
         'demo_url' => 'https://heitorsv001.github.io/festividades/',
-        'status' => 'Finalizado · Projeto academico',
+        'status' => 'Finalizado · projeto acadêmico',
         'featured' => false,
     ],
     [
@@ -67,7 +67,7 @@ return [
         'image' => null,
         'github_url' => 'https://github.com/heitorsv001/Noticias',
         'demo_url' => 'https://heitorsv001.github.io/Noticias/',
-        'status' => 'Finalizado · Projeto academico',
+        'status' => 'Finalizado · projeto acadêmico',
         'featured' => false,
     ],
 ];

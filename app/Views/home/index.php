@@ -12,7 +12,7 @@
             <img src="<?= htmlspecialchars($basePath . '/assets/images/meu-retrato.png', ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars('Retrato de ' . $profile['name'], ENT_QUOTES, 'UTF-8') ?>" width="1122" height="1402" decoding="async" fetchpriority="high">
         </div>
         <h1 id="apresentacao-titulo"><?= htmlspecialchars($profile['name'], ENT_QUOTES, 'UTF-8') ?></h1>
-        <p class="hero-subtitle">Desenvolvedor Web e estudante</p>
+        <p class="hero-subtitle">Desenvolvedor Web Full Stack · Estudante de Técnico em Informática no IFMS</p>
         <?php require dirname(__DIR__) . '/partials/social-links.php'; ?>
     </div>
 </section>
