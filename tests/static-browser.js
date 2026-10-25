@@ -141,8 +141,14 @@ async function main() {
             theme: document.documentElement.dataset.theme,
             overflow: document.documentElement.scrollWidth > window.innerWidth,
             headings: document.querySelectorAll('h1').length,
+            skillColumns: document.querySelector('.skills-grid')
+              ? getComputedStyle(document.querySelector('.skills-grid')).gridTemplateColumns.split(/\s+/).length
+              : 0,
           }));
           expect(state.theme === theme && !state.overflow && state.headings === 1, `Layout ${width}px/${theme}/${route}`);
+          if (width >= 1024 && route === '/') {
+            expect(state.skillColumns === 3, `Habilidades em três colunas: ${width}px/${theme}`);
+          }
           screenshots.push(await page.screenshot({ fullPage: true, animations: 'disabled' }));
         }
         expect(screenshots[0].equals(screenshots[1]), `Imagem PHP/estático idêntica: ${width}px/${theme}/${route}`);

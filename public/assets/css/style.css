@@ -904,6 +904,10 @@ img {
 }
 
 @media (min-width: 64rem) {
+    .skills-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
     .experience-item {
         grid-template-columns: minmax(0, 10rem) minmax(0, 1fr);
     }
