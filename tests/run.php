@@ -126,7 +126,7 @@ $expectLayout = static function (string $html, string $basePath, string $homeHtm
     $expect(strpos($html, $themeScript) < strpos($html, '<link rel="stylesheet"'), 'Tema inicializado antes do CSS');
     $expect(substr_count($html, 'data-theme-toggle') === 1, 'Um controle de tema por página');
     $expect(str_contains($html, 'aria-label="Alternar para tema claro" title="Alternar para tema claro" hidden'), 'Controle de tema nomeado e oculto até o JS estar disponível');
-    $expect(str_contains($html, '<link rel="icon" type="image/png" href="' . $basePath . '/assets/images/meu-retrato.png">'), 'Retrato como favicon PNG respeita caminho-base em ' . $basePath);
+    $expect(str_contains($html, '<link rel="icon" type="image/svg+xml" href="' . $basePath . '/assets/images/favicon.svg">'), 'Favicon SVG respeita caminho-base em ' . $basePath);
     $expect(str_contains($html, 'href="#conteudo"'), 'Link para pular navegação');
     $expect(str_contains($html, 'id="conteudo"'), 'Destino do link para conteúdo');
     $expect(str_contains($html, '<html lang="pt-BR"'), 'Idioma da página declarado');
@@ -153,7 +153,7 @@ $expectLayout = static function (string $html, string $basePath, string $homeHtm
     preg_match_all('/\bid="([^"]+)"/', $html, $ids);
     preg_match_all('/\bid="([^"]+)"/', $homeHtml, $homeIds);
     $expect(count($ids[1]) === count(array_unique($ids[1])), 'Identificadores únicos na página');
-    $allowedLinks = [$basePath . '/', $basePath . '/projetos', $stylesheetUrl, $basePath . '/assets/images/meu-retrato.png'];
+    $allowedLinks = [$basePath . '/', $basePath . '/projetos', $stylesheetUrl, $basePath . '/assets/images/meu-retrato.png', $basePath . '/assets/images/favicon.svg'];
     foreach (['github_url', 'linkedin_url'] as $key) {
         if ($contact[$key] !== null) {
             $allowedLinks[] = htmlspecialchars($contact[$key], ENT_QUOTES, 'UTF-8');

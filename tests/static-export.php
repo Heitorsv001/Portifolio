@@ -85,15 +85,16 @@ try {
     file_put_contents($workspace . '/public/assets/.env', 'SECRET=nao-publicar');
     $assertBuild();
     $baseline = $snapshot($workspace . '/dist');
-    $expect(count($baseline) === 16, 'Inventário inicial tem 16 arquivos necessários');
+    $expect(count($baseline) === 17, 'Inventário inicial tem 17 arquivos necessários');
     foreach (['index.html', 'projetos/index.html', 'projetos/gerenciador-de-permanencias/index.html', 'projetos/crowns/index.html', 'projetos/festividades-de-fim-de-ano/index.html', 'projetos/noticias/index.html', '404.html', 'sitemap.xml', 'robots.txt'] as $path) {
         $expect(isset($baseline[$path]), 'Arquivo público gerado: ' . $path);
     }
     foreach (array_keys($baseline) as $path) {
-        $expect(!preg_match('~(?:portfolio-mvc-php|nao-utilizado|favicon\.svg|social-preview\.svg|\.gitkeep|\.php|\.env|^vendor/|^config/|^app/|^tests/|^scripts/)~', $path), 'Arquivo permitido: ' . $path);
+        $expect(!preg_match('~(?:portfolio-mvc-php|nao-utilizado|social-preview\.svg|\.gitkeep|\.php|\.env|^vendor/|^config/|^app/|^tests/|^scripts/)~', $path), 'Arquivo permitido: ' . $path);
     }
     $home = file_get_contents($workspace . '/dist/index.html');
     $expect(str_contains($home, 'href="/projetos/"') && str_contains($home, 'href="/projetos/crowns/"'), 'Links estáticos com barra final');
+    $expect(isset($baseline['assets/images/favicon.svg']), 'Favicon SVG incluído na saída estática');
     $expect(str_contains($home, 'href="/assets/documents/CurriculoLinkedin.pdf" download>'), 'Download original preservado');
     $expect(str_contains($home, 'https://portfolio.example/') && str_contains($home, 'property="og:image"'), 'SEO renderizado no HTML');
     $error = file_get_contents($workspace . '/dist/404.html');

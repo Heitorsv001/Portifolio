@@ -41,7 +41,7 @@
             <meta property="og:image:type" content="<?= htmlspecialchars($shareImageSize['mime'], ENT_QUOTES, 'UTF-8') ?>">
         <?php endif; ?>
     <?php endif; ?>
-    <link rel="icon" type="image/png" href="<?= htmlspecialchars($faviconUrl, ENT_QUOTES, 'UTF-8') ?>">
+    <link rel="icon" type="image/svg+xml" href="<?= htmlspecialchars($faviconUrl, ENT_QUOTES, 'UTF-8') ?>">
     <script src="<?= htmlspecialchars($themeScriptUrl, ENT_QUOTES, 'UTF-8') ?>"></script>
     <link rel="stylesheet" href="<?= htmlspecialchars($stylesheetUrl, ENT_QUOTES, 'UTF-8') ?>">
     <script src="<?= htmlspecialchars($siteScriptUrl, ENT_QUOTES, 'UTF-8') ?>" defer></script>

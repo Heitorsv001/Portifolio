@@ -8,7 +8,7 @@
 
 ## 1. Visão geral
 
-Atualização após a revisão final: retrato fornecido pelo responsável em `public/assets/images/meu-retrato.png` incluído no avatar circular da home, também usado como favicon PNG em todas as páginas, com texto alternativo no avatar e zoom de 15% por CSS. Validado nos dois temas em 390/1440px; evidências atuais em `design/validation/portrait-favicon/`. As capturas e métricas da etapa 9 registram o estado anterior à inclusão do retrato.
+Atualização após a revisão final: retrato fornecido pelo responsável em `public/assets/images/meu-retrato.png` incluído no avatar circular da home, com texto alternativo e zoom de 15% por CSS. O favicon `public/assets/images/favicon.svg` é usado em todas as páginas. Validado nos dois temas em 390/1440px; evidências atuais em `design/validation/portrait-favicon/`. As capturas e métricas da etapa 9 registram o estado anterior à inclusão do retrato.
 
 Desenvolver um **site de portfólio pessoal** para apresentar o desenvolvedor, seus projetos, habilidades e meios de contato. O endereço será divulgado no **LinkedIn, GitHub e currículo**. A experiência deve ser profissional, acessível, responsiva, rápida e simples de manter.
 

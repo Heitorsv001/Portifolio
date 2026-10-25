@@ -30,7 +30,7 @@ abstract class Controller
         $stylesheetUrl = $this->versionedAssetUrl('assets/css/style.css');
         $themeScriptUrl = $this->versionedAssetUrl('assets/js/theme-init.js');
         $siteScriptUrl = $this->versionedAssetUrl('assets/js/site.js');
-        $faviconUrl = $basePath . '/assets/images/meu-retrato.png';
+        $faviconUrl = $basePath . '/assets/images/favicon.svg';
         $data += [
             'title' => $appName,
             'description' => 'Portfólio de um Desenvolvedor Full Stack.',
