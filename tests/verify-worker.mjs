@@ -13,8 +13,15 @@ const options = {
   origin: 'https://heitorvareiro.heitorsvareiro.workers.dev',
 };
 const response = (result) => Response.json({ success: true, result });
-const success = (url) => response(url.endsWith('/scripts/heitorvareiro/subdomain')
-  ? { enabled: true, previews_enabled: false } : { subdomain: 'heitorsvareiro' });
+const publicPage = () => new Response('<!doctype html><html lang="pt-BR"><title>Portfólio</title></html>', {
+  headers: { 'Content-Type': 'text/html; charset=utf-8' },
+});
+const workerUrl = `https://api.cloudflare.com/client/v4/accounts/${options.accountId}/workers/scripts/heitorvareiro/subdomain`;
+const success = (url) => {
+  if (url === workerUrl) return response({ enabled: true, previews_enabled: false });
+  assert.equal(url, `${options.origin}/`, 'Somente a API do Worker e a URL pública podem ser consultadas');
+  return publicPage();
+};
 const noRequest = async () => assert.fail('A API não deve ser consultada');
 
 function rejects(configChange, optionsChange, message) {
@@ -23,20 +30,27 @@ function rejects(configChange, optionsChange, message) {
   }), message);
 }
 
-test('confirma conta e Worker existente usando somente GET e o mesmo Account ID', async () => {
+test('aceita token restrito ao Worker sem consultar subdomínio da conta nem enviar secrets à URL pública', async () => {
   const paths = [];
   await verifyWorker(config, { ...options, request: async (url, init) => {
     paths.push(url);
     assert.equal(init.method, 'GET');
-    assert.equal(init.headers.Authorization, `Bearer ${options.token}`);
-    assert.equal(init.headers.Accept, 'application/json');
     assert.equal(init.redirect, 'error');
     assert.ok(init.signal instanceof AbortSignal);
+    if (url === `${options.origin}/`) {
+      assert.deepEqual(init.headers, { Accept: 'text/html' });
+      assert.ok(!JSON.stringify(init).includes(options.token));
+      assert.ok(!JSON.stringify(init).includes(options.accountId));
+    } else {
+      assert.equal(init.headers.Authorization, `Bearer ${options.token}`);
+      assert.equal(init.headers.Accept, 'application/json');
+    }
+    if (url.endsWith('/workers/subdomain')) return new Response(null, { status: 403 });
     return success(url);
   } });
   assert.deepEqual(paths, [
-    `https://api.cloudflare.com/client/v4/accounts/${options.accountId}/workers/subdomain`,
-    `https://api.cloudflare.com/client/v4/accounts/${options.accountId}/workers/scripts/heitorvareiro/subdomain`,
+    workerUrl,
+    `${options.origin}/`,
   ]);
 });
 
@@ -83,20 +97,18 @@ test('preserva bloqueios de configuração, rotas, ambientes e diretório de pub
   }
 });
 
-for (const resource of ['conta', 'Worker']) {
-  for (const [status, message] of [
-    [401, /Falha de autenticação.*HTTP 401/],
-    [403, /Permissão insuficiente.*HTTP 403/],
-    [404, resource === 'conta' ? /Conta ou subdomínio não encontrado.*HTTP 404/ : /Worker heitorvareiro não encontrado.*HTTP 404/],
-    [400, /Falha da API.*HTTP 400/], [429, /Falha da API.*HTTP 429/], [500, /Falha da API.*HTTP 500/],
-  ]) {
-    test(`distingue HTTP ${status} ao consultar ${resource}, mesmo com corpo não JSON`, async () => {
-      await assert.rejects(verifyWorker(config, { ...options, request: async (url) => {
-        if (resource === 'Worker' && url.endsWith('/workers/subdomain')) return success(url);
-        return new Response('<html>erro</html>', { status });
-      } }), message);
-    });
-  }
+for (const [status, message] of [
+  [401, /Falha de autenticação.*HTTP 401/],
+  [403, /Permissão insuficiente.*HTTP 403/],
+  [404, /Worker heitorvareiro não encontrado ou não visível.*HTTP 404/],
+  [400, /Falha da API.*HTTP 400/], [429, /Falha da API.*HTTP 429/], [500, /Falha da API.*HTTP 500/],
+]) {
+  test(`bloqueia HTTP ${status} na API do Worker antes de consultar a URL pública`, async () => {
+    await assert.rejects(verifyWorker(config, { ...options, request: async (url) => {
+      assert.equal(url, workerUrl);
+      return new Response('<html>erro</html>', { status });
+    } }), message);
+  });
 }
 
 test('informa somente códigos numéricos seguros, sem repetir mensagens ou campos da API', async () => {
@@ -138,22 +150,46 @@ test('recusa respostas HTTP, JSON, success e result inválidos', async () => {
   }
 });
 
-test('recusa subdomínio inválido ou inesperado antes de consultar o Worker', async () => {
-  for (const subdomain of [undefined, null, '', true, 'outra-conta']) {
-    let calls = 0;
-    await assert.rejects(verifyWorker(config, { ...options, request: async () => {
-      calls++;
-      return response({ subdomain });
-    } }), subdomain === 'outra-conta' ? /Subdomínio inesperado.*CLOUDFLARE_ACCOUNT_ID/ : /Resposta inválida.*result.subdomain/);
-    assert.equal(calls, 1);
-  }
-});
-
 test('distingue enabled inválido de workers.dev desabilitado; previews não autorizam produção', async () => {
   for (const enabled of [undefined, null, 'true', 1, false]) {
     await assert.rejects(verifyWorker(config, { ...options, request: async (url) => {
-      return url.endsWith('/workers/subdomain') ? success(url) : response({ enabled, previews_enabled: true });
+      assert.equal(url, workerUrl);
+      return response({ enabled, previews_enabled: true });
     } }), enabled === false ? /workers.dev desabilitado/ : /result.enabled deve ser booleano/);
+  }
+});
+
+for (const status of [201, 204, 301, 302, 401, 403, 404, 500]) {
+  test(`bloqueia URL pública com HTTP ${status} mesmo após autenticação válida no Worker`, async () => {
+    await assert.rejects(verifyWorker(config, { ...options, request: async (url) => {
+      return url === workerUrl ? success(url) : new Response(null, { status });
+    } }), new RegExp(`URL pública de produção indisponível \\(HTTP ${status}\\)`));
+  });
+}
+
+test('bloqueia falha de rede ou redirecionamento na URL pública sem expor a exceção', async () => {
+  await assert.rejects(verifyWorker(config, { ...options, request: async (url) => {
+    if (url === workerUrl) return success(url);
+    throw new Error(options.token);
+  } }), (error) => {
+    assert.match(error.message, /Falha de rede, redirecionamento ou tempo limite.*URL pública/);
+    assert.ok(!error.message.includes(options.token));
+    return true;
+  });
+});
+
+test('bloqueia resposta pública inválida, conteúdo não HTML, HTML vazio e leitura interrompida', async () => {
+  for (const [makeResponse, message] of [
+    [() => undefined, /Resposta HTTP inválida/],
+    [() => Response.json({ success: true }), /Content-Type text\/html/],
+    [() => new Response('texto'), /Content-Type text\/html/],
+    [() => new Response('  ', { headers: { 'Content-Type': 'text/html' } }), /HTML vazio/],
+    [() => ({ status: 200, headers: new Headers({ 'Content-Type': 'text/html' }),
+      text: async () => { throw new Error(options.token); } }), /Falha de rede ou tempo limite ao ler/],
+  ]) {
+    await assert.rejects(verifyWorker(config, { ...options, request: async (url) => {
+      return url === workerUrl ? success(url) : makeResponse();
+    } }), message);
   }
 });
 
@@ -202,17 +238,38 @@ test('CLI preserva diagnóstico HTTP sem divulgar corpo, token ou Account ID', a
   }
 });
 
-test('CLI recebe secrets e APP_ORIGIN do ambiente e retorna exit 0 somente após duas consultas válidas', async () => {
+test('CLI retorna exit 1 quando a URL pública falha, mesmo com autenticação válida no Worker', async () => {
+  for (const status of [403, 404, 500]) {
+    const result = await runCli({ preload: `globalThis.fetch = async (url) => {
+      if (url === process.env.APP_ORIGIN + '/') return new Response(null, { status: ${status} });
+      return Response.json({ success: true, result: { enabled: true } });
+    };` });
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, new RegExp(`URL pública de produção indisponível \\(HTTP ${status}\\)`));
+    assert.match(result.stderr, /Nenhum deploy autorizado/);
+    assert.equal(result.stdout, '');
+  }
+});
+
+test('CLI só aprova após API autenticada e URL pública válidas e informa a limitação sobre o vínculo da conta', async () => {
   const result = await runCli({ preload: `let calls = 0;
     globalThis.fetch = async (url, init) => {
-      if (init.headers.Authorization !== 'Bearer ' + process.env.CLOUDFLARE_API_TOKEN ||
-          !url.includes('/accounts/' + process.env.CLOUDFLARE_ACCOUNT_ID + '/')) throw new Error('ambiente divergente');
       calls++;
-      return Response.json({ success: true, result: url.endsWith('/workers/subdomain')
-        ? { subdomain: 'heitorsvareiro' } : { enabled: true, previews_enabled: false } });
+      if (url === process.env.APP_ORIGIN + '/') {
+        if ('Authorization' in init.headers) throw new Error('credencial na URL pública');
+        return new Response('<html>Portfólio</html>', { headers: { 'Content-Type': 'text/html' } });
+      }
+      if (init.headers.Authorization !== 'Bearer ' + process.env.CLOUDFLARE_API_TOKEN ||
+          url !== 'https://api.cloudflare.com/client/v4/accounts/' + process.env.CLOUDFLARE_ACCOUNT_ID +
+            '/workers/scripts/heitorvareiro/subdomain') throw new Error('ambiente divergente');
+      return Response.json({ success: true, result: { enabled: true, previews_enabled: false } });
     };
     process.on('exit', () => { if (calls !== 2) process.exitCode = 2; });` });
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /Worker existente verificado: heitorvareiro/);
-  assert.equal(result.stderr, '');
+  assert.match(result.stderr, /Limitação: o subdomínio da conta não foi consultado/);
+  assert.match(result.stderr, /não comprova o vínculo entre ambos/);
+  for (const value of [options.token, options.accountId]) {
+    assert.ok(!(result.stdout + result.stderr).includes(value));
+  }
 });

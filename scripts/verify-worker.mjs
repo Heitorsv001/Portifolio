@@ -83,9 +83,7 @@ export async function verifyWorker(config, { token, accountId, origin, request =
         fail(`Permissão insuficiente ao consultar ${context} Confira o escopo do token e a conta indicada por CLOUDFLARE_ACCOUNT_ID; uma conta incorreta também pode causar 403. Não conceda permissões administrativas para diagnosticar.`);
       }
       if (response.status === 404) {
-        fail(path === 'subdomain'
-          ? `Conta ou subdomínio não encontrado ao consultar ${context} Confira CLOUDFLARE_ACCOUNT_ID e se o subdomínio workers.dev está cadastrado. A resposta não prova, sozinha, que o Account ID está incorreto.`
-          : `Worker heitorvareiro não encontrado na conta verificada (HTTP 404).${apiCodes(data)} Confira se o Worker existe e se seu nome no painel é heitorvareiro. Nenhum Worker será criado por esta verificação.`);
+        fail(`Worker heitorvareiro não encontrado ou não visível na conta informada (HTTP 404).${apiCodes(data)} Confira CLOUDFLARE_ACCOUNT_ID, o nome no painel e o escopo do token. Nenhum Worker será criado por esta verificação.`);
       }
       fail(`Falha da API ao consultar ${context} Confira a disponibilidade da Cloudflare; em HTTP 400, revise também o Account ID e o escopo do token.`);
     }
@@ -101,13 +99,6 @@ export async function verifyWorker(config, { token, accountId, origin, request =
     return data.result;
   }
 
-  const account = await get('subdomain', 'subdomínio da conta');
-  if (typeof account.subdomain !== 'string' || !account.subdomain) {
-    fail('Resposta inválida do subdomínio da conta: result.subdomain deve ser uma string não vazia.');
-  }
-  if (account.subdomain !== 'heitorsvareiro') {
-    fail('Subdomínio inesperado: a conta consultada não retorna heitorsvareiro. CLOUDFLARE_ACCOUNT_ID pode apontar para outra conta ou o subdomínio pode ter sido alterado. Confira ambos no painel.');
-  }
   const worker = await get(`scripts/${config.name}/subdomain`, 'Worker heitorvareiro');
   if (typeof worker.enabled !== 'boolean') {
     fail('Resposta inválida do Worker: result.enabled deve ser booleano.');
@@ -115,7 +106,38 @@ export async function verifyWorker(config, { token, accountId, origin, request =
   if (!worker.enabled) {
     fail('workers.dev desabilitado para heitorvareiro: result.enabled=false. Confira Domains & Routes no painel; previews_enabled não habilita a URL de produção.');
   }
-  console.log(`Worker existente verificado: ${config.name}; destino: ${origin}`);
+
+  let publicResponse;
+  let html;
+  try {
+    publicResponse = await request(`${origin}/`, {
+      method: 'GET',
+      headers: { Accept: 'text/html' },
+      redirect: 'error',
+      signal: AbortSignal.timeout(30000),
+    });
+  } catch {
+    fail('Falha de rede, redirecionamento ou tempo limite ao consultar a URL pública de produção.');
+  }
+  if (!publicResponse || !Number.isInteger(publicResponse.status)) {
+    fail('Resposta HTTP inválida da URL pública de produção.');
+  }
+  if (publicResponse.status !== 200) {
+    fail(`URL pública de produção indisponível (HTTP ${publicResponse.status}). A disponibilidade pública não substitui a autenticação da API do Worker.`);
+  }
+  if (publicResponse.headers?.get('content-type')?.split(';')[0].trim().toLowerCase() !== 'text/html') {
+    fail('Resposta inválida da URL pública de produção: esperado Content-Type text/html.');
+  }
+  try {
+    html = await publicResponse.text();
+  } catch {
+    fail('Falha de rede ou tempo limite ao ler a página pública de produção.');
+  }
+  if (!html.trim()) {
+    fail('Resposta inválida da URL pública de produção: HTML vazio.');
+  }
+  console.warn('Limitação: o subdomínio da conta não foi consultado. A API confirmou o Worker no Account ID informado e a URL pública respondeu, mas isso não comprova o vínculo entre ambos. Confira esse vínculo no painel Cloudflare.');
+  console.log(`Worker existente verificado: ${config.name}; URL pública disponível: ${origin}`);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
