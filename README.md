@@ -421,7 +421,7 @@ return [
 
 Espaços nas extremidades são removidos e itens vazios são omitidos. A stack do site não é automaticamente apresentada como uma declaração de habilidades pessoais.
 
-As categorias aparecem em um carrossel abaixo do título, com três cards no desktop, dois em telas médias e um no celular. A rolagem automática é contínua enquanto a seção está visível e retorna ao início ao alcançar o final. A navegação manual usa a barra de rolagem, o toque ou o teclado, sem botões. A reprodução pausa durante a interação manual e retoma após 1,8 segundo; manter o ponteiro ou o foco na seção não a interrompe. A preferência por movimento reduzido desativa a reprodução automática. Sem JavaScript, os cards continuam acessíveis pela rolagem horizontal nativa.
+As categorias aparecem em um carrossel abaixo do título, com três cards no desktop, dois em telas médias e um no celular. A rolagem automática é contínua e infinita enquanto a seção está visível, sem salto ao repetir os cards, com gradientes suaves nas laterais que acompanham o tema. O indicador da barra acompanha o ciclo: sai gradualmente pela direita e reaparece pela esquerda, preservando o arraste e a navegação pelo teclado. A navegação manual também funciona por toque, sem botões. A reprodução pausa durante a interação manual e retoma após 1,8 segundo; manter o ponteiro ou o foco na seção não a interrompe. A preferência por movimento reduzido desativa a reprodução automática. Sem JavaScript, os cards continuam acessíveis pela barra de rolagem nativa.
 
 ### Contatos e currículo
 

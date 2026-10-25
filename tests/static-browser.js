@@ -194,6 +194,12 @@ async function main() {
   const track = page.locator('[data-carousel-track]');
   await track.scrollIntoViewIfNeeded();
   expect(await page.locator('#habilidades button').count() === 0, 'Carrossel utiliza somente a barra de rolagem, sem botões');
+  expect(await page.locator('[data-carousel-clone]').count() === 0, 'Movimento reduzido mantém somente os cards originais');
+  expect(await page.locator('.skills-viewport').evaluate(element =>
+    ['::before', '::after'].every(side => {
+      const style = getComputedStyle(element, side);
+      return style.backgroundImage.includes('linear-gradient') && style.pointerEvents === 'none';
+    })), 'Gradientes nas duas laterais preservam a interação com a barra');
   await track.hover();
   await page.mouse.wheel(320, 0);
   await page.waitForFunction(() => document.querySelector('[data-carousel-track]').scrollLeft > 0);
@@ -220,6 +226,22 @@ async function main() {
   await page.keyboard.press('ArrowRight');
   await page.waitForFunction(() => document.querySelector('[data-carousel-track]').scrollLeft < 1);
   expect(true, 'Teclado permite circular entre o início e o fim');
+  const scrollbar = page.getByRole('scrollbar', { name: 'Rolagem de habilidades e tecnologias' });
+  expect(await scrollbar.isVisible() && await scrollbar.getAttribute('aria-controls') === 'lista-habilidades',
+    'Barra personalizada acessível controla os cards');
+  const scrollbarBounds = await scrollbar.boundingBox();
+  await page.mouse.move(scrollbarBounds.x + 10, scrollbarBounds.y + scrollbarBounds.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(scrollbarBounds.x + scrollbarBounds.width * 0.6, scrollbarBounds.y + scrollbarBounds.height / 2, { steps: 10 });
+  await page.mouse.up();
+  expect(await track.evaluate(element => element.scrollLeft) > 10 && Number(await scrollbar.getAttribute('aria-valuenow')) > 0,
+    'Arraste da barra move os cards e atualiza o valor acessível');
+  await scrollbar.focus();
+  await page.keyboard.press('End');
+  await page.waitForFunction(() => document.querySelector('[data-carousel-scrollbar]').getAttribute('aria-valuenow') === '100');
+  await page.keyboard.press('Home');
+  await page.waitForFunction(() => document.querySelector('[data-carousel-track]').scrollLeft < 1);
+  expect(true, 'Barra também permite navegação pelo teclado');
   await context.close();
 
   const particles = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'no-preference' });
@@ -244,6 +266,11 @@ async function main() {
   const initialPosition = await automaticTrack.evaluate(element => element.scrollLeft);
   await particlesPage.waitForFunction(position => document.querySelector('[data-carousel-track]').scrollLeft > position + 10, initialPosition);
   expect(true, 'Rolagem automática avança mesmo com ponteiro e foco no carrossel');
+  expect(await automaticTrack.evaluate(element => {
+    const copies = [...element.querySelectorAll('[data-carousel-clone]')];
+    return copies.length > 0 && copies.length * 2 === element.children.length
+      && copies.every(copy => copy.getAttribute('aria-hidden') === 'true' && copy.hasAttribute('inert'));
+  }), 'Repetição visual não duplica conteúdo para leitores de tela ou foco');
   await particlesPage.mouse.down();
   const heldPosition = await automaticTrack.evaluate(element => element.scrollLeft);
   await particlesPage.waitForTimeout(400);
@@ -251,18 +278,49 @@ async function main() {
   await particlesPage.mouse.up();
   await particlesPage.waitForFunction(position => document.querySelector('[data-carousel-track]').scrollLeft > position + 10, heldPosition);
   expect(true, 'Rolagem automática retoma após a interação manual');
-  await particlesPage.keyboard.press('End');
-  await particlesPage.waitForFunction(() => {
-    const element = document.querySelector('[data-carousel-track]');
-    return element.scrollLeft >= element.scrollWidth - element.clientWidth - 1;
+  await particlesPage.mouse.down();
+  await automaticTrack.evaluate(element => {
+    const copy = element.querySelector('[data-carousel-clone]');
+    const cycleWidth = copy.getBoundingClientRect().left - element.firstElementChild.getBoundingClientRect().left;
+    element.scrollLeft = cycleWidth - 2;
   });
+  await particlesPage.waitForFunction(() =>
+    parseFloat(document.querySelector('[data-scrollbar-rail]').style.getPropertyValue('--scroll-thumb-position')) > 99);
+  const leadingCardState = (element) => {
+    const bounds = element.getBoundingClientRect();
+    const center = bounds.left + element.firstElementChild.getBoundingClientRect().width / 2;
+    const card = [...element.children].find(item => {
+      const rect = item.getBoundingClientRect();
+      return rect.left <= center && rect.right > center;
+    });
+    return { title: card.querySelector('h3').textContent, left: card.getBoundingClientRect().left - bounds.left };
+  };
+  const beforeLoop = await automaticTrack.evaluate(leadingCardState);
+  const scrollbarSegments = (element) => {
+    const bounds = element.querySelector('[data-scrollbar-rail]').getBoundingClientRect();
+    return [...element.querySelectorAll('.skills-scrollbar-thumb')].map(thumb => {
+      const rect = thumb.getBoundingClientRect();
+      return { left: Math.max(bounds.left, rect.left) - bounds.left, right: Math.min(bounds.right, rect.right) - bounds.left };
+    }).filter(segment => segment.right > segment.left).sort((a, b) => (b.right - b.left) - (a.right - a.left));
+  };
+  const automaticScrollbar = particlesPage.locator('[data-carousel-scrollbar]');
+  const beforeScrollbar = await automaticScrollbar.evaluate(scrollbarSegments);
+  await particlesPage.mouse.up();
   await particlesPage.waitForFunction(() => document.querySelector('[data-carousel-track]').scrollLeft < 10);
-  expect(true, 'Rolagem automática volta ao início quando alcança o final');
+  const afterLoop = await automaticTrack.evaluate(leadingCardState);
+  expect(beforeLoop.title === afterLoop.title && Math.abs(beforeLoop.left - afterLoop.left) < 12,
+    'Loop infinito preserva os cards visíveis e a continuidade do movimento');
+  const afterScrollbar = await automaticScrollbar.evaluate(scrollbarSegments);
+  expect(beforeScrollbar.length === 2 && afterScrollbar.length === 1
+    && Math.abs(beforeScrollbar[0].left - afterScrollbar[0].left) < 12
+    && Math.abs(beforeScrollbar[0].right - afterScrollbar[0].right) < 12,
+    'Indicador atravessa as duas extremidades sem salto ao reiniciar o ciclo');
   await particlesPage.emulateMedia({ reducedMotion: 'reduce' });
   await particlesPage.waitForTimeout(100);
   const reducedPosition = await automaticTrack.evaluate(element => element.scrollLeft);
   await particlesPage.waitForTimeout(400);
   expect(await automaticTrack.evaluate(element => element.scrollLeft) === reducedPosition, 'Movimento reduzido interrompe a rolagem automática');
+  expect(await particlesPage.locator('[data-carousel-clone]').count() === 0, 'Alteração para movimento reduzido remove as cópias visuais');
   await particles.close();
   const noScript = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 900 } });
   const fallback = await noScript.newPage();
@@ -270,6 +328,9 @@ async function main() {
   expect(await fallback.locator('h1').isVisible() && await fallback.locator('a[download]').isVisible(), 'Conteúdo e currículo disponíveis sem JavaScript');
   expect(await fallback.locator('.skill-category').count() > 0
     && await fallback.locator('#habilidades button').count() === 0, 'Cards e rolagem nativa continuam disponíveis sem JavaScript e sem botões');
+  expect(await fallback.locator('[data-carousel-scrollbar]').isHidden()
+    && await fallback.locator('.skills-track').evaluate(element => getComputedStyle(element).scrollbarWidth !== 'none'),
+    'Sem JavaScript, a barra nativa substitui a barra personalizada');
   await noScript.close();
   expect(errors.length === 0, `Sem erros inesperados de console/rede: ${errors.join('; ')}`);
   console.log(`${checks}/${checks} verificações HTTP/navegador aprovadas; 32 comparações visuais PHP/estático idênticas.`);
